@@ -5,12 +5,23 @@
 ## 产品范围与事实边界
 
 - 产品目标是 Pocket 3 经 USB／OTG 进入手机受管理完整副本，再上传飞牛 SMB，支持内嵌 tsnet。指定 USB 验收目标为 Android／Pixel 6 Pro 和 iOS／iPhone 17 Pro USB-C；不考虑 Lightning。
-- 当前阶段为 M0 云端协议与 Android probe、M1 Android／iOS 可用前台基础版及指定 Pocket USB 验收、M2 Android 自动模式与恢复强化、M3 双平台发行准备。OpenDAL／网盘仍为未排期 backlog。
-- M0 以受控 SMB 服务和 Dora Android 物理设备取得连接／完整传输证据；Pocket／Pixel／真实飞牛链路不属于 M0 完成前提。相机和指定手机的完整链路在 M0 后经用户关口进入 M1，云端协议成功不证明 OTG 或飞牛兼容性。
-- 双平台默认 `on_open`。Android 可选 `on_attach` 在 M2 使用已实测的系统接入流程和可见、可停止的前台服务；M1 前台恢复通过不表示自动模式通过。
-- M1 iOS 必须交付真实可安装的前台 App、原生来源／持久状态／完整副本和共享传输，不以 iOS 标签、桥接 spike 或仅 Framework 代替。macOS／Xcode、签名安装方式和指定 USB 设备缺失时，对应验收保持阻塞／未测。
+- 当前阶段为 M0 云端协议与 Android probe、M1 Android 可用前台基础版及指定 Pocket／Pixel／飞牛链路、M2 Android 自动模式／恢复与 Android 发行准备、M3 才开始 iOS 前台版／指定 Pocket USB 验收及双平台交付。M2 的 Android 发行安排是当前待审方案，不表示用户已授权发布；OpenDAL／网盘仍为未排期 backlog。
+- M0 以受控 SMB 服务和 Dora Android 物理设备取得连接／完整传输证据；Pocket／Pixel／真实飞牛链路不属于 M0 完成前提。Android 指定链路经 M0 后的用户关口进入 M1，iPhone USB-C 链路在 M3；云端协议成功不证明 OTG 或飞牛兼容性。
+- Android 默认 `on_open`，可选 `on_attach` 在 M2 使用已实测的系统接入流程和可见、可停止的前台服务；M1 前台恢复通过不表示自动模式通过。M3 iOS 采用 `on_open`，不提前承诺早期 iOS 运行支持。
+- M0–M2 只实现 Android，不加入 macOS／Xcode、iOS bridge／签名／安装或 iOS 回归关口，不为未来 iOS 预先实现平台抽象或生产接口。保留 Android 所需的正常 Go 模块边界和确定性规则向量即可。
+- M3 iOS 必须交付真实可安装的前台 App、原生来源／持久状态／完整副本和实际传输，不以 iOS 标签、桥接 spike 或仅 Framework 代替。到 M3 才开始 iOS 设计、工程和实现；macOS／Xcode、签名安装方式和指定 USB 设备缺失时，对应验收保持阻塞／未测。
 - 保留相机原文件；“已完成”要求远端内容校验通过。不得通过大小相同、写入成功或虚拟设备结果声称真实素材链路已通过。
 - 当前状态和阶段入口见 [实施计划](docs/implementation-plan.md)；实现不得自行扩大范围或将未验证的平台能力写成支持承诺。
+
+## 所有 UI 先生成概念并取得接受
+
+- 任何 UI 方案必须使用用户指定的 `build-web-apps:frontend-app-builder` skill，并通过 Image Gen 生成完整主屏和必要状态／细节概念。覆盖 M0 probe、M1 Android 产品、M2 新增设置／通知与 M3 iOS；不得以文字描述、手绘代码或局部图代替所需完整概念，不得把设计图当作真实 App 截图。
+- 实施顺序为功能 brief → skill／Image Gen 完整 screen／states → 用户明确接受覆盖的设计 → 从接受图提取 tokens／组件／文案／交互清单 → 独立 UI 实施计划 review → 在已批准 milestone 内实现 → 实际 App 截图与概念图逐项保真及功能验收。概念未被用户接受前，不先写具体布局／字体／间距／tokens 等视觉实施方案或 UI 代码。
+- 保存概念路径、内容 SHA-256、screen／state 清单、fixture 说明和用户决定原文／时间／接受范围。概念是设计建议，不是设备截图或功能证据；接受图成为当前 spec。图数由覆盖和可读性决定，缺失、模糊或新增的可见状态先补图并取得接受。
+- 设计接受和 milestone 实施批准是两个关口，分别记录。接受 Android 产品图不等于接受 probe 图，不自动覆盖未来 M2／M3 UI；内部 review、生成图和用户批准规划都不能默认为设计已接受。非 UI 核心工作只受其本身依赖和用户阶段批准约束，不为等待视觉接受阻塞无关节点。
+- 保留项目原生框架 Android Kotlin／Compose、M3 iOS Swift／SwiftUI。该选择依据用户原生产品目标与当前架构，适用 skill 对已有／指定框架的约定，不改为 React／WebView；native 验证适配须写入计划并供用户与独立 reviewer 审阅。
+- 原生适配以实际运行 App 的真机截图代替浏览器 render，记录屏幕／状态、设备／系统、源码、尺寸／缩放、主题和必要输入条件；同一 QA 轮次用 `view_image` 直接查看已接受概念与最新对应截图。至少核对文案、层级／布局、字体、色彩、间距／容器五类，并检查图标、控件状态、裁切、可访问字号和交互；记录可见文案 diff、fidelity ledger、修复证据和用户接受的偏差。可修复的实质视觉差异必须修复后再交付，功能通过不能代替保真通过。
+- Browser／Playwright 规则只报告实际网页 artifact 的浏览器验证。若有网页预览，遵循 Browser 优先／不可用时说明 Playwright fallback，并标明只验证该预览；无网页实现时写 Browser QA `NOT_APPLICABLE`，不能称 skill 的网页验收已通过。native 截图／操作也不能证明 USB、传输或生命周期门槛，相关真机实验另行验收。
 
 ## 角色与模型
 
@@ -29,7 +40,7 @@
 - 当前规划交付后停在用户审阅关口。只有用户明确批准 M0，才可开始 Android／Go 探针、真实 APK 构建和对应 Actions；后续阶段同样执行关口。
 - 在用户审批记录中保留原始决定的会话引用／时间和批准范围。只接受用户明确给出的决定，不推定批准，不把内部 reviewer 标成用户审批人。
 - 范围、验收、平台保证、数据保留／破坏行为或里程碑依赖发生实质变化时，更新计划并重新独立审查；涉及用户已批准范围的变化还须重新提交用户决定。
-- 当前 Dora／M1 双平台范围是用户要求修订未批准规划，仍须以新计划和新审查提交用户审阅；旧范围 PASS 不能套用到修订后 head。旧报告保留原结论、原 SHA，并明确历史适用范围。
+- 当前 Android 优先／iOS 延至 M3／UI 先出图是用户要求修订未批准规划，仍须以新计划、新概念与新审查提交用户审阅；旧 M1 双平台方案及旧审批问题被替代，不能解释为当前范围授权。旧 PASS 不覆盖修订后 head；旧报告保留原结论、原 SHA，并明确历史适用范围。
 
 ## DAG、工作树与文件所有权
 
@@ -59,7 +70,7 @@
 - 公共仓库创建前核实登录账号、目标、可见性和是否存在；若 `GhostFlying/ferry` 已存在或状态不明确，上报主代理，不接管、覆写或重用既有仓库。
 - 规划阶段只可提供文档验证 CI。存在真实 Android 应用且用户批准对应里程碑后，Actions 必须构建可安装的真实 APK；不得用空 job、假 APK、仅 AAR 或跳过构建表示 Android 交付成功。
 - APK 产物标明完整源码 SHA、构建 run、版本号／版本代码、ABI、debug／release 类型、工具链版本和 SHA-256。首次 debug APK 明确不是正式发布；发布签名密钥不得进入仓库或普通日志。
-- M1 iOS 产物同样关联完整源码 SHA、工具链、包／安装路径、签名方式和内容哈希，并验证实际安装／启动及共享核心调用；裸 IPA、签名未满足的包或仅 Framework 不算可安装 App。
+- M3 iOS 产物同样关联完整源码 SHA、工具链、包／安装路径、签名方式和内容哈希，并验证实际安装／启动及共享核心调用；裸 IPA、签名未满足的包或仅 Framework 不算可安装 App。
 - 许可证、应用标识和正式分发渠道在用户决定后记录；许可证待定时不添加擅自选择的 LICENSE，不将仓库公开等同于许可证已确定。
 - 用户已在 2026-10-02 的项目会话中选择 Apache-2.0，标准全文见 [LICENSE](LICENSE)。此选择不批准应用实现、应用标识或正式分发渠道。
 
@@ -68,7 +79,7 @@
 - 公共文档、issue、PR、产物、日志和截图不得包含 SMB 密码、Tailnet auth key／节点状态、令牌、私钥、签名文件或真实私人配置。示例使用占位值和凭据引用；报告公开前审查内容。
 - USB／OTG、供电、拔线重连、锁屏、硬件相关性能及真实 Pocket 3 → 手机 → 飞牛链路必须使用相应实体设备。云设备、模拟来源和测试 SMB 只证明对应的测试环境。
 - M0 用户指定 Dora Android 物理设备，不以模拟器代替该门槛。先明确受控服务 owner、测试共享、限域短期账号、测试数据、云设备可达路径和清理；不假设云设备与开发机／家庭 NAS 同网段。连接成功与完整传输分别判定，Dora 经 tsnet 通过不记为 Dora 局域网通过。
-- M0／M1 的云端物理设备结果绑定实际机型和网络环境，不代表指定 Pixel／iPhone 的 Pocket USB、供电或性能。M1 iOS 云设备的安装还依赖可用签名／设备注册方式。
+- 云端物理设备结果绑定实际机型和网络环境，不代表指定 Pixel／iPhone 的 Pocket USB、供电或性能。M0／M1 为 Android 范围；M3 iOS 云设备的安装还依赖可用签名／设备注册方式。
 - 没有合适本地设备时，按上级规则通过 Dora 查询明确 OS 与设备类型。每个会话从新查询的 idle＋online 设备建立自己的新 lease，记录 serial、session ID 和连接地址；任何连接、ADB／BDC、续租或释放前重新验证 session ID。
 - 不接管此前已占用的设备，即使占用者是当前用户。自动化使用 `trap`／`finally`，只释放 session ID 仍一致的本会话 lease，并核实 occupied 列表已移除；USB 实验不能以云模拟替代。
 - 实测记录手机型号／系统／API／ABI、相机固件、线材、microSD 文件系统、应用完整 SHA、测试步骤、结果和证据出处。iOS 构建需要真实可用的 macOS／Xcode；Linux 结果不能证明 iOS 构建成功。

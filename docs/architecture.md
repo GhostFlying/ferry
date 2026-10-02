@@ -1,6 +1,6 @@
 # Ferry 架构提案
 
-本方案围绕 Pocket 3 OTG、飞牛 SMB 和内嵌 tsnet。M0 用 Android probe 与 Dora 云端物理设备验证协议；M1 拟交付 Android／Pixel 6 Pro 和 iOS／iPhone 17 Pro／USB-C 的前台基础版，并在 M0 后开展 Pocket USB 完整链路。具体依赖版本在可行性实验后固定。
+本方案围绕 Pocket 3 OTG、飞牛 SMB 和内嵌 tsnet。M0 用 Android probe 与 Dora 云端物理设备验证协议；M1 交付 Android／Pixel 6 Pro 前台基础版，M2 补充自动模式与 Android 发行；M3 才实现 iOS／iPhone 17 Pro／USB-C。M0 后开展 Android Pocket USB 完整链路，iOS USB 留 M3。具体依赖版本在可行性实验后固定。
 
 ## 模块边界
 
@@ -19,9 +19,9 @@ flowchart LR
     Engine -. 后续适配 .-> Cloud["OpenDAL / 网盘"]
 ```
 
-M1 Android 使用 Kotlin／Jetpack Compose，iOS 使用 Swift／SwiftUI。来源授权、应用生命周期、前台服务和凭据存储由原生层负责。规则、确定性的路径规划、SMB 传输和 tsnet 放入共享 Go 核心，避免两端重复实现协议。Android 实现不能将平台 URI、Context 或服务对象泄漏进共享核心。
+M1 Android 使用 Kotlin／Jetpack Compose；M3 iOS 使用 Swift／SwiftUI。来源授权、应用生命周期、前台服务和凭据存储由原生层负责。规则、确定性的路径规划、SMB 传输和 tsnet 放入共享 Go 核心，避免两端重复实现协议。Android 实现不能将平台 URI、Context 或服务对象泄漏进共享核心。
 
-M0 输出 Android AAR；M1 先在 macOS／Xcode 上验证同一核心的 iOS Framework／XCFramework，再集成 iOS App。iOS 构建和实际安装不能被 Android 构建通过替代。先验证 gomobile 对实际依赖的构建与运行情况；必要时使用单一 Go 产物的 C ABI。上游 libtailscale 的 iOS 构建是参考，不把两个各带 Go runtime 的独立静态库同时链接进 App。[gomobile 文档](https://pkg.go.dev/golang.org/x/mobile/cmd/gomobile)、[libtailscale 构建](https://github.com/tailscale/libtailscale/blob/main/Makefile)。
+M0 输出 Android AAR；M0–M2 只建立 Android 实际需要的接口，不提前实现 iOS bridge、平台服务抽象或生产适配。保持 Go 核心不依赖 Android 生命周期和保留规则向量即可。M3 再在 macOS／Xcode 上验证同一核心的 iOS Framework／XCFramework，按实际需要调整边界并集成 iOS App。iOS 构建和实际安装不能被 Android 构建通过替代。先验证 gomobile 对实际依赖的构建与运行情况；必要时使用单一 Go 产物的 C ABI。上游 libtailscale 的 iOS 构建是参考，不把两个各带 Go runtime 的独立静态库同时链接进 App。[gomobile 文档](https://pkg.go.dev/golang.org/x/mobile/cmd/gomobile)、[libtailscale 构建](https://github.com/tailscale/libtailscale/blob/main/Makefile)。
 
 桥接契约冻结协议版本、操作 ID、结构化错误、回调线程、64 位字节计数、取消完成回调、迟到事件隔离和文件所有权。桥接只传任务描述、沙盒文件路径、进度事件和取消指令。视频数据通过文件读取，不把整个视频转成桥接层字节数组。
 
@@ -35,7 +35,7 @@ USB 接入事件只作为重新检查来源的信号。USB 设备授权与 SAF �
 
 首期不默认自己实现 USB Mass Storage／exFAT 驱动。若目标手机未通过系统 provider 暴露目录，应明确兼容性限制，再单独评估读取适配。
 
-### iOS，M1
+### iOS，M3
 
 通过系统文件选择器取得外接素材目录的 security-scoped URL，保存 bookmark。读取时恢复授权、使用文件协调机制，结束后释放访问。重连后 bookmark 不可用时要求重新选择目录。[Apple 目录访问文档](https://developer.apple.com/documentation/uikit/providing-access-to-directories)。
 
@@ -43,7 +43,7 @@ USB 接入事件只作为重新检查来源的信号。USB 设备授权与 SAF �
 
 ## 本地存储和任务状态
 
-原生层使用 SQLite 持久化任务，Android 可用 Room，iOS 具体封装在实验后选择。Go 核心执行受控的单次操作，由原生任务管理器先持久化操作意图，再发起操作；完成事件持久化后才进入下一阶段。
+原生层使用 SQLite 持久化任务，M1 Android 使用 Room；M3 才选择并实现 iOS 封装。Go 核心执行受控的单次操作，由原生任务管理器先持久化操作意图，再发起操作；完成事件持久化后才进入下一阶段。
 
 核心记录：
 
@@ -86,7 +86,7 @@ SMB 没有本方案可普遍依赖的远端 SHA-256 接口，因此首期采用�
 
 每个安装实例维护一个持久的应用节点；任务间复用节点，离开允许运行的生命周期时释放连接与运行资源，重启后复用身份。提供登录状态、登录链接、退出与重新认证操作。
 
-节点状态通过自有 `ipn.StateStore` 或等效整状态加密，使用 iOS Keychain 或 Android Keystore 支撑的保护；验证原子写入、锁屏访问策略、退出／重登与排除备份。默认私有文件目录不等于已加密。SMB 凭据同样存放于平台保护存储。示例和配置导出均不包含节点密钥或账号密码。
+节点状态通过自有 `ipn.StateStore` 或等效整状态加密，Android 使用 Keystore 支撑的保护，iOS 在 M3 实现 Keychain 支撑的保护；验证原子写入、锁屏访问策略、退出／重登与排除备份。默认私有文件目录不等于已加密。SMB 凭据同样存放于平台保护存储。示例和配置导出均不包含节点密钥或账号密码。
 
 首期使用浏览器交互登录，不内置共享 auth key。tsnet 登录成功后仍要检查 NAS 路由、访问策略与 TCP 445 可达性；Tailscale 身份不替代 SMB 账号权限。
 
@@ -100,7 +100,7 @@ iOS 和 Android 的 `on_open` 模式：应用进入前台时对账并自动恢�
 
 M2 Android 可选 `on_attach` 模式：经实测的系统接入流程进入允许启动服务的状态，再按工作性质使用前台服务。USB 导入和网络上传分别匹配适用服务类型；网络上传不能伪装成设备连接工作来规避超时。USB attach 或声明 `connectedDevice` 本身不赋予后台启动豁免，必须验证可见 Activity／用户动作等合法入口。任务持续显示通知、可停止，处理启动拒绝、超时和 OEM 终止。[Android 传输任务选择](https://developer.android.com/develop/background-work/background-tasks/data-transfer-options)。
 
-普通 SMB 与应用内 tsnet 不适用 iOS 后台 URLSession 文件上传托管。M1 iOS 版本采用用户已经接受的前台运行范围。[Apple 后台 URLSession 限制](https://developer.apple.com/documentation/foundation/downloading-files-in-the-background)。
+普通 SMB 与应用内 tsnet 不适用 iOS 后台 URLSession 文件上传托管。M3 iOS 版本采用用户已经接受的前台运行范围。[Apple 后台 URLSession 限制](https://developer.apple.com/documentation/foundation/downloading-files-in-the-background)。
 
 ## OpenDAL 后续接入
 
@@ -114,4 +114,6 @@ OpenDAL 作为网盘／对象存储候选；当前查阅的公开 services 列�
 
 M0 的 host 受控 SMB 测试证明 `net.Conn` 注入／协议语义；Dora Android 物理设备实际验证 App 内 tsnet 到受控 SMB 的完整传输。Dora 与家庭 NAS／开发机不默认同网，直接 SMB 只在已批准私网路径真实可达时补测；不以公网暴露 TCP 445 换取可达性。构造素材的读回一致不证明 Pocket USB。
 
-M1 将生产规则、原生导入／状态与传输接成双平台前台路径。Dora iOS 的安装取决于 macOS／Xcode 与签名／设备注册条件，其普通文件与网络实验不代替 Pocket → iPhone 17 Pro USB-C。指定两套 Pocket 实体链路、飞牛 LAN／tsnet、数据恢复与暂停分别验收；缺条件时该项未运行且完整验收未通过。
+M1 将生产规则、Android 导入／状态与传输接成可用前台路径；Pixel／Pocket／飞牛 LAN 与 tsnet、数据恢复与暂停分别验收。M2 不要求 iOS 回归。M3 才验证 Dora iOS 的安装、普通文件／网络与实际 Pocket → iPhone 17 Pro USB-C；macOS／Xcode、签名／注册和指定设备是 M3 前提，不能提前成为 Android gate。缺条件时对应阶段的规定验收保持未完成。
+
+视觉方案由专门design agent按 `build-web-apps:frontend-app-builder` 先生成图，经用户接受后再定义tokens／具体组件；架构中的职责与数据流不预先规定视觉布局。Android Compose和M3 SwiftUI保留原生实现，浏览器稿不代替原生截图／功能验证。

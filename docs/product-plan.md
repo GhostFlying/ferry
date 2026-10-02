@@ -6,13 +6,13 @@
 
 用户用 USB／OTG 将 DJI Osmo Pocket 3 连接到手机。Ferry 根据预先配置的规则，上传原始素材到飞牛 NAS 的 SMB 共享，并保留可靠的任务记录。用户可以使用应用内的 tsnet 访问远端 NAS。
 
-M0 先交付 Android 协议 probe，在 Dora 云端 Android 物理设备上验证受控 SMB／内嵌 tsnet。M1 拟交付 Android 与 iOS 的可用前台基础版，以 Pixel 6 Pro 和 iPhone 17 Pro／USB-C 验证 Pocket 3 完整流程，不考虑 Lightning。M1 双平台范围是落实用户“iOS 移入 M1”的具体提案，仍待用户 review；真实 USB 完整链路在 M0 结束后确认条件并开展。iOS 优先于 OpenDAL／网盘。
+M0 先交付 Android 协议 probe，在 Dora 云端 Android 物理设备上验证受控 SMB／内嵌 tsnet。M1 交付 Android 可用前台基础版，以 Pixel 6 Pro 验证 Pocket 3／飞牛完整流程；M2 增加 Android 自动模式、可靠性与发行准备。M3 才实现 iOS，以 iPhone 17 Pro／USB-C 验证，不考虑 Lightning。M0–M2 不以 iOS 构建、签名或回归为前提；真实 USB 完整链路在 M0 结束后确认条件并开展。最新阶段计划仍待用户 review；iOS 排在 OpenDAL／网盘之前。
 
 ## 运行方式
 
 | 平台／模式 | 启动方式 | 离开 App 后 | 中断后的行为 |
 | --- | --- | --- | --- |
-| iOS：M1 基础版 | 用户打开 App，自动检查来源并执行启用的规则 | 暂停导入和 SMB／tsnet 上传 | 下次打开恢复；必要时重新授权来源 |
+| iOS：M3 基础版 | 用户打开 App，自动检查来源并执行启用的规则 | 暂停导入和 SMB／tsnet 上传 | 下次打开恢复；必要时重新授权来源 |
 | Android：M1 打开时运行，默认 | 用户打开 App，自动检查来源并执行启用的规则 | 暂停任务，不启动持续运行的服务 | 下次打开恢复 |
 | Android：M2 自动模式，可选 | 使用已验证的设备接入流程启动；系统仍可能要求打开 App 或授权 | 通过适用的前台服务继续，显示进度和停止操作 | 在系统允许时恢复；否则保留任务并提示打开 App |
 
@@ -22,7 +22,7 @@ M1 不交付自动接入服务，不把尚未实现的开关显示为可用。M2
 
 手动暂停的任务不会因再次打开 App 而自行恢复。系统原因暂停的任务可以在条件重新满足时恢复。
 
-## M1 双平台前台能力
+## M1 Android 前台能力，M3 延伸至 iOS
 
 1. 使用系统目录选择器绑定 Pocket 3 素材目录；保存可持久化的授权引用并在使用前检查。
 2. 扫描媒体文件，展示数量、总大小、来源可用状态及目标连接状态。
@@ -69,9 +69,16 @@ M1 不交付自动接入服务，不把尚未实现的开关显示为可用。M2
 
 - Pixel 6 Pro 和 iPhone 17 Pro 的实际系统版本，以及相机固件；机型和 USB-C 范围已确定。
 - M0 受控 SMB 服务的授权环境、Dora 可达路径与短期测试账号；Dora 候选设备列表不证明连接成功。
-- M1 飞牛共享名称、实际账号权限和 NAS 的 Tailnet 接入方式，以及两套 Pocket USB 设备的操作条件。
-- M1 macOS／Xcode、iOS 安装签名与 Dora iOS 物理设备条件。
-- 两端最低系统版本：在移动端桥接和实机实验后确定。
-- 应用标识建议：Android applicationId／iOS bundle ID 为 `io.github.ghostflying.ferry`，M0 诊断包后缀 `.probe`；随当前计划 review 确认，iOS profile／安装适用性须实测。许可证已由用户选择 Apache-2.0，公开仓库为 `GhostFlying/ferry`。
+- M1 飞牛共享名称、实际账号权限和 NAS 的 Tailnet 接入方式，以及 Pocket 3／Pixel 6 Pro USB 设备的操作条件。
+- M3 才确认 Pocket 3／iPhone 17 Pro USB-C 组合与相应飞牛实测条件。
+- M3 才确认 macOS／Xcode、iOS 安装签名与 Dora iOS 物理设备条件，不阻塞早期 Android。
+- Android 最低系统版本在早期工具链／实机实验后确定；iOS 最低系统版本留到 M3 桥接和实机实验。
+- Android applicationId 建议 `io.github.ghostflying.ferry`，M0 诊断包后缀 `.probe`；随当前计划 review 确认。iOS bundle ID／profile／安装适用性留 M3。许可证已由用户选择 Apache-2.0，公开仓库为 `GhostFlying/ferry`。
 
 以上事项不阻碍形成方案；相关兼容性结论和发布承诺必须等待对应验证。
+
+## UI 设计与接受
+
+功能与状态需求先作为brief交设计agent，用 `build-web-apps:frontend-app-builder`／Image Gen 生成完整主界面及必要状态，用户接受所覆盖的图后才提取tokens和详细UI实施清单。此处的来源／目标／规则／任务需求不是预先指定布局。概念中的示例数字只用于设计，不代表设备已连接或上传成功。
+
+M0诊断UI、M1产品UI、M2新增设置／通知、M3 iOS各自遵守设计关口；接受Android图不自动接受iOS界面。非UI核心可在阶段获批后独立推进。原生App交付需对照接受图检查文案、层级、字体、颜色、间距等至少五项，记录截图与差异账本；视觉保真和真实传输／USB验收分别通过。

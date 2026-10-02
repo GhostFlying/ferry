@@ -1,6 +1,6 @@
 # 平台资料与证据边界
 
-查阅日期：2026-10-02。M0 计划使用 Dora Android 物理设备做受控 SMB／tsnet 实验；M1 的 Pocket USB 实测目标为 Pixel 6 Pro 和 iPhone 17 Pro／USB-C。以下是官方文档和上游源码依据，尚未进行本项目的 Pocket 3、飞牛、Android 或 iPhone 实机测试。文档证明可用接口或已报告的问题，不等于本方案的组合已经验证。
+查阅日期：2026-10-02。M0 计划使用 Dora Android 物理设备做受控 SMB／tsnet 实验；M1 的 Pocket USB 实测目标为 Pixel 6 Pro；iPhone 17 Pro／USB-C 属于 M3。以下是官方文档和上游源码依据，尚未进行本项目的 Pocket 3、飞牛、Android 或 iPhone 实机测试。文档证明可用接口或已报告的问题，不等于本方案的组合已经验证。
 
 ## Pocket 3 有线导入
 
@@ -10,7 +10,7 @@
 
 [DJI OTG 帮助](https://repair.dji.com/help/content?customId=01700007307&lang=en&paperDocType=ARTICLE&re=US&spaceId=17)包含 Pocket 3，列出 iOS 的 OTG 操作和「文件」中的 DCIM 位置，但其具体示例使用 Lightning 适配器，不构成本项目 iPhone 17 Pro／USB-C 的兼容性证明。Lightning 不在项目范围内；USB-C 路径必须实测。
 
-结论：有线导入有官方依据。具体手机上是否可由第三方 App 读取、重连后授权是否有效和实际文件系统表现，属于 M0 结束后 M1 的实测事项，当前不是 M0 门槛。
+结论：有线导入有官方依据。具体手机上是否可由第三方 App 读取、重连后授权是否有效和实际文件系统表现，Android 属于 M0 结束后 M1 的实测事项，iOS 属于 M3，均不是 M0 门槛。
 
 ## Android
 
@@ -32,7 +32,7 @@
 
 [后台 URLSession 文档](https://developer.apple.com/documentation/foundation/downloading-files-in-the-background)说明后台传输托管仅适用于 HTTP／HTTPS，后台上传需要以文件为来源。它不能直接承载任意 SMB 客户端或应用进程内的 tsnet 网络栈。
 
-结论：M1 iOS 采用用户确定的打开 App 后运行方式。系统目录授权仍必要；iOS 锁屏与挂起后恢复连接是验收事项。
+结论：M3 iOS 采用用户确定的打开 App 后运行方式。系统目录授权仍必要；iOS 锁屏与挂起后恢复连接是验收事项。
 
 ## tsnet 与移动桥接
 
@@ -62,7 +62,9 @@
 | 工具链／Dora 候选查询 | 当前环境准备情况 | 设备租用、安装、服务可达或协议成功 |
 | M0 host 受控 SMB（待做） | 该客户端／服务器组合的连接与提交语义 | Dora 直连、飞牛或相机兼容性 |
 | M0 Dora App 内 tsnet＋受控 SMB（待做） | 实际云端手机中的桥接和完整传输／恢复 | LAN 路径或 Pocket USB；构造素材不是相机素材 |
-| M1 Dora iOS 普通文件／网络（待做） | 所测设备上的 iOS 安装／核心／前台行为 | iPhone 17 Pro／Pocket USB-C 兼容性 |
-| M1 指定 Pocket／手机／飞牛（待做） | 该版本与线材／系统组合的实际完整链路 | 未测试机型或系统的泛化兼容性 |
+| M3 Dora iOS 普通文件／网络（待做） | 所测设备上的 iOS 安装／核心／前台行为 | iPhone 17 Pro／Pocket USB-C 兼容性 |
+| M1 Android／M3 iOS 指定 Pocket／手机／飞牛（待做） | 该版本与线材／系统组合的实际完整链路 | 未测试机型或系统的泛化兼容性 |
 
-M0 先确认受控服务及路由，优先使用授权测试 Tailnet；云端直接 SMB 仅在受控私有网络中可达时补测，不能笼统写“LAN／tsnet 均通过”。M1 iOS 需要 macOS／Xcode 和有效签名／安装路径，不以无签名产物或 Linux 编译作为 iOS 运行证据。
+M0 先确认受控服务及路由，优先使用授权测试 Tailnet；云端直接 SMB 仅在受控私有网络中可达时补测，不能笼统写“LAN／tsnet 均通过”。M3 iOS 需要 macOS／Xcode 和有效签名／安装路径，不以无签名产物或 Linux 编译作为 iOS 运行证据。
+
+最新用户决定不在 M0–M2 做 iOS 工程验证或以其阻塞 Android。此前双平台 M1 的计划／review属于历史范围，不能作为当前计划通过证据。UI概念由指定skill生成，属于设计提案；接受图与原生运行截图、协议／USB证据必须分别记录。没有web实现时不能宣称Browser／Playwright QA已完成。

@@ -1,5 +1,7 @@
 # Dora 与 M1 iOS 范围修订独立审查
 
+> 历史范围记录：本报告 PASS 仅覆盖下述 M1 双平台技术快照 `a8f6fee7da5fe57ac575b181bb540a89e02d544c` 与报告追加 head `f86441ff3caa32f9eca2b47b0d32de6a99cad0e5`。用户随后要求 iOS 后移 M3、早期仅 Android，并要求所有 UI 先按指定技能生成设计图；当前修订见 [新独立审查](android-first-design-revision-review.md)。原结论与证据保留，不覆盖新范围或构成实施批准。
+
 日期：2026-10-02。作者：`/root/plan_milestones`（技术规划）、`/root/repo_governance`（治理）；独立审查者：`/root/review_plan`。模型／reasoning 以协调代理的任务分配记录为准；本报告不推断运行时配置。
 
 ## 文档变更计划审查

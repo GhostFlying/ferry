@@ -1,6 +1,6 @@
 # Ferry 代理协作与审查协议
 
-状态：未批准规划的范围修订，待新范围独立审查及用户审阅。项目约束见 [AGENTS.md](../AGENTS.md)，阶段与产品验收见 [实施计划](implementation-plan.md)，本次变更依据见 [修订计划](plans/milestone-scope-revision.md)。
+状态：未批准规划的范围修订，待新范围独立审查及用户审阅。项目约束见 [AGENTS.md](../AGENTS.md)，阶段与产品验收见 [实施计划](implementation-plan.md)，本次变更依据见 [Android 优先与设计先行修订计划](plans/android-first-design-revision.md)。
 
 ## 授权与推进顺序
 
@@ -15,7 +15,40 @@
 
 内部 PASS、CI 通过、PR 合并、任务关闭和用户未回复不构成用户里程碑批准。可以完成已获授权的任务；不得把 `awaiting_user_review` 改写成 `accepted`。
 
-当前范围为 M0 受控服务／Dora Android 物理设备协议验证、M1 双平台可用前台基础版及指定 Pocket USB 验收、M2 Android 自动模式／恢复、M3 双平台发行准备。此次变更只修订规划，不启动 M0、Actions 或设备租约。用户明确批准规划与 M0 后，先合并规划 PR，让规则和计划进入 main，再从该已批准基线建立 M0 工作树。
+当前范围为 M0 受控服务／Dora Android 物理设备协议验证、M1 Android 前台基础版及 Pocket／Pixel／飞牛链路、M2 Android 自动模式／恢复与发行准备、M3 才做 iOS 前台版／Pocket USB 和双平台交付。M0–M2 不含 iOS／macOS／签名／回归依赖，也不提前实现未来平台抽象。本轮只修订规划和生成用户审阅概念，不启动 M0、Actions 或设备租约；M2 的发行安排仍是待审方案。用户明确批准规划与 M0 后，先合并规划 PR，让规则和计划进入 main，再从该已批准基线建立 M0 工作树。旧 M1 双平台审批问题已被当前范围替代。
+
+## UI 概念、接受与原生保真协议
+
+每个阶段的任何 UI 方案先使用 `build-web-apps:frontend-app-builder` 与 Image Gen。先记录功能 brief／必须信息和行为，不在图示及用户接受前指定布局、tokens、字体、间距或组件几何。M0 probe 诊断界面也属于 UI；M2 新设置／通知及 M3 iOS 到相应阶段另生成图，不用 M1 概念默认覆盖。
+
+| 顺序／记录 | 必需产物和关口 |
+| --- | --- |
+| Brief／surface inventory | 真实流程、屏幕及状态、必须文案／控件／数据、fixture 与未验证能力、目标原生平台；完整主屏和必要细节都须可读 |
+| Concept generation | skill／Image Gen 生成图、路径／SHA-256、screen／state 映射、质量自检；缺态／模糊图重新生成，不用局部裁剪代替完整参考 |
+| User design acceptance | 用户决定原文／时间、接受的具体图片版本和覆盖范围；pending／revise／accepted 分明，内部 PASS 不算接受 |
+| Tokens／UI implementation plan | 仅从接受图提取色彩锁定、文字／字体、图标、间距、组件／状态和交互清单；记录文件 owner、概念映射、偏差、验收及独立 plan review |
+| Implementation authorization | 另查 milestone 用户批准与实际任务依赖；设计接受不批准应用实现，阶段批准也不默认为概念被接受 |
+| Native fidelity QA | 实际 App 真机截图、同轮 `view_image` 概念／截图、至少五类对照、可见文案 diff、fidelity ledger、修复与复核；按状态覆盖，不能只看概览 |
+| Functional／device QA | 真实控制和状态变化、安装／权限／恢复、传输／USB 各自 evidence 与 PASS；视觉／功能结果分别判定 |
+
+本项目使用 Kotlin／Compose 与 M3 Swift／SwiftUI，基于用户原生目标和已有架构，遵守 skill 的指定／已有框架选择规则。原生验证适配须明确写入 UI 计划并供用户 review：使用实际运行 App 的真机截图对照接受图，记录尺寸不一致、系统栏／输入法／字号／主题等环境差异；无权以此声称 Browser QA 已通过。如果另有网页 artifact，才执行其 Browser 优先或说明 Playwright fallback 的网页流程，网页结果不代替 native 验证。本轮只有概念图时 native／browser 实现验证均为 `NOT_RUN` 或网页不存在时 `NOT_APPLICABLE`。
+
+视觉验收至少逐项检查文案、信息层级／布局、字体、色彩、间距／容器，并覆盖图标、可见状态、裁切／换行、必要可访问性与实际控件行为。同一 QA 轮次用 `view_image` 查看概念和最新截图，保持内容、几何、颜色、密度和交互忠实；保存 mismatch → 概念证据 → 截图证据 → 修复／用户批准偏差的 ledger。可修复的明显差异阻止 UI 交付，构建或操作通过不免除视觉保真；新可见内容／主要状态缺概念时回到生成与接受关口。
+
+```text
+UI task / milestone / skill source:
+Concept files / SHA-256 / screen-state coverage / fixture declarations:
+User design decision / timestamp / accepted versions and scope (or pending):
+Separate user milestone authorization (or pending):
+Native framework rationale / browser adaptation and actual artifacts:
+Accepted-copy inventory / extracted tokens and component plan (only after acceptance):
+Independent UI plan reviewer / findings / resolutions:
+Source SHA / actual device-system / dimensions-theme-input / screenshot files:
+view_image comparison / at least five points / copy diff / fidelity ledger:
+Functional-device result / untested scope / intentional user-approved deviations:
+```
+
+设计任务可先完成已经授权的图示建议；概念尚待接受时记录该部分状态，不伪装成整个 task／milestone 已完成。无关非 UI 核心任务不依赖视觉接受，仍受用户阶段批准、技术计划和依赖约束。概念／原生截图的必要审查证据保留可追踪来源，其他临时 QA 文件按 skill 清理。
 
 ## 每个 milestone 的工作与验收契约
 
@@ -142,9 +175,9 @@ Task issue 使用 [任务模板](../.github/ISSUE_TEMPLATE/task.yml)，包含范
 
 M0 的 Dora Android 物理设备必须先有受控 SMB 和可达拓扑，再执行真实 probe 的连接、完整大文件传输、读回摘要、竞争和中断验收；连接与完整传输分开报告。受控 tsnet 路径不表示局域网已测，合成文件和云端物理设备不证明 Pocket OTG／指定 Pixel／飞牛。每个租约和每次操作遵守上级独立 session ID／cleanup 规则；当前规划修订不执行这些实验。
 
-M1 Android／iOS 都需要实际 App、完整副本／共享传输和前台恢复证据，macOS／Xcode、iOS 签名安装路径和 Pocket 指定 USB 条件缺失时，不将整个 M1 标记通过。将来源、手机、目标、网络方式和产物分别列证据，云端普通网络／UI 结果不能替代指定相机链路。
+M1 只验收 Android 实际 App、完整副本／传输、前台恢复和指定 Pocket／Pixel／飞牛；缺真实 USB／目标条件时不把完整链路标通过，不以 macOS／iOS 条件阻塞它。M2 只做 Android 自动模式／恢复及发行准备。M3 才验收 iOS 原生 App、来源／副本／传输／恢复、macOS／Xcode／签名安装和指定 Pocket／iPhone USB-C，以及双平台最终交付。将来源、手机、目标、网络方式和产物分别列证据，云端普通网络／UI 结果不能替代指定相机链路。
 
-当前规划阶段只验证文档、示例 JSON 和仓库准备。文档 CI 不能命名或报告为 Android 构建通过。真实应用存在且对应里程碑批准后，Android Actions 应构建并保存可安装的 APK；AAR 是桥接中间产物，不是 APK 验收。
+当前规划阶段验证文档、示例 JSON、仓库准备及概念事实／覆盖／可读性；生成概念不是实现或验收。文档 CI 不能命名或报告为 Android 构建通过。真实应用存在且对应里程碑批准后，Android Actions 应构建并保存可安装的 APK；AAR 是桥接中间产物，不是 APK 验收。
 
 ```text
 Artifact:
@@ -165,4 +198,4 @@ debug APK 明确不是正式发布。签名密钥、SMB 凭据、Tailnet 登录�
 
 主代理提供本里程碑的最终计划、所有关联 issue／PR、最终 SHA、独立 review 与修复、验收与真实环境、APK 或其他真实产物、未测范围、未决项以及下一阶段的具体范围／停止条件。明确请求用户决定 `approve_next`、`revise` 或 `hold`，记录批准覆盖哪个 milestone 和计划版本。用户决定前保持关口，继续范围内的整理及问题修复，不开始下一阶段实现。
 
-审阅包覆盖该 milestone 的每个验收 ID，不用少量代表性截图代替完整判定。M0 包只报告其受控服务／Dora 协议范围；M1 的真实 USB 与双平台基础版、M2 自动模式、M3 发行准备各按当前阶段计划判定。任何缺失、豁免或受限版本接受都需用户明确决定，不能因迁移任务而默认放宽。
+审阅包覆盖该 milestone 的每个验收 ID，不用少量代表性截图代替完整判定。M0 包只报告其受控服务／Dora 协议范围；M1 的 Android 基础版／真实 USB、M2 自动模式／Android 发行准备、M3 iOS／双平台交付各按当前阶段计划判定；另列设计接受和视觉对照状态。任何缺失、豁免或受限版本接受都需用户明确决定，不能因迁移任务而默认放宽。
