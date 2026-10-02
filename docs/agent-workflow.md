@@ -1,6 +1,6 @@
 # Ferry 代理协作与审查协议
 
-状态：当前规划交付的一部分，待独立审查及用户审阅。项目约束见 [AGENTS.md](../AGENTS.md)，阶段与产品验收见 [实施计划](implementation-plan.md)。
+状态：未批准规划的范围修订，待新范围独立审查及用户审阅。项目约束见 [AGENTS.md](../AGENTS.md)，阶段与产品验收见 [实施计划](implementation-plan.md)，本次变更依据见 [修订计划](plans/milestone-scope-revision.md)。
 
 ## 授权与推进顺序
 
@@ -14,6 +14,24 @@
 6. 整理 milestone 的计划、PR、证据、未决项和下一阶段范围，交用户审阅。只有明确批准后才进入下一 milestone。
 
 内部 PASS、CI 通过、PR 合并、任务关闭和用户未回复不构成用户里程碑批准。可以完成已获授权的任务；不得把 `awaiting_user_review` 改写成 `accepted`。
+
+当前范围为 M0 受控服务／Dora Android 物理设备协议验证、M1 双平台可用前台基础版及指定 Pocket USB 验收、M2 Android 自动模式／恢复、M3 双平台发行准备。此次变更只修订规划，不启动 M0、Actions 或设备租约。用户明确批准规划与 M0 后，先合并规划 PR，让规则和计划进入 main，再从该已批准基线建立 M0 工作树。
+
+## 每个 milestone 的工作与验收契约
+
+所有当前阶段文件和 GitHub milestone 都必须提供下列映射；不能只写阶段目标或使用“支持、稳定、完善”作为通过条件。未排期 backlog 选入阶段时，先补同样的计划并独立审查。
+
+| 必需字段 | 内容与判定 |
+| --- | --- |
+| Work／task | 实际执行的工作、全限定任务 ID、负责角色和文件所有权 |
+| Artifact | 将交付的文件、App／包、报告、数据或可审查变更 |
+| Environment／procedure | 指定工具链、设备、网络、账号范围、输入和可复现步骤 |
+| Acceptance | 唯一验收 ID、明确预期与 PASS／FAIL 判定；实现成功、安装成功与业务／设备通过分别判断 |
+| Evidence | 完整源码 SHA、命令结果、产物／哈希、脱敏日志／截图和原始摘要出处 |
+| Stop／blocked | 缺少哪个条件、失败如何保留状态、哪些节点不能继续、如何解除 |
+| User gate | 开工授权与阶段结果／下一阶段批准分别记录，范围改变回到用户决定 |
+
+Task issue 映射阶段验收 ID，并说明工作、产物和验收所需证据。独立 reviewer 检查上述字段和所有阶段一致性；缺少工作或可判定验收阻止计划技术 PASS。GitHub 说明是当前计划摘要，不可保留与版本化文档冲突的旧阶段要求。
 
 ## 任务 DAG 与工作树
 
@@ -29,9 +47,12 @@
 | Branch／base | 实现分支、目标分支、完整基线 SHA和依赖 PR |
 | Worktree | `../ferry-worktrees/<task-id>-<slug>/` 或记录的实际路径 |
 | Acceptance | 可执行步骤、输入、期望、证据和硬件条件 |
+| Milestone criteria | 对应阶段验收 ID、任务交付产物、PASS 判定和证据链接 |
 | Stop conditions | 何时上报／重新规划／等待用户决定 |
 
 依赖满足后才开始实现。无依赖的计划、读资料和环境调查可以并行，但必须标明其范围。依赖 PR 合并后更新依赖者到新的基线，重跑受影响的验收和 review；旧提交的 PASS 不覆盖新提交。
+
+迁移现有任务时保留 issue 编号与历史 ID，记录旧阶段／范围、旧完整 SHA、新阶段／任务、拆分关系和原因。移动或 superseded 不等于完成；拆分 meta 入口不得冒充实施任务，阶段验收只依据实际子任务。变更依赖后逐项核对 start／final integration 及反向 Blocks，并检查整张 DAG 无环。
 
 ## 计划记录模板
 
@@ -46,6 +67,7 @@ Owner / independent plan reviewer / implementation reviewer:
 Models and reasoning:
 Owned files and worktree:
 Implementation steps:
+Deliverable artifacts and mapped milestone acceptance IDs:
 Acceptance steps, expected results, environment and evidence:
 Device/tool/credential prerequisites (references only):
 Risks, rollback or recovery:
@@ -112,9 +134,15 @@ Task issue 使用 [任务模板](../.github/ISSUE_TEMPLATE/task.yml)，包含范
 
 发现原计划不能满足关键能力时暂停受影响实现，在原 issue 记录问题，更新计划版本、依赖、验收、成本和替代方案，交独立 reviewer。若改变用户批准的范围、平台保证、数据行为或里程碑顺序，交用户重新决定；不靠内部 review 继续推进。
 
+范围变更后的审查记录列新文件快照／完整 SHA。旧 PASS 只适用于原 head，旧报告明确标记历史范围并保留结论；新增计划、DAG 和远端登记必须重新独立审查。发布修订后 PR 与用户关口指向新的可访问计划和审查，不把历史 PASS 表示为当前通过。
+
 ## 验收与产物
 
 验收记录绑定完整源码 SHA、命令、工具链、设备／系统、输入、期望和实际结果，并区分 `PASS`、`FAIL`、`BLOCKED`、`NOT_RUN`。必要的 USB 真机、飞牛和 tsnet 结果各自列证据来源；一般模拟器测试不证明 USB／供电或真实性能。
+
+M0 的 Dora Android 物理设备必须先有受控 SMB 和可达拓扑，再执行真实 probe 的连接、完整大文件传输、读回摘要、竞争和中断验收；连接与完整传输分开报告。受控 tsnet 路径不表示局域网已测，合成文件和云端物理设备不证明 Pocket OTG／指定 Pixel／飞牛。每个租约和每次操作遵守上级独立 session ID／cleanup 规则；当前规划修订不执行这些实验。
+
+M1 Android／iOS 都需要实际 App、完整副本／共享传输和前台恢复证据，macOS／Xcode、iOS 签名安装路径和 Pocket 指定 USB 条件缺失时，不将整个 M1 标记通过。将来源、手机、目标、网络方式和产物分别列证据，云端普通网络／UI 结果不能替代指定相机链路。
 
 当前规划阶段只验证文档、示例 JSON 和仓库准备。文档 CI 不能命名或报告为 Android 构建通过。真实应用存在且对应里程碑批准后，Android Actions 应构建并保存可安装的 APK；AAR 是桥接中间产物，不是 APK 验收。
 
@@ -122,9 +150,11 @@ Task issue 使用 [任务模板](../.github/ISSUE_TEMPLATE/task.yml)，包含范
 Artifact:
 Source full SHA / PR / Actions run:
 App version / version code / debug or release:
-ABI and minimum/target SDK:
-JDK / Gradle / AGP / Android SDK / Go / gomobile versions:
-APK SHA-256 and download link:
+Platform / ABI / supported OS or SDK:
+Android toolchain and/or macOS / Xcode / iOS toolchain versions:
+Go / mobile binding versions:
+APK or iOS app artifact SHA-256 / download or installation path:
+iOS signing / device registration / installation prerequisites (references only):
 Install/launch verification environment and result:
 Device/integration tests and explicitly untested scope:
 ```
@@ -134,3 +164,5 @@ debug APK 明确不是正式发布。签名密钥、SMB 凭据、Tailnet 登录�
 ## 里程碑交给用户的审阅包
 
 主代理提供本里程碑的最终计划、所有关联 issue／PR、最终 SHA、独立 review 与修复、验收与真实环境、APK 或其他真实产物、未测范围、未决项以及下一阶段的具体范围／停止条件。明确请求用户决定 `approve_next`、`revise` 或 `hold`，记录批准覆盖哪个 milestone 和计划版本。用户决定前保持关口，继续范围内的整理及问题修复，不开始下一阶段实现。
+
+审阅包覆盖该 milestone 的每个验收 ID，不用少量代表性截图代替完整判定。M0 包只报告其受控服务／Dora 协议范围；M1 的真实 USB 与双平台基础版、M2 自动模式、M3 发行准备各按当前阶段计划判定。任何缺失、豁免或受限版本接受都需用户明确决定，不能因迁移任务而默认放宽。
