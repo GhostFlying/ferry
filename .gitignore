@@ -1,0 +1,21 @@
+# Local credentials and runtime data
+.env
+.env.*
+!.env.example
+*.local.json
+/state/
+/spool/
+/private/
+
+# Native builds and local tooling
+.gradle/
+**/build/
+local.properties
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+.DS_Store
