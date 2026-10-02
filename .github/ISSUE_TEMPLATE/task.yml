@@ -1,0 +1,82 @@
+name: Project task
+description: Plan a scoped Ferry task with dependencies, ownership, review and acceptance.
+title: "[task] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Link the repository plan and use public-safe evidence. Independent technical review does not approve a milestone; only the user's explicit decision can authorize the next milestone.
+  - type: input
+    id: task_id
+    attributes:
+      label: Task ID and milestone
+      description: Use the stable local ID and the exact milestone name.
+      placeholder: M0-A01 / M0A
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Problem, outcome and scope
+      description: State the behavior to deliver, owned files and explicit exclusions.
+    validations:
+      required: true
+  - type: textarea
+    id: authorization
+    attributes:
+      label: User authorization and milestone gate
+      description: Record the approved scope and the original decision reference, or state pending. Do not treat internal PASS or silence as approval.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: DAG dependencies, branch and base
+      description: List depends-on / blocks tasks, dependency PRs, target branch and complete base SHA. Write none when appropriate.
+    validations:
+      required: true
+  - type: textarea
+    id: ownership
+    attributes:
+      label: Owner, independent reviewers and worktree
+      description: Record agent roles, model/reasoning, worktree path and file ownership. Reviewers must be independent from the author.
+    validations:
+      required: true
+  - type: textarea
+    id: plan
+    attributes:
+      label: Plan and independent plan review
+      description: Link the versioned plan and review, finding resolutions and remaining risks. State pending if not yet reviewed.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance and evidence boundary
+      description: Give executable steps, expected results, tool/device conditions, evidence to capture and explicit untested scope.
+    validations:
+      required: true
+  - type: textarea
+    id: stopping
+    attributes:
+      label: Stop conditions and open decisions
+      description: Describe blocking conditions, rollback/recovery and decisions requiring the user. Never include credentials.
+    validations:
+      required: true
+  - type: textarea
+    id: progress
+    attributes:
+      label: Checkpoints, commits, PR and artifacts
+      description: Update with complete source SHAs, independent implementation review, validation commands/results, artifact hashes and user milestone decisions. Before the first commit, record uncommitted preparation plus the file manifest and SHA-256 hashes.
+  - type: checkboxes
+    id: delivery
+    attributes:
+      label: Delivery checklist
+      description: These technical checks do not replace the user milestone review.
+      options:
+        - label: The plan is written and has independent technical review.
+        - label: Implementation is within explicitly authorized milestone scope.
+        - label: Independent implementation review has no open P0/P1 findings.
+        - label: Acceptance evidence is tied to the final complete source SHA.
+        - label: Private credentials and device/network information are removed from public evidence.
+        - label: The milestone review package and next-stage scope are ready for the user.

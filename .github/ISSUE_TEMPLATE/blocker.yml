@@ -1,0 +1,69 @@
+name: Project blocker
+description: Record a blocked Ferry task, evidence, affected dependencies and the exact resolution needed.
+title: "[blocker] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep credentials and private device/network details out of this issue. A pending user milestone review is a normal authorization gate; do not work around it with internal review or CI.
+  - type: dropdown
+    id: category
+    attributes:
+      label: Blocker category
+      options:
+        - technical
+        - environment
+        - device_access
+        - user_decision
+        - authorization
+    validations:
+      required: true
+  - type: input
+    id: task
+    attributes:
+      label: Affected task, milestone and plan
+      description: Link the issue and versioned plan; list the milestone.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Observed condition and evidence
+      description: Include the complete source SHA, environment, reproduction and sanitized errors. Distinguish facts from hypotheses.
+    validations:
+      required: true
+  - type: textarea
+    id: investigation
+    attributes:
+      label: Investigation and attempts
+      description: Record completed read-only checks, tested alternatives and their outcomes. Do not claim an unrun check passed.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: DAG impact and independent work
+      description: List blocked task/PR IDs, affected acceptance and work that can continue within the authorized milestone.
+    validations:
+      required: true
+  - type: textarea
+    id: resolution
+    attributes:
+      label: Required resolution or user decision
+      description: State exactly which condition, access, resource or scoped decision is needed, and how the fix will be verified.
+    validations:
+      required: true
+  - type: textarea
+    id: plan_change
+    attributes:
+      label: Plan change and review requirements
+      description: Link updated scope/dependencies/acceptance and independent review. State whether the user's earlier approval changes, or write none.
+    validations:
+      required: true
+  - type: textarea
+    id: followup
+    attributes:
+      label: Owner and resolution checkpoint
+      description: Record responsible agent, next authorized action and evidence required to close. Do not invite or mention other people without explicit authorization.
+    validations:
+      required: true
