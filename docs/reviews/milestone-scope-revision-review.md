@@ -76,6 +76,27 @@ mini plan 的最终改动包含上述分工修正、BUILD0、发布授权边界�
 
 ## 远端登记与用户状态
 
-本次新版远端 issue／PR／DAG 同步：**待发布后独立核验**。此前针对 `b06b1fed92f6edc28f1eff56e11d12986cd27d38` 技术范围与 `def54a4c559931078a1d23abcf0f25d2f2048541` 发布结果的历史 PASS 不自动覆盖本次修订。
+结论：**PASS，2026-10-02 已完成新版远端规划登记的独立核验。** 审查技术 head 为 [`a8f6fee7da5fe57ac575b181bb540a89e02d544c`](https://github.com/GhostFlying/ferry/commit/a8f6fee7da5fe57ac575b181bb540a89e02d544c)，基线为 `def54a4c559931078a1d23abcf0f25d2f2048541`。本节是该技术 head 发布后补充的审计报告；随后只提交本报告不会改变已审技术快照，最终追加提交另核对父提交、仅报告差异、身份与 PR 状态，不循环审查自身 hash。
 
-本轮未实现 App／Actions、启动服务、占用设备或运行传输。M0 尚待用户明确实施批准；M1–M3 仍分别受前阶段验收及用户关口约束。许可证与身份配置未变，本轮不重复将其全套验证当作新产品证据。
+通过 GitHub API／`gh` 直接读取远端 tree、blob、提交、PR、全部 Issue 和 milestone；未仅依据作者摘要或本地登记 payload 判定。核验结果如下：
+
+- 仓库为 PUBLIC；`main` 仍为 `6e95a997054215fcaadb96570b26c1be531c1f59`，最小 seed 内容未变。[PR #21](https://github.com/GhostFlying/ferry/pull/21) 为 OPEN，`mergedAt` 与 `autoMergeRequest` 均为空。
+- 技术 head 的远端 tree 与本地冻结 tree 一致，上述 14 个作者文件逐一匹配 SHA-256；此次相对基线仅 18 个规划／治理／审查文档变更。LICENSE、`.gitignore` 和 JSON 示例未变，没有应用源码、Actions workflow 或产物提前加入。Actions API 返回运行数为 0。
+- 本次三个提交分别为 `e58d362e755a9b409097099f73461122f97b148f`（阶段范围）、`abcc5fe8d439b15bbf03f6fe852dcb070a27de1c`（治理验收约束）和 `a8f6fee7da5fe57ac575b181bb540a89e02d544c`（独立审查）。各提交 author／committer 均为用户 GhostFlying 与已授权 noreply 身份，未含 bot 或 co-author；标题使用小写 `docs` type，并具体描述各自变更。
+- 共 33 个非 PR Issue，全部 OPEN：30 个实施任务均为 `status: planned`；[#1](https://github.com/GhostFlying/ferry/issues/1) 和 [#2](https://github.com/GhostFlying/ferry/issues/2) 为 `status: awaiting-user-review`；[#11](https://github.com/GhostFlying/ferry/issues/11) 是无 milestone 的 `type: meta` 拆分记录，仍 planned，未伪装成已完成。
+- 四个 milestone 均 OPEN。按每个 Issue 的实际归属计数，M0／M1／M2／M3 分别为 9／15／3／3 个实施任务；另有 #1／#2／#11 三个关口／meta，不计入实施任务或阶段验收。四阶段描述均保留工作、产物、环境、可判定条件、证据、阻塞和用户关口。
+
+| 阶段 | 已核对的任务 Issue |
+| --- | --- |
+| [M0](https://github.com/GhostFlying/ferry/milestone/1) | #3、#4、#5、#6、#7、#8、#13、#22、#23 |
+| [M1](https://github.com/GhostFlying/ferry/milestone/2) | #9、#10、#12、#14、#15、#16、#17、#18、#19、#20、#24、#25、#26、#27、#28 |
+| [M2](https://github.com/GhostFlying/ferry/milestone/3) | #29、#30、#31 |
+| [M3](https://github.com/GhostFlying/ferry/milestone/4) | #32、#33、#34 |
+
+独立程序逐一核对 30 个任务正文的 start／additional-final 前向边、反向 Blocks 和无环性，并核对最终 PR 的 30 行数字 DAG 与阶段计划一致。所有远端任务的验收表行与本地阶段文件对应行逐字一致，覆盖全部 33 个唯一验收 ID；任务初步交付不能冒领整阶段验收的边界已明确。正文固定引用上述技术 head 的公开计划和审查链接。
+
+迁移记录可追踪：#9／#10／#12 保留历史 M0-B1／B2／X1 标识及旧版本引用，当前归 M1；#11 明确拆至 #28／#29／#30，不存在生产 DAG 边。M0-R0 #13 只等待 M0 A／C 任务；#24 BUILD0 → #26 I1 → #19 P6 单向交接，无循环；#9／#10 使用 #18 集成 Android 包，不被 iOS 最终包阻塞。#20 仍等待完整双平台及真实链路验收。
+
+已直接阅读最终 PR、#1 和 #2 的范围／审批文字：旧版“完整 M0／仅 M0A”未答问题已被修订范围替代；用户明确批准当前规划与 M0 后，才先合并规划 PR，再从含 AGENTS 与批准计划的 main 创建实现工作树。跨阶段依赖满足、独立 PASS 或 PR 合并均不替代下一阶段的用户批准。
+
+本次未实现 App／Actions、启动 SMB 服务、占用设备或运行传输。Dora 认证／候选只读查询不证明有效 lease、网络可达、SMB／tsnet 或 Pocket USB 通过。M0 尚待用户明确实施批准；M1–M3 仍分别受前阶段验收及用户关口约束。许可证与身份配置未变，本轮未重复全套官方许可证／全局 Git 配置历史核查，也不把历史或本次文档 PASS 当作产品实测证据。
