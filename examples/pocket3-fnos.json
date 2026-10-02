@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "execution": {
+    "android_mode": "on_open",
+    "ios_mode": "on_open"
+  },
+  "sources": [
+    {
+      "id": "pocket3",
+      "profile": "dji-osmo-pocket-3",
+      "transport": "usb_otg",
+      "directory_binding_ref": "device-local:pocket3-directory",
+      "read_only": true
+    }
+  ],
+  "spool": {
+    "max_bytes": 34359738368,
+    "min_free_bytes": 4294967296,
+    "verified_retention_hours": 0,
+    "import_concurrency": 1,
+    "upload_concurrency": 1
+  },
+  "network": {
+    "upload_on": "wifi_only",
+    "tsnet": {
+      "enabled": true,
+      "login": "interactive",
+      "hostname_prefix": "ferry",
+      "state_ref": "device-local:tailnet-state"
+    }
+  },
+  "destinations": [
+    {
+      "id": "fnos",
+      "backend": "smb",
+      "transport": "tsnet",
+      "host": "fnos.your-tailnet.ts.net",
+      "port": 445,
+      "share": "Media",
+      "root": "Ferry/Pocket3",
+      "credential_ref": "device-local:fnos-smb",
+      "verification": "readback_sha256",
+      "conflict_policy": "never_overwrite"
+    }
+  ],
+  "rules": {
+    "evaluation": "first_match",
+    "items": [
+      {
+        "id": "pocket3-originals",
+        "enabled": true,
+        "source_id": "pocket3",
+        "match": {
+          "include_extensions": [".mp4", ".mov", ".jpg", ".jpeg", ".dng", ".wav"],
+          "exclude_extensions": [".lrf", ".thm"],
+          "min_bytes": 1
+        },
+        "destination_id": "fnos",
+        "date_source": "mtime",
+        "timezone": "Asia/Shanghai",
+        "path_template": "{yyyy}/{mm}/{dd}/{stem}__{sha256}{ext}"
+      }
+    ]
+  }
+}
