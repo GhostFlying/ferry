@@ -1,8 +1,10 @@
 # 公共仓库与规划 PR 独立验收
 
+> 历史发布验收：本报告记录原版已列 head 的仓库／PR／issue 状态。用户随后要求 M0 Dora 协议验证、iOS 移入 M1；新版文件和任务 DAG 须另做 [范围修订审查](milestone-scope-revision-review.md)，本报告 PASS 不自动覆盖后续远端修改。
+
 - 审查时间：2026-10-02 08:54 UTC；远端状态是该次检查的快照。
 - 作者／实施：`/root/repo_governance`；独立审查者：`/root/review_plan`。
-- 审查模型：继承协调会话配置，未单独覆盖。
+- 模型／reasoning：以协调代理的任务分配记录为准；本报告不推断运行时配置。此行在范围修订时纠正原先未经核实的“继承配置”表述，不改变原发布验收证据。
 - 结论：**PASS，限仓库发布、规划 PR、已审文件与任务登记。** 无未解 P0／P1／P2。本报告不批准 M0／M1，也不证明 App 或设备能力可用。
 - 仓库：[GhostFlying/ferry](https://github.com/GhostFlying/ferry)。
 - PR：[规划 PR #21](https://github.com/GhostFlying/ferry/pull/21)。
