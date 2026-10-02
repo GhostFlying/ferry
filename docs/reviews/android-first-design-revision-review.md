@@ -1,6 +1,6 @@
 # Android 优先与 UI 先出图修订独立审查
 
-当前状态：**本地规划、治理与主要屏幕／关键状态概念提案独立审查 PASS，可按既有授权发布供用户审阅。** [最终结论与边界](#最终结论与边界)列明覆盖范围；设计接受、M0 实施批准和新版远端登记核验仍分别待完成。
+当前状态：**本地规划／治理／概念提案与新版远端发布登记独立审查 PASS。** [远端发布审查](#远端发布审查)固定实际已审提交与登记结果；[最终结论与边界](#最终结论与边界)列明覆盖范围。设计接受与 M0 实施批准仍须用户本人分别决定。
 
 日期：2026-10-02。规划作者：`/root/plan_milestones`；治理作者：`/root/repo_governance`；独立审查者：`/root/review_plan`。模型／reasoning 以协调任务分配记录为准，不推断运行时配置。
 
@@ -146,6 +146,24 @@ mini plan 的最终状态入口改为指向本报告，未改其范围和审批�
 
 用户仍须分别决定当前规划／M0 实施范围，以及愿意接受的具体概念版本／界面范围。设计接受不批准 milestone，实现批准也不自动接受图。未展示的自绘 UI 继续受补图与接受关口约束；已获阶段批准的独立非 UI 工作不因这些视觉缺口全局阻塞。旧双平台 M1 方案及旧未答问题已被当前范围替代，不能推定授权。
 
-新版远端发布审查：**待发布后独立核验**。本轮 reviewer 没有提交／推送、修改远端记录、写 App／CI、启动 SMB 服务、占用 Dora、连接设备或运行传输。许可证与身份配置未变，没有重复将旧许可证／身份审查或本次静态概念 PASS 当作产品运行证据。
+本地检查完成当时，新版远端发布审查尚待执行；后续结果见下节。本轮 reviewer 没有提交／推送、修改远端记录、写 App／CI、启动 SMB 服务、占用 Dora、连接设备或运行传输。许可证与身份配置未变，没有重复将旧许可证／身份审查或本次静态概念 PASS 当作产品运行证据。
 
 发布前格式复核：`index.md` 仅删除一个 EOF 空行；将该空行加回后的 SHA-256 为先前审查的 `2c0913c9bd0f9ff0fef1c2ce4481df2bb62c3252136f355fa43a835ff74dfbba`，证明正文未变。当前索引哈希见上表。manifest 未引用索引哈希且内容哈希不变，无需改动；暂存变更 `git diff --cached --check` 通过。受影响范围复核 PASS，保留本地发布 GO；用户设计接受与 M0 实施批准仍待明确决定。
+
+
+## 远端发布审查
+
+2026-10-02，reviewer 直接读取 GitHub API 的 repository、PR、main commit、recursive tree、compare、40 个非 PR Issue、4 个 milestone 与 Actions runs；不是仅采信 publisher 的读回摘要。**远端规划／概念资源发布及任务登记 PASS**，固定技术 head [`3d0dbd64126a5ee8e694c9f67e1a8ffd3caa8ecd`](https://github.com/GhostFlying/ferry/commit/3d0dbd64126a5ee8e694c9f67e1a8ffd3caa8ecd)，概念提交为 `fadd5b651833370d591a292cd4daf5bbb15489d3`。审查没有未解 P0／P1／P2 阻断项。
+
+- 仓库仍 PUBLIC；[PR #21](https://github.com/GhostFlying/ferry/pull/21) 为 OPEN、未 merged、auto_merge 为 null；main 仍为 `6e95a997054215fcaadb96570b26c1be531c1f59`，只有 `.gitignore` 和最小 README。
+- 从上轮 `f86441ff3caa32f9eca2b47b0d32de6a99cad0e5` 到本轮 head 的两次提交分别承载候选概念与阶段／治理修订。两者 author／committer 均为用户 GhostFlying 及已授权 noreply；具体描述的 `docs:` 类型全小写，无 bot／co-author。未重新修改身份配置，也未把本次只读检查写作全局配置前后证明。
+- 远端递归树的全部 61 个 blob 与当前本地字节计算的 Git blob ID 一致；本报告中的 30 个 SHA-256 快照条目（14 个作者文档、11 张 PNG、5 个设计记录）全部匹配。本轮 diff 49 个文件仅含规划、治理、审查、概念图片与生成记录；无 App／核心源码、构建工程或 Actions workflow 提前加入。11 张图沿用本轮实际 `view_image` 审查且公开字节未变，没有以哈希替代首次图像检查。
+- 40 个非 PR Issue 均 OPEN：37 个工作／设计任务，外加 #1／#2 用户关口和无 milestone 的 #11 拆分 meta。逐 Issue 实际归属为 M0=10、M1=13、M2=6、M3=8；4 个 milestone 均 OPEN，其工作、可判定验收与阶段文件一致。此次 milestone API 汇总计数仍显示 10／16／6／5，与实际 Issue 归属不一致；结论以逐 Issue 的 milestone 字段为准，不把缓存汇总当迁移失败，也未为修数字改动任务。
+- 独立解析 37 个任务的 Start dependencies、Additional dependencies before final integration/acceptance 和 reverse Blocks，并逐行核对 PR 数字 DAG；正反向一致，全图无环，无 M0–M2 指向 M3 的实施前置。各任务引用的验收表行与版本化阶段文件逐字一致，43 条唯一验收全覆盖（10／12／9／12）。阶段批准仍是 DAG 之外不可跳过的用户关口。
+- #12／#24／#26 保留旧 ID 和引用 SHA 后迁 M3；#19／#20／#28 变为 Android 范围，#28 的 iOS 职责显式移交 #41；#32／#33 的 Android 发行准备分别移交 #39／#40；#11 保留历史拆分入口且不参与实施依赖。新增 #35–#38 为四阶段 DESIGN1，#39／#40 为 M2 DOC1／BUILD1，#41 为 M3 IOSV1；没有静默删除旧任务或将迁移标为已完成。
+- #35／#36 状态为 `awaiting-design-user`，35 个其余任务为 `planned`；#37／#38 明确尚未出图、等待未来阶段设计范围。#1／#2 为 `awaiting-user-review`。PR、关口和任务均链接到实际 head 的设计索引／当前计划；无待替换 head 占位符。设计仍须用户本人审阅并明确接受，内部 PASS 或“继续完成规划发布”不代表设计接受或 M0 实施批准。
+- #29 明确 UI 子任务开始前就要 #37 的设计接受与独立 UI 计划 review，不能拖到最终验收；其不相关非 UI 准备可在阶段获批后按自身依赖进行。#12 的无 UI 核心实验与可见壳分别受其实际关口约束。PR／#1 仍要求用户批准当前规划／M0 后才 merge 规划并建立实现工作树。
+
+Actions API 返回运行数 0；没有 App、APK／iOS 安装产物、原生视觉实现或设备／SMB／USB通过证据。本次 reviewer 未启动任何应用、服务或设备操作。上述 PASS 只允许将这份具体规划与候选图交用户审阅，不批准 UI 实施、M0 或后续 milestone；未画出的 UI 仍须补图并取得对应接受。
+
+本报告追加后由发布 owner 单独提交；最终只需核对 report-only diff、parent、报告哈希、提交身份与 PR／main 状态，不循环生成自引用快照。上述技术 head 的文档、图片和任务依赖仍是本次审查对象。
