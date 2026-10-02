@@ -1,6 +1,6 @@
 # 平台资料与证据边界
 
-查阅日期：2026-10-02。首期实测目标为 Pixel 6 Pro，紧随后续 iOS 版本的目标为 iPhone 17 Pro／USB-C。以下是官方文档和上游源码依据，尚未进行本项目的 Pocket 3、飞牛、Android 或 iPhone 实机测试。文档证明可用接口或已报告的问题，不等于本方案的组合已经验证。
+查阅日期：2026-10-02。M0 计划使用 Dora Android 物理设备做受控 SMB／tsnet 实验；M1 的 Pocket USB 实测目标为 Pixel 6 Pro 和 iPhone 17 Pro／USB-C。以下是官方文档和上游源码依据，尚未进行本项目的 Pocket 3、飞牛、Android 或 iPhone 实机测试。文档证明可用接口或已报告的问题，不等于本方案的组合已经验证。
 
 ## Pocket 3 有线导入
 
@@ -10,7 +10,7 @@
 
 [DJI OTG 帮助](https://repair.dji.com/help/content?customId=01700007307&lang=en&paperDocType=ARTICLE&re=US&spaceId=17)包含 Pocket 3，列出 iOS 的 OTG 操作和「文件」中的 DCIM 位置，但其具体示例使用 Lightning 适配器，不构成本项目 iPhone 17 Pro／USB-C 的兼容性证明。Lightning 不在项目范围内；USB-C 路径必须实测。
 
-结论：有线导入有官方依据。具体手机上是否可由第三方 App 读取、重连后授权是否有效和实际文件系统表现，仍属于 M0 实测事项。
+结论：有线导入有官方依据。具体手机上是否可由第三方 App 读取、重连后授权是否有效和实际文件系统表现，属于 M0 结束后 M1 的实测事项，当前不是 M0 门槛。
 
 ## Android
 
@@ -32,7 +32,7 @@
 
 [后台 URLSession 文档](https://developer.apple.com/documentation/foundation/downloading-files-in-the-background)说明后台传输托管仅适用于 HTTP／HTTPS，后台上传需要以文件为来源。它不能直接承载任意 SMB 客户端或应用进程内的 tsnet 网络栈。
 
-结论：紧随后续的 iOS 版本采用用户确定的打开 App 后运行方式。系统目录授权仍必要；iOS 锁屏与挂起后恢复连接是验收事项。
+结论：M1 iOS 采用用户确定的打开 App 后运行方式。系统目录授权仍必要；iOS 锁屏与挂起后恢复连接是验收事项。
 
 ## tsnet 与移动桥接
 
@@ -51,3 +51,18 @@
 [OpenDAL services](https://opendal.apache.org/docs/rust/opendal/services/)列出 S3、OneDrive、WebDAV 等服务；此次查阅未找到 SMB。服务覆盖、绑定实现和移动端构建需要分别确认。
 
 结论：首期飞牛使用独立 SMB 适配；OpenDAL 可在后续网盘阶段评估。存储服务列表不代表应用已完成对应服务的认证、后台上传或 tsnet 集成。
+
+## 本轮环境查询与证据分层
+
+2026-10-02 约 17:01（PRC）协调 agent 只读检查：bytedcli 已安装且认证有效；明确使用 `android`／`physical`／`idle`／`online`／`CN` 查询，返回 20 个候选（服务报告总数 1905），样本含 API 31／36、arm64-v8a。没有 occupy，没有连接 ADB，没有网络或 SMB 实验。此时存在候选不保证实施时可租；不公开 serial、连接地址或账号信息。
+
+| 证据层 | 能说明什么 | 不能说明什么 |
+| --- | --- | --- |
+| 官方文档／源码 | 接口与已知约束 | Ferry 已构建或组合已运行 |
+| 工具链／Dora 候选查询 | 当前环境准备情况 | 设备租用、安装、服务可达或协议成功 |
+| M0 host 受控 SMB（待做） | 该客户端／服务器组合的连接与提交语义 | Dora 直连、飞牛或相机兼容性 |
+| M0 Dora App 内 tsnet＋受控 SMB（待做） | 实际云端手机中的桥接和完整传输／恢复 | LAN 路径或 Pocket USB；构造素材不是相机素材 |
+| M1 Dora iOS 普通文件／网络（待做） | 所测设备上的 iOS 安装／核心／前台行为 | iPhone 17 Pro／Pocket USB-C 兼容性 |
+| M1 指定 Pocket／手机／飞牛（待做） | 该版本与线材／系统组合的实际完整链路 | 未测试机型或系统的泛化兼容性 |
+
+M0 先确认受控服务及路由，优先使用授权测试 Tailnet；云端直接 SMB 仅在受控私有网络中可达时补测，不能笼统写“LAN／tsnet 均通过”。M1 iOS 需要 macOS／Xcode 和有效签名／安装路径，不以无签名产物或 Linux 编译作为 iOS 运行证据。

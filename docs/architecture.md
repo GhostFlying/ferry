@@ -1,6 +1,6 @@
 # Ferry 架构提案
 
-本方案围绕 Pocket 3 OTG、飞牛 SMB 和内嵌 tsnet。首期先交付 Android／Pixel 6 Pro，紧随其后补全 iOS／iPhone 17 Pro／USB-C。具体依赖版本在可行性实验后固定。
+本方案围绕 Pocket 3 OTG、飞牛 SMB 和内嵌 tsnet。M0 用 Android probe 与 Dora 云端物理设备验证协议；M1 拟交付 Android／Pixel 6 Pro 和 iOS／iPhone 17 Pro／USB-C 的前台基础版，并在 M0 后开展 Pocket USB 完整链路。具体依赖版本在可行性实验后固定。
 
 ## 模块边界
 
@@ -19,11 +19,11 @@ flowchart LR
     Engine -. 后续适配 .-> Cloud["OpenDAL / 网盘"]
 ```
 
-建议首期 Android 使用 Kotlin／Jetpack Compose，后续 iOS 使用 Swift／SwiftUI。来源授权、应用生命周期、前台服务和凭据存储由原生层负责。规则、确定性的路径规划、SMB 传输和 tsnet 放入共享 Go 核心，避免两端重复实现协议。Android 实现不能将平台 URI、Context 或服务对象泄漏进共享核心。
+M1 Android 使用 Kotlin／Jetpack Compose，iOS 使用 Swift／SwiftUI。来源授权、应用生命周期、前台服务和凭据存储由原生层负责。规则、确定性的路径规划、SMB 传输和 tsnet 放入共享 Go 核心，避免两端重复实现协议。Android 实现不能将平台 URI、Context 或服务对象泄漏进共享核心。
 
-Go 核心首期输出 Android AAR，并尽早验证后续 iOS Framework／XCFramework 的桥接路径。先验证 gomobile 对实际依赖的构建与运行情况；必要时使用单一 Go 产物的 C ABI。上游 libtailscale 的 iOS 构建是参考，不把两个各带 Go runtime 的独立静态库同时链接进 App。[gomobile 文档](https://pkg.go.dev/golang.org/x/mobile/cmd/gomobile)、[libtailscale 构建](https://github.com/tailscale/libtailscale/blob/main/Makefile)。
+M0 输出 Android AAR；M1 先在 macOS／Xcode 上验证同一核心的 iOS Framework／XCFramework，再集成 iOS App。iOS 构建和实际安装不能被 Android 构建通过替代。先验证 gomobile 对实际依赖的构建与运行情况；必要时使用单一 Go 产物的 C ABI。上游 libtailscale 的 iOS 构建是参考，不把两个各带 Go runtime 的独立静态库同时链接进 App。[gomobile 文档](https://pkg.go.dev/golang.org/x/mobile/cmd/gomobile)、[libtailscale 构建](https://github.com/tailscale/libtailscale/blob/main/Makefile)。
 
-桥接只传任务描述、沙盒文件路径、进度事件和取消指令。视频数据通过文件读取，不把整个视频转成桥接层字节数组。
+桥接契约冻结协议版本、操作 ID、结构化错误、回调线程、64 位字节计数、取消完成回调、迟到事件隔离和文件所有权。桥接只传任务描述、沙盒文件路径、进度事件和取消指令。视频数据通过文件读取，不把整个视频转成桥接层字节数组。
 
 ## 来源适配
 
@@ -35,7 +35,7 @@ USB 接入事件只作为重新检查来源的信号。USB 设备授权与 SAF �
 
 首期不默认自己实现 USB Mass Storage／exFAT 驱动。若目标手机未通过系统 provider 暴露目录，应明确兼容性限制，再单独评估读取适配。
 
-### iOS，紧随后续版本
+### iOS，M1
 
 通过系统文件选择器取得外接素材目录的 security-scoped URL，保存 bookmark。读取时恢复授权、使用文件协调机制，结束后释放访问。重连后 bookmark 不可用时要求重新选择目录。[Apple 目录访问文档](https://developer.apple.com/documentation/uikit/providing-access-to-directories)。
 
@@ -66,7 +66,7 @@ USB 接入事件只作为重新检查来源的信号。USB 设备授权与 SAF �
 
 选择能够接受既有 `net.Conn` 的 Go SMB 客户端。`go-smb2` 的 `Dialer.Dial(conn)` 是候选接口，需进一步验证 SMB 协商、签名／加密、移动端稳定性和无覆盖提交能力。[上游示例](https://github.com/hirochachacha/go-smb2)。
 
-局域网使用系统 TCP 连接；tsnet 模式使用 `tsnet.Server.Dial(ctx, "tcp", "host:445")`，再把该连接交给同一 SMB 客户端。因此 SMB 适配不依赖系统 VPN 或本机 SMB 挂载。
+局域网使用系统 TCP 连接；tsnet 模式使用 `tsnet.Server.Dial(ctx, "tcp", "host:445")`，再把该连接交给同一 SMB 客户端。该连接始终由同一 Go 产物内的 SMB 客户端使用，不作为原生 socket／FD 导出。因此 SMB 适配不依赖系统 VPN 或本机 SMB 挂载。
 
 上传顺序：
 
@@ -86,7 +86,7 @@ SMB 没有本方案可普遍依赖的远端 SHA-256 接口，因此首期采用�
 
 每个安装实例维护一个持久的应用节点；任务间复用节点，离开允许运行的生命周期时释放连接与运行资源，重启后复用身份。提供登录状态、登录链接、退出与重新认证操作。
 
-节点状态保存在受保护的应用私有存储，密钥与 SMB 凭据使用 iOS Keychain 或 Android Keystore 支撑的加密存储。示例和配置导出均不包含节点密钥或账号密码。
+节点状态通过自有 `ipn.StateStore` 或等效整状态加密，使用 iOS Keychain 或 Android Keystore 支撑的保护；验证原子写入、锁屏访问策略、退出／重登与排除备份。默认私有文件目录不等于已加密。SMB 凭据同样存放于平台保护存储。示例和配置导出均不包含节点密钥或账号密码。
 
 首期使用浏览器交互登录，不内置共享 auth key。tsnet 登录成功后仍要检查 NAS 路由、访问策略与 TCP 445 可达性；Tailscale 身份不替代 SMB 账号权限。
 
@@ -98,9 +98,9 @@ tsnet 只承载接入它的应用连接。它不是自动提供给系统所有�
 
 iOS 和 Android 的 `on_open` 模式：应用进入前台时对账并自动恢复系统原因暂停的任务；离开前台时停止新任务、取消在途操作、保存结果，必要时重新建立 tsnet 和 SMB 会话。人工暂停保持暂停。
 
-Android 可选 `on_attach` 模式：经实测的系统接入流程进入允许启动服务的状态，再按工作性质使用前台服务。USB 导入和网络上传分别匹配适用服务类型；网络上传不能伪装成设备连接工作来规避超时。任务持续显示通知、可停止，处理启动拒绝、超时和 OEM 终止。[Android 传输任务选择](https://developer.android.com/develop/background-work/background-tasks/data-transfer-options)。
+M2 Android 可选 `on_attach` 模式：经实测的系统接入流程进入允许启动服务的状态，再按工作性质使用前台服务。USB 导入和网络上传分别匹配适用服务类型；网络上传不能伪装成设备连接工作来规避超时。USB attach 或声明 `connectedDevice` 本身不赋予后台启动豁免，必须验证可见 Activity／用户动作等合法入口。任务持续显示通知、可停止，处理启动拒绝、超时和 OEM 终止。[Android 传输任务选择](https://developer.android.com/develop/background-work/background-tasks/data-transfer-options)。
 
-普通 SMB 与应用内 tsnet 不适用 iOS 后台 URLSession 文件上传托管。后续 iOS 版本采用用户已经接受的前台运行范围。[Apple 后台 URLSession 限制](https://developer.apple.com/documentation/foundation/downloading-files-in-the-background)。
+普通 SMB 与应用内 tsnet 不适用 iOS 后台 URLSession 文件上传托管。M1 iOS 版本采用用户已经接受的前台运行范围。[Apple 后台 URLSession 限制](https://developer.apple.com/documentation/foundation/downloading-files-in-the-background)。
 
 ## OpenDAL 后续接入
 
@@ -109,3 +109,9 @@ Android 可选 `on_attach` 模式：经实测的系统接入流程进入允许�
 OpenDAL 作为网盘／对象存储候选；当前查阅的公开 services 列表未列出 SMB，首期不将飞牛 SMB 建立在它上面。列表中的 Aliyun OSS 是对象存储，不应当视作阿里云盘。[OpenDAL services](https://opendal.apache.org/docs/rust/opendal/services/)。
 
 引入前验证移动端构建、绑定层、所需服务、认证刷新、包体和取消行为。若 OpenDAL 使用自己的 HTTP／socket 栈，它不会自动通过 tsnet；必须明确桥接或选择支持该流量的传输方式。通过应用内代理也不能宣称在 iOS 挂起后继续运行。
+
+## 分阶段验证边界
+
+M0 的 host 受控 SMB 测试证明 `net.Conn` 注入／协议语义；Dora Android 物理设备实际验证 App 内 tsnet 到受控 SMB 的完整传输。Dora 与家庭 NAS／开发机不默认同网，直接 SMB 只在已批准私网路径真实可达时补测；不以公网暴露 TCP 445 换取可达性。构造素材的读回一致不证明 Pocket USB。
+
+M1 将生产规则、原生导入／状态与传输接成双平台前台路径。Dora iOS 的安装取决于 macOS／Xcode 与签名／设备注册条件，其普通文件与网络实验不代替 Pocket → iPhone 17 Pro USB-C。指定两套 Pocket 实体链路、飞牛 LAN／tsnet、数据恢复与暂停分别验收；缺条件时该项未运行且完整验收未通过。
