@@ -1,0 +1,31 @@
+Use case: ui-mockup
+Asset type: one complete Android app portrait screen, high-fidelity candidate design concept only
+Input image role: a01-tasks-active-v2.png is STYLE REFERENCE ONLY, not an edit target and not content to copy. Generate a fresh complete screen for the specific content below.
+Style/medium: same restrained native Android Ferry visual language as reference: true white, charcoal Chinese sans serif text, restrained deep teal primary action, open sections and list rows with fine dividers, purposeful outline icons. No default rounded card grid, no marketing hero. Airy but practical and fully readable.
+Composition/framing: ONE edge-to-edge full portrait phone screen at approximately 9:20 ratio, no device bezel, no outer presentation board, no collage, no crop. Include Android status bar and bottom gesture area. Chinese copy must be clear and exact. Eventual UI must be Kotlin/Compose native text and controls, never shipped raster UI.
+Constraints: all values, file names, connected states and completion examples are illustrative design fixtures only, not real device/network/transfer evidence. No actual secrets, usernames, passwords, node data, private addresses or private images. No iOS UI, no automatic attach/background-service switch, no OpenDAL or cloud-drive buttons, no speed/ETA, no invented awards/badges/metrics. Preserve original camera files. Source is read-only; full persistent private phone copy precedes upload; only full remote SHA-256 readback permits completed; same-name existing content cannot be overwritten. Native controls feasible.
+Small footer, verbatim: 设计示例，非运行证据
+
+Primary request: Design Ferry's separate M0 diagnostic probe screen, complete controlled test diagnostics. It is NOT the M1 four-tab product and NOT proof of Pocket USB compatibility. Use a compact clear checklist/step rail and diagnostic rows. Active result is readback FAILED, not completed. Service/network/source/bridge and a large non-sparse constructed test file must all be present, legible. Do not invent test success outside given fixture labels. Full fixture hash is wrapped into two lines without truncation.
+Text (verbatim):
+Ferry / 诊断 Probe
+仅测试素材 · Pocket USB 未验证
+测试服务
+HOST-DEMO / SHARE-DEMO
+网络方式 / 内嵌 tsnet · 受控测试路径
+连接 / 已建立测试会话
+测试来源 / 构造文件 · 只读
+Android ↔ Go / 桥接调用已返回
+测试文件 / fixture-5g.bin
+5,368,709,120 B · 非稀疏
+参考 SHA-256
+0123456789abcdef0123456789abcdef
+0123456789abcdef0123456789abcdef
+传输与读回
+1 完整手机副本 / 已就绪
+2 SMB 上传 / 5,368,709,120 B 已写入
+3 远端读回 / 摘要不一致 · 未完成
+失败：读回校验不一致
+保留完整手机副本，可重新测试
+Buttons: 重试读回 / 取消测试
+No four-tab nav; use simple diagnostic bottom action area with footer. Do not show a completion checkmark for failed readback.

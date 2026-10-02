@@ -1,0 +1,32 @@
+Use case: ui-mockup
+Asset type: one complete Android app portrait screen, high-fidelity candidate design concept only
+Input image role: a01-tasks-active-v3.png is STYLE REFERENCE ONLY, not an edit target and not content to copy. Generate a fresh complete screen for the specific content below.
+Style/medium: same restrained native Android Ferry visual language as reference: true white, charcoal Chinese sans serif text, restrained deep teal primary action, open sections and list rows with fine dividers, purposeful outline icons. No default rounded card grid, no marketing hero. Airy but practical and fully readable.
+Composition/framing: ONE edge-to-edge full portrait phone screen at approximately 9:20 ratio, no device bezel, no outer presentation board, no collage, no crop. Include Android status bar and bottom gesture area. Chinese copy must be clear and exact. Eventual UI must be Kotlin/Compose native text and controls, never shipped raster UI.
+Constraints: all values, file names, connected states and completion examples are illustrative design fixtures only, not real device/network/transfer evidence. No actual secrets, usernames, passwords, node data, private addresses or private images. No iOS UI, no automatic attach/background-service switch, no OpenDAL or cloud-drive buttons, no speed/ETA, no invented awards/badges/metrics. Preserve original camera files. Source is read-only; full persistent private phone copy precedes upload; only full remote SHA-256 readback permits completed; same-name existing content cannot be overwritten. Native controls feasible.
+Small footer, verbatim: 设计示例，非运行证据
+
+Primary request: Design complete M1 rule editing and file matching preview page. Keep sufficient readable detail to cover actual deterministic rules without inventing automatic mode. A displayed hash template uses full {sha256}; unknown file hash prevents frozen target path. Date is based on file mtime, missing date unknown-date. Use open form rows and preview list with fine divider. One rule illustration, not many cards.
+Bottom navigation, verbatim: 任务 / 来源 / 目标 / 规则; selected 规则.
+Text (verbatim):
+Ferry / 规则
+规则名称 / 视频归档
+来源 / SOURCE-DEMO
+目标 / NAS-DEMO
+目录前缀 / DCIM
+允许扩展名 / mp4, mov
+排除扩展名 / lrf
+排除优先 · 按顺序首次匹配
+路径模板
+{yyyy}/{mm}/{dd}/{stem}_{sha256}.{ext}
+日期取文件修改时间；缺失时用 unknown-date
+Button: 预览匹配
+匹配预览
+DEMO_003.mp4 / 匹配 · 摘要待完整导入
+目标路径待内容确定
+DEMO_003.lrf / 排除 · 不创建任务
+DCIM-old/demo.mp4 / 不匹配 · 目录边界
+目标不会覆盖同名内容
+保存仅影响新任务，不移动已有任务
+Button: 保存规则
+Never replace full hash template with shortened hash. Avoid a fake finalized target file path before content hash is available.

@@ -1,0 +1,29 @@
+Use case: ui-mockup
+Asset type: one complete Android app portrait screen, high-fidelity candidate design concept only
+Input image role: a01-tasks-active-v3.png is STYLE REFERENCE ONLY, not an edit target and not content to copy. Generate a fresh complete screen for the specific content below.
+Style/medium: same restrained native Android Ferry visual language as reference: true white, charcoal Chinese sans serif text, restrained deep teal primary action, open sections and list rows with fine dividers, purposeful outline icons. No default rounded card grid, no marketing hero. Airy but practical and fully readable.
+Composition/framing: ONE edge-to-edge full portrait phone screen at approximately 9:20 ratio, no device bezel, no outer presentation board, no collage, no crop. Include Android status bar and bottom gesture area. Chinese copy must be clear and exact. Eventual UI must be Kotlin/Compose native text and controls, never shipped raster UI.
+Constraints: all values, file names, connected states and completion examples are illustrative design fixtures only, not real device/network/transfer evidence. No actual secrets, usernames, passwords, node data, private addresses or private images. No iOS UI, no automatic attach/background-service switch, no OpenDAL or cloud-drive buttons, no speed/ETA, no invented awards/badges/metrics. Preserve original camera files. Source is read-only; full persistent private phone copy precedes upload; only full remote SHA-256 readback permits completed; same-name existing content cannot be overwritten. Native controls feasible.
+Small footer, verbatim: 设计示例，非运行证据
+
+Primary request: Design one complete M1 task detail for USER PAUSED, emphasizing that foreground opening and recovered connectivity cannot resume this without a user's explicit action. Complete phone copy is preserved; some bytes were uploaded, but readback and final completion have not happened. One primary manual resume button; no automatic switch.
+Bottom navigation, verbatim: 任务 / 来源 / 目标 / 规则; selected 任务.
+Text (verbatim):
+Back chevron / 任务详情
+DEMO_005.wav
+用户暂停
+再次打开 App 仍保持暂停
+手机完整副本 / 已保留 · 1.0 GB
+目标 / NAS-DEMO
+网络 / 应用内 Tailscale · Wi-Fi
+暂停前进度 / 已上传 0.4 GB / 1.0 GB
+远端内容校验 / 尚未完成
+任务未完成
+操作记录
+你手动暂停了此任务
+网络恢复或回到前台不会自动继续
+Button: 恢复任务
+请保持 App 在前台
+离开后保存状态，等待下次打开
+来源原文件保持不变
+Do not show upload completed, remote verified, or automatically unpausing. Resume may safely use file-level retry; never promise byte-range resume.

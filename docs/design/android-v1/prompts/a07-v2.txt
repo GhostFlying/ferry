@@ -1,0 +1,3 @@
+Use case: text-localization
+Asset type: candidate Android readback-failure detail
+Input image: a07-verification-failure.png is edit target. Preserve all layout, failure states, wording, source/target/network fields, icons, pending completion rail, actions, bottom navigation and review-only footer. Change ONLY the informational sentence "修复连接后可从完整副本重新上传" to "可从手机完整副本重新上传此文件". The readback hash mismatch has no proven cause, so do not attribute it to a network/connection issue. Still not completed; complete phone copy retained; same-name target never overwritten. Full readable phone screen, no crop.

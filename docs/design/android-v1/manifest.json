@@ -1,0 +1,806 @@
+{
+  "schema_version": 1,
+  "status": "awaiting-user-acceptance",
+  "created_utc": "2026-10-02 11:10:09 UTC",
+  "task_ids": [
+    "M0-DESIGN1",
+    "M1-DESIGN1"
+  ],
+  "platform": "Android Kotlin/Jetpack Compose candidate concepts",
+  "mode": "built-in image_gen__imagegen only; no CLI/API fallback",
+  "workflow": "build-web-apps:frontend-app-builder Concept Review Mode + imagegen",
+  "base_commit": "f86441ff3caa32f9eca2b47b0d32de6a99cad0e5",
+  "snapshot_kind": "uncommitted preparation; per-image and prompt SHA-256 identify this design set",
+  "selected_count": 11,
+  "user_acceptance": {
+    "status": "awaiting-user-acceptance",
+    "reference": null
+  },
+  "milestone_implementation_authorization": "not granted by this design work",
+  "annotations_not_product_copy": [
+    "设计示例，非运行证据 (review-only footer)"
+  ],
+  "dynamic_fixtures": [
+    "SOURCE-DEMO/NAS-DEMO/HOST-DEMO/SHARE-DEMO names",
+    "DEMO filenames and directory paths",
+    "file sizes/progress/capacity",
+    "reference digest",
+    "connection/bridge/completion/pause examples",
+    "timestamp 今天09:12 and Android status bar"
+  ],
+  "functional_copy_boundary": "Fixture values are dynamic examples. Meaningful state labels and readonly/full-copy/readback/pause/retry/no-overwrite behavior remain product requirements; fixture status does not make them review-only.",
+  "implementation": "No app/browser/native implementation, tokens or detailed UI implementation plan generated",
+  "verification": {
+    "generation": "19 successful built-in results; 11 selected outputs; no errors or fallback",
+    "static_inspection": "each selected and edit-input image inspected with view_image",
+    "native_dimensions": "PNG IHDR metadata; image sizes are concept bitmap sizes, not tested phone viewports",
+    "runtime": "NOT_RUN",
+    "browser_or_playwright": "NOT_RUN: no browser implementation",
+    "native_fidelity_comparison": "NOT_RUN: no native implementation or accepted concept",
+    "apk_usb_smb_device": "NOT_RUN",
+    "metadata_check": "PASS: 19 source/workspace PNG copies byte-identical; 11 selected image dimensions/hash; every prompt record resolves",
+    "final_artifact_integrity": "PASS: exactly 11 selected workspace PNGs; all selected hashes/native dimensions/prompt paths and original sources valid; local Markdown links resolve; 8 superseded task-owned PNG copies removed after all Image Gen calls completed"
+  },
+  "not_visually_covered": [
+    "OS directory picker, external browser login page, permission dialogs and keyboard are platform surfaces, not Ferry screenshots in this set",
+    "A04 is M1 target UI and at most a field-family reference for M0; it does not supply or approve the M0 settings surface",
+    "M0 test-service editing subform and connection-error/active-cancel-result/success-report variants",
+    "M1 rule sub-editors, rule enable/disable/order/timezone/min-size controls and complete rules collection",
+    "M1 copy-budget/retention settings, discard-task confirmation, name-conflict and other failure detail variants",
+    "M1 waiting-network/waiting-open/source-detached detail variants beyond the shown source and foreground explanations",
+    "M2 automatic modes and M3 iOS (not in current design scope)"
+  ],
+  "unshown_surface_gate": "This bundle proposes only the shown Android surfaces. Any new Ferry-visible UI/state requires a matching concept and user acceptance before detailed visual planning or implementation; do not extrapolate accepted coverage.",
+  "selected": [
+    {
+      "concept_id": "A01",
+      "title": "M1 任务主屏：单上传／单导入与队列",
+      "status": "awaiting-user-acceptance",
+      "path": "a01-tasks-active-v3.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-2956fb0c-1fa7-4e04-ba65-06609b8a0b78.png",
+      "prompt_record": "prompts/a01-v3.txt",
+      "coverage": [
+        "任务/来源/目标/规则导航",
+        "一个上传与一个导入并行",
+        "待上传队列",
+        "远端 SHA-256 已验证的已完成列表状态",
+        "人工暂停列表状态",
+        "来源可访问/只读",
+        "副本占用与剩余空间",
+        "暂停入口/前台条件"
+      ],
+      "view_image_inspected": true,
+      "text_anomalies": [],
+      "additional_copy_notes": [],
+      "sha256": "3480b347bbd0f142cdc794b6a851142f52694f20e6bacfdc4b75e9881e4f69e1",
+      "bytes": 1312028,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "17faccbbd471053772a1cdb0fef31ee237748ac8e41f125543d69fbbefb9b7b6",
+      "generation_intent": "edit",
+      "inputs": [
+        {
+          "version_id": "a01-v2",
+          "role": "edit_target",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active-v2.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-c91d9082-c8c2-42db-9859-f5b4d30c5e8b.png",
+          "sha256": "096474feda64c50acd747ed2208f5924b4b0e640badc7fe12485cca2e3088048"
+        }
+      ]
+    },
+    {
+      "concept_id": "A02",
+      "title": "M0 诊断：读回失败与取消",
+      "status": "awaiting-user-acceptance",
+      "path": "a02-probe-diagnostics.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-1ab679fd-8e07-46ef-a5d8-38b818ee3bc6.png",
+      "prompt_record": "prompts/a02.txt",
+      "coverage": [
+        "M0 受控服务/tsnet/来源/桥接诊断行",
+        "5 GiB非稀疏构造文件/参考完整SHA-256",
+        "完整手机副本/写入/失败读回阶段",
+        "校验失败不完成",
+        "重试读回与取消测试控件",
+        "完整副本保留",
+        "Pocket USB未验证"
+      ],
+      "view_image_inspected": true,
+      "text_anomalies": [],
+      "additional_copy_notes": [],
+      "sha256": "b5e0f0973756b41a15da2c9065d06d256f1a7801e45ba4bd8f003a6b7ede8384",
+      "bytes": 1020587,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "3c44d3de4a983a3abdb3585538c97c16fe728f6f420d28d2c8e65a4d87c01c5b",
+      "generation_intent": "generate",
+      "inputs": [
+        {
+          "version_id": "a01-v2",
+          "role": "style_reference_only",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active-v2.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-c91d9082-c8c2-42db-9859-f5b4d30c5e8b.png",
+          "sha256": "096474feda64c50acd747ed2208f5924b4b0e640badc7fe12485cca2e3088048"
+        }
+      ]
+    },
+    {
+      "concept_id": "A03",
+      "title": "M1 来源：授权失效",
+      "status": "awaiting-user-acceptance",
+      "path": "a03-source-authorization-v2.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-47da756f-5c65-4ce3-b5e3-92cf50b24b7c.png",
+      "prompt_record": "prompts/a03-v2.txt",
+      "coverage": [
+        "来源权限失效/等待授权",
+        "系统目录只读授权入口",
+        "重新选择目录/添加来源入口",
+        "重连不可访问可操作提示",
+        "新导入等待/已完整副本可继续上传",
+        "保留原文件"
+      ],
+      "view_image_inspected": true,
+      "text_anomalies": [],
+      "additional_copy_notes": [
+        "generated explanatory copy repeats safe source/complete-copy conditions"
+      ],
+      "sha256": "da1d1af1d243a6cb4064dde7dedf4131b3a8954221bc1fc9ecb1109b8d17193c",
+      "bytes": 1341086,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "cbe4ea3db15a1908c410d91170a85e6bb0eeb7e61f79f1eff919b98de988d3d5",
+      "generation_intent": "edit",
+      "inputs": [
+        {
+          "version_id": "a03-v1",
+          "role": "edit_target",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a03-source-authorization.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-cae51668-79be-4a22-9ec2-86ddecb91684.png",
+          "sha256": "82c4b9121397141b36ede53b2e20c07db4b70e78c7b17013ae9bb382938b7e10"
+        }
+      ]
+    },
+    {
+      "concept_id": "A04",
+      "title": "M1 目标：SMB 与应用内 Tailscale 配置",
+      "status": "awaiting-user-acceptance",
+      "path": "a04-target-config-v2.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-12dd5716-3efd-4d41-a71f-7bc49ead8590.png",
+      "prompt_record": "prompts/a04-v2.txt",
+      "coverage": [
+        "SMB host/share/root/username/password输入",
+        "局域网/应用内 Tailscale显式选择",
+        "未登录/浏览器登录入口",
+        "网络不自动切换",
+        "仅使用Wi-Fi上传ON switch",
+        "尚未测试连接",
+        "测试连接/保存入口"
+      ],
+      "view_image_inspected": true,
+      "text_anomalies": [],
+      "additional_copy_notes": [
+        "connection label/value is an inline status row, not a verified result"
+      ],
+      "sha256": "74cc141ff3c89180308a438d309a43e2ffa3d68ffce8111078ad9c9d37932f27",
+      "bytes": 1208804,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "7f05121da905906e9040b8e040e812ca844b2a4ccdf5d482c5fb76771effae86",
+      "generation_intent": "edit",
+      "inputs": [
+        {
+          "version_id": "a04-v1",
+          "role": "edit_target",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a04-target-config.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-5d89a674-e995-4c14-8a29-2fc92543adba.png",
+          "sha256": "46a8805d5ea68cb7aa57d182f3b9f92aadcfe840a855fc3a12913117aa36a929"
+        }
+      ]
+    },
+    {
+      "concept_id": "A05",
+      "title": "M1 规则：匹配预览",
+      "status": "awaiting-user-acceptance",
+      "path": "a05-rules-preview-v2.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-fb6046ed-ef67-4f04-93fc-eeeb49db1b28.png",
+      "prompt_record": "prompts/a05-v2.txt",
+      "coverage": [
+        "来源/目标引用与视频规则编辑入口",
+        "目录前缀/允许与排除",
+        "排除优先/首次匹配",
+        "实际示例完整hash路径模板",
+        "mtime/unknown-date",
+        "未知hash目标待内容确定",
+        "排除与目录边界预览",
+        "保存不重定位旧任务"
+      ],
+      "view_image_inspected": true,
+      "text_anomalies": [],
+      "additional_copy_notes": [
+        "extension display mp4/mov/lrf is friendly notation; persisted schema values include leading dots. Fixture rule is video subset, not a claim that full example config changed. Exact template matches examples/pocket3-fnos.json."
+      ],
+      "sha256": "d051283eed758e7395fbcab47eed97a999d38f9754d266e6d521c4aebc27ec59",
+      "bytes": 1302173,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "db5839160fc12030479e71263dace8bdab5c58288419b06f45fbeba551b2fdb6",
+      "generation_intent": "edit",
+      "inputs": [
+        {
+          "version_id": "a05-v1",
+          "role": "edit_target",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a05-rules-preview.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-c4cd569b-c0f7-4316-95d5-2628c35ef9b8.png",
+          "sha256": "82f0c7e8c1167e9ad218064546b5767181aed136a131e61edd4a6b5a01049145"
+        }
+      ]
+    },
+    {
+      "concept_id": "A06",
+      "title": "M1 任务：等待空间",
+      "status": "awaiting-user-acceptance",
+      "path": "a06-waiting-space-v2.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-5dfb0e5f-b643-4249-94ea-45fb1d667be1.png",
+      "prompt_record": "prompts/a06-v2.txt",
+      "coverage": [
+        "等待空间/所需与可用容量",
+        "当前文件未完成导入不上传",
+        "其他任务副本保留",
+        "释放空间后重新检查",
+        "人工暂停入口",
+        "原文件保留"
+      ],
+      "view_image_inspected": true,
+      "text_anomalies": [],
+      "additional_copy_notes": [],
+      "sha256": "3123e28efac5ba82b18c260dc0c037cc0d0bd814a1af243a17743453b34331dd",
+      "bytes": 1262870,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "84aa0f45c8cdfe8c151748cbbf15db523d7ef5021b3c0467c95f3ed0b4a56fa0",
+      "generation_intent": "edit",
+      "inputs": [
+        {
+          "version_id": "a06-v1",
+          "role": "edit_target",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a06-waiting-space.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-bf0d2385-5810-43ab-b633-41bbca8b1b65.png",
+          "sha256": "62a0d14bcfe0c7a72ce11255e733ed8071cc052f57d404b76ea5e2ed7711d387"
+        }
+      ]
+    },
+    {
+      "concept_id": "A07",
+      "title": "M1 任务：读回校验失败",
+      "status": "awaiting-user-acceptance",
+      "path": "a07-verification-failure-v2.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-90b9f85a-ccc4-4580-8193-40e50fe5c92f.png",
+      "prompt_record": "prompts/a07-v2.txt",
+      "coverage": [
+        "读回摘要不一致/任务未完成",
+        "完整手机副本保留",
+        "目标目录/网络/阶段记录",
+        "无原因推断的文件级重新上传入口",
+        "暂停/不覆盖/保留来源"
+      ],
+      "view_image_inspected": true,
+      "text_anomalies": [
+        "review-only footer near 证据 has a minor underline-like mark; no product text affected"
+      ],
+      "additional_copy_notes": [],
+      "sha256": "10d8b898d134b32b0b57c5e5cf45d1fe3bb344101c7da3200477644f15df1265",
+      "bytes": 1280850,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "14c34b85d0f48235d138b28982b5817fecb608bb1ded5294dac2a1b7d71a6611",
+      "generation_intent": "edit",
+      "inputs": [
+        {
+          "version_id": "a07-v1",
+          "role": "edit_target",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a07-verification-failure.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-be26a587-28b9-4f06-a6b5-69af8f2d831a.png",
+          "sha256": "1c19683e433b6b2a54d9ad46dd5204cf4e78d5fc8704d61413f34916de3be619"
+        }
+      ]
+    },
+    {
+      "concept_id": "A08",
+      "title": "M1 任务：首次配置空态",
+      "status": "awaiting-user-acceptance",
+      "path": "a08-first-setup.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-ddd1a4ba-48f3-4f6a-9968-a9b22ebc75df.png",
+      "prompt_record": "prompts/a08.txt",
+      "coverage": [
+        "首次无任务",
+        "来源/目标/规则三步配置入口",
+        "只读来源",
+        "完整副本与读回后完成",
+        "前台运行/人工暂停保持/原文件保留"
+      ],
+      "view_image_inspected": true,
+      "text_anomalies": [],
+      "additional_copy_notes": [],
+      "sha256": "b471c00ab06df5bdc272d7398ba9a6bceb2c1b95a5c66ae5b1c1acb79f9aa5ba",
+      "bytes": 936927,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "c0f5a108aee373b8f268d61ca35afd6bbb38ff32051fcded1b8f678c8b30dc03",
+      "generation_intent": "generate",
+      "inputs": [
+        {
+          "version_id": "a01",
+          "role": "style_reference_only",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active-v3.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-2956fb0c-1fa7-4e04-ba65-06609b8a0b78.png",
+          "sha256": "3480b347bbd0f142cdc794b6a851142f52694f20e6bacfdc4b75e9881e4f69e1"
+        }
+      ]
+    },
+    {
+      "concept_id": "A09",
+      "title": "M1 任务：人工暂停与手动恢复",
+      "status": "awaiting-user-acceptance",
+      "path": "a09-user-paused-v2.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-79082b8f-101c-46d9-b938-7e22cbd69f92.png",
+      "prompt_record": "prompts/a09-v2.txt",
+      "coverage": [
+        "人工暂停保持",
+        "历史字节进度",
+        "完整副本保留/远端尚未校验",
+        "人工恢复入口",
+        "恢复从头重新上传",
+        "前台条件/原文件保留"
+      ],
+      "view_image_inspected": true,
+      "text_anomalies": [],
+      "additional_copy_notes": [
+        "今天09:12 is generated dynamic fixture timestamp"
+      ],
+      "sha256": "f572960121b875697236b5427b1d9014316c9c35db9803a3a0b1c6dedc2b0b70",
+      "bytes": 1276885,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "3b3b68e4d697919eea1b435b589da12d0addf09a5b787063e0bc0b0ca1359e57",
+      "generation_intent": "edit",
+      "inputs": [
+        {
+          "version_id": "a09-v1",
+          "role": "edit_target",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a09-user-paused.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-f961d422-acc8-4b7e-b0db-952dc4842b19.png",
+          "sha256": "50a47e2c1f69d5dc0ef36263bbda23a3f37f6b167c34350b511c779f21640834"
+        }
+      ]
+    },
+    {
+      "concept_id": "A10",
+      "title": "M1 任务：内容读回中",
+      "status": "awaiting-user-acceptance",
+      "path": "a10-readback-active.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-7e343f02-5149-468b-b3a5-819d1b264387.png",
+      "prompt_record": "prompts/a10.txt",
+      "coverage": [
+        "单文件独立读回中状态",
+        "读回字节进度",
+        "上传已写入待校验",
+        "完成尚未通过",
+        "完整副本保留",
+        "暂停/不覆盖/原文件保留"
+      ],
+      "view_image_inspected": true,
+      "text_anomalies": [],
+      "additional_copy_notes": [],
+      "sha256": "bf4507b83555c5e3a91928f3deaf67eabdc112861460f375247d150f24aef9de",
+      "bytes": 993373,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "852883d1952369890c0d05c396f15662ff92842c6fab92e165c7f29f0d9212ec",
+      "generation_intent": "generate",
+      "inputs": [
+        {
+          "version_id": "a01",
+          "role": "style_reference_only",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active-v3.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-2956fb0c-1fa7-4e04-ba65-06609b8a0b78.png",
+          "sha256": "3480b347bbd0f142cdc794b6a851142f52694f20e6bacfdc4b75e9881e4f69e1"
+        }
+      ]
+    },
+    {
+      "concept_id": "A11",
+      "title": "M0 诊断：初始未运行",
+      "status": "awaiting-user-acceptance",
+      "path": "a11-probe-initial.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-b8a46946-87a5-4cbe-a301-171bb06a86f2.png",
+      "prompt_record": "prompts/a11.txt",
+      "coverage": [
+        "初始未连接/未检查/未生成",
+        "受控服务配置入口",
+        "建立测试连接入口",
+        "构造文件/只读目录来源选项",
+        "5GiB非稀疏生成入口",
+        "桥接检查入口",
+        "前置不足开始传输disabled",
+        "Pocket USB未验证"
+      ],
+      "view_image_inspected": true,
+      "text_anomalies": [],
+      "additional_copy_notes": [
+        "generated explanatory source-choice copy stays within the requested test-source workflow"
+      ],
+      "sha256": "58f8c8aca09d01a01dfec0d31f0d1e0e969805b6840ce690eec461c770b94f03",
+      "bytes": 1068929,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "564266e2a88bd2e6b54dede672d7baf21d5ddbe056fc3b149fd8ffaaf7153b1e",
+      "generation_intent": "generate",
+      "inputs": [
+        {
+          "version_id": "a01",
+          "role": "style_reference_only",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active-v3.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-2956fb0c-1fa7-4e04-ba65-06609b8a0b78.png",
+          "sha256": "3480b347bbd0f142cdc794b6a851142f52694f20e6bacfdc4b75e9881e4f69e1"
+        }
+      ]
+    }
+  ],
+  "superseded": [
+    {
+      "version": "a01-v1",
+      "former_workspace_path": "a01-tasks-active.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-90c35855-98e1-4f18-9369-37db9f3d7930.png",
+      "prompt_record": "prompts.md#A01",
+      "version_status": "superseded",
+      "user_acceptance": "never accepted",
+      "reason": "superseded: product network wording and conflicting simultaneous upload/readback",
+      "workspace_copy_removed": true,
+      "sha256": "95ef9c74edd6ef813e638db4fdcce1934ec497ce32348ed6ae4a025f880824f1",
+      "bytes": 976599,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "2fca8e52da5d70c144268dabbf020eb31c80a4dd6e37564a86e7a0f4a81fa4d2",
+      "generation_intent": "generate",
+      "inputs": [],
+      "source_generated_original_preserved": true
+    },
+    {
+      "version": "a01-v2",
+      "former_workspace_path": "a01-tasks-active-v2.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-c91d9082-c8c2-42db-9859-f5b4d30c5e8b.png",
+      "prompt_record": "prompts.md#A01 v2",
+      "version_status": "superseded",
+      "user_acceptance": "never accepted",
+      "reason": "superseded: conflicting simultaneous upload/readback",
+      "workspace_copy_removed": true,
+      "sha256": "096474feda64c50acd747ed2208f5924b4b0e640badc7fe12485cca2e3088048",
+      "bytes": 1268745,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "2fca8e52da5d70c144268dabbf020eb31c80a4dd6e37564a86e7a0f4a81fa4d2",
+      "generation_intent": "edit",
+      "inputs": [
+        {
+          "version_id": "a01-v1",
+          "role": "edit_target",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-90c35855-98e1-4f18-9369-37db9f3d7930.png",
+          "sha256": "95ef9c74edd6ef813e638db4fdcce1934ec497ce32348ed6ae4a025f880824f1"
+        }
+      ],
+      "source_generated_original_preserved": true
+    },
+    {
+      "version": "a03-v1",
+      "former_workspace_path": "a03-source-authorization.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-cae51668-79be-4a22-9ec2-86ddecb91684.png",
+      "prompt_record": "prompts/a03.txt",
+      "version_status": "superseded",
+      "user_acceptance": "never accepted",
+      "reason": "superseded: internal identity explanation",
+      "workspace_copy_removed": true,
+      "sha256": "82c4b9121397141b36ede53b2e20c07db4b70e78c7b17013ae9bb382938b7e10",
+      "bytes": 1100910,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "736770db593cdfc8236e55c7183c468485d09f3d09806ba6c4099059b0d0640d",
+      "generation_intent": "generate",
+      "inputs": [
+        {
+          "version_id": "a01-v2",
+          "role": "style_reference_only",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active-v2.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-c91d9082-c8c2-42db-9859-f5b4d30c5e8b.png",
+          "sha256": "096474feda64c50acd747ed2208f5924b4b0e640badc7fe12485cca2e3088048"
+        }
+      ],
+      "source_generated_original_preserved": true
+    },
+    {
+      "version": "a04-v1",
+      "former_workspace_path": "a04-target-config.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-5d89a674-e995-4c14-8a29-2fc92543adba.png",
+      "prompt_record": "prompts/a04.txt",
+      "version_status": "superseded",
+      "user_acceptance": "never accepted",
+      "reason": "superseded: internal account reference, incomplete Wi-Fi control, technical disclaimers",
+      "workspace_copy_removed": true,
+      "sha256": "46a8805d5ea68cb7aa57d182f3b9f92aadcfe840a855fc3a12913117aa36a929",
+      "bytes": 1004554,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "e688e2477bedf0e1e8e8728b0109bbb4115ee17f43d399b26120b081409352d4",
+      "generation_intent": "generate",
+      "inputs": [
+        {
+          "version_id": "a01-v2",
+          "role": "style_reference_only",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active-v2.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-c91d9082-c8c2-42db-9859-f5b4d30c5e8b.png",
+          "sha256": "096474feda64c50acd747ed2208f5924b4b0e640badc7fe12485cca2e3088048"
+        }
+      ],
+      "source_generated_original_preserved": true
+    },
+    {
+      "version": "a05-v1",
+      "former_workspace_path": "a05-rules-preview.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-c4cd569b-c0f7-4316-95d5-2628c35ef9b8.png",
+      "prompt_record": "prompts/a05.txt",
+      "version_status": "superseded",
+      "user_acceptance": "never accepted",
+      "reason": "superseded: template mismatch to ext leading-dot contract",
+      "workspace_copy_removed": true,
+      "sha256": "82f0c7e8c1167e9ad218064546b5767181aed136a131e61edd4a6b5a01049145",
+      "bytes": 1040161,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "36b27b0608e380163f3abef00bbc383595449d0bec3ece5e97868eedb04be693",
+      "generation_intent": "generate",
+      "inputs": [
+        {
+          "version_id": "a01",
+          "role": "style_reference_only",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active-v3.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-2956fb0c-1fa7-4e04-ba65-06609b8a0b78.png",
+          "sha256": "3480b347bbd0f142cdc794b6a851142f52694f20e6bacfdc4b75e9881e4f69e1"
+        }
+      ],
+      "source_generated_original_preserved": true
+    },
+    {
+      "version": "a06-v1",
+      "former_workspace_path": "a06-waiting-space.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-bf0d2385-5810-43ab-b633-41bbca8b1b65.png",
+      "prompt_record": "prompts/a06.txt",
+      "version_status": "superseded",
+      "user_acceptance": "never accepted",
+      "reason": "superseded: ambiguous other-task copy ownership and implementation term",
+      "workspace_copy_removed": true,
+      "sha256": "62a0d14bcfe0c7a72ce11255e733ed8071cc052f57d404b76ea5e2ed7711d387",
+      "bytes": 1025210,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "8fd40d3d1cf805400ea4a52a311d6c940be89d0f3b8acf12a38b7847b175cb17",
+      "generation_intent": "generate",
+      "inputs": [
+        {
+          "version_id": "a01",
+          "role": "style_reference_only",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active-v3.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-2956fb0c-1fa7-4e04-ba65-06609b8a0b78.png",
+          "sha256": "3480b347bbd0f142cdc794b6a851142f52694f20e6bacfdc4b75e9881e4f69e1"
+        }
+      ],
+      "source_generated_original_preserved": true
+    },
+    {
+      "version": "a07-v1",
+      "former_workspace_path": "a07-verification-failure.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-be26a587-28b9-4f06-a6b5-69af8f2d831a.png",
+      "prompt_record": "prompts/a07.txt",
+      "version_status": "superseded",
+      "user_acceptance": "never accepted",
+      "reason": "superseded: unproven connection cause",
+      "workspace_copy_removed": true,
+      "sha256": "1c19683e433b6b2a54d9ad46dd5204cf4e78d5fc8704d61413f34916de3be619",
+      "bytes": 1040463,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "5965886effb89c2deb4d841dca81756ae8e9049f95010a105865d7f075d349c1",
+      "generation_intent": "generate",
+      "inputs": [
+        {
+          "version_id": "a01",
+          "role": "style_reference_only",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active-v3.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-2956fb0c-1fa7-4e04-ba65-06609b8a0b78.png",
+          "sha256": "3480b347bbd0f142cdc794b6a851142f52694f20e6bacfdc4b75e9881e4f69e1"
+        }
+      ],
+      "source_generated_original_preserved": true
+    },
+    {
+      "version": "a09-v1",
+      "former_workspace_path": "a09-user-paused.png",
+      "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-f961d422-acc8-4b7e-b0db-952dc4842b19.png",
+      "prompt_record": "prompts/a09.txt",
+      "version_status": "superseded",
+      "user_acceptance": "never accepted",
+      "reason": "superseded: explicit whole-file retry explanation missing",
+      "workspace_copy_removed": true,
+      "sha256": "50a47e2c1f69d5dc0ef36263bbda23a3f37f6b167c34350b511c779f21640834",
+      "bytes": 996234,
+      "native_image_dimensions": {
+        "width": 841,
+        "height": 1870
+      },
+      "source_equals_selected_copy": true,
+      "prompt_file_sha256": "b853ea2f2256660f956392e7ced1476d6196ba93ca0d79c7d20bcfb3d3c736a7",
+      "generation_intent": "generate",
+      "inputs": [
+        {
+          "version_id": "a01",
+          "role": "style_reference_only",
+          "historical_tool_input_workspace_path": "docs/design/android-v1/a01-tasks-active-v3.png",
+          "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-2956fb0c-1fa7-4e04-ba65-06609b8a0b78.png",
+          "sha256": "3480b347bbd0f142cdc794b6a851142f52694f20e6bacfdc4b75e9881e4f69e1"
+        }
+      ],
+      "source_generated_original_preserved": true
+    }
+  ],
+  "prompt_records": [
+    "prompts.md#A01",
+    "prompts.md#A01 v2",
+    "prompts/a01-v3.txt",
+    "prompts/a02.txt",
+    "prompts/a03.txt",
+    "prompts/a04.txt",
+    "prompts/a05.txt",
+    "prompts/a06.txt",
+    "prompts/a07.txt",
+    "prompts/a09.txt",
+    "prompts/a03-v2.txt",
+    "prompts/a04-v2.txt",
+    "prompts/a05-v2.txt",
+    "prompts/a06-v2.txt",
+    "prompts/a07-v2.txt",
+    "prompts/a08.txt",
+    "prompts/a09-v2.txt",
+    "prompts/a10.txt",
+    "prompts/a11.txt"
+  ],
+  "metadata_checked_utc": "2026-10-02 11:13:28 UTC",
+  "prompt_files": [
+    {
+      "path": "prompts.md",
+      "sha256": "2fca8e52da5d70c144268dabbf020eb31c80a4dd6e37564a86e7a0f4a81fa4d2"
+    },
+    {
+      "path": "prompts/a01-v3.txt",
+      "sha256": "17faccbbd471053772a1cdb0fef31ee237748ac8e41f125543d69fbbefb9b7b6"
+    },
+    {
+      "path": "prompts/a02.txt",
+      "sha256": "3c44d3de4a983a3abdb3585538c97c16fe728f6f420d28d2c8e65a4d87c01c5b"
+    },
+    {
+      "path": "prompts/a03-v2.txt",
+      "sha256": "cbe4ea3db15a1908c410d91170a85e6bb0eeb7e61f79f1eff919b98de988d3d5"
+    },
+    {
+      "path": "prompts/a03.txt",
+      "sha256": "736770db593cdfc8236e55c7183c468485d09f3d09806ba6c4099059b0d0640d"
+    },
+    {
+      "path": "prompts/a04-v2.txt",
+      "sha256": "7f05121da905906e9040b8e040e812ca844b2a4ccdf5d482c5fb76771effae86"
+    },
+    {
+      "path": "prompts/a04.txt",
+      "sha256": "e688e2477bedf0e1e8e8728b0109bbb4115ee17f43d399b26120b081409352d4"
+    },
+    {
+      "path": "prompts/a05-v2.txt",
+      "sha256": "db5839160fc12030479e71263dace8bdab5c58288419b06f45fbeba551b2fdb6"
+    },
+    {
+      "path": "prompts/a05.txt",
+      "sha256": "36b27b0608e380163f3abef00bbc383595449d0bec3ece5e97868eedb04be693"
+    },
+    {
+      "path": "prompts/a06-v2.txt",
+      "sha256": "84aa0f45c8cdfe8c151748cbbf15db523d7ef5021b3c0467c95f3ed0b4a56fa0"
+    },
+    {
+      "path": "prompts/a06.txt",
+      "sha256": "8fd40d3d1cf805400ea4a52a311d6c940be89d0f3b8acf12a38b7847b175cb17"
+    },
+    {
+      "path": "prompts/a07-v2.txt",
+      "sha256": "14c34b85d0f48235d138b28982b5817fecb608bb1ded5294dac2a1b7d71a6611"
+    },
+    {
+      "path": "prompts/a07.txt",
+      "sha256": "5965886effb89c2deb4d841dca81756ae8e9049f95010a105865d7f075d349c1"
+    },
+    {
+      "path": "prompts/a08.txt",
+      "sha256": "c0f5a108aee373b8f268d61ca35afd6bbb38ff32051fcded1b8f678c8b30dc03"
+    },
+    {
+      "path": "prompts/a09-v2.txt",
+      "sha256": "3b3b68e4d697919eea1b435b589da12d0addf09a5b787063e0bc0b0ca1359e57"
+    },
+    {
+      "path": "prompts/a09.txt",
+      "sha256": "b853ea2f2256660f956392e7ced1476d6196ba93ca0d79c7d20bcfb3d3c736a7"
+    },
+    {
+      "path": "prompts/a10.txt",
+      "sha256": "852883d1952369890c0d05c396f15662ff92842c6fab92e165c7f29f0d9212ec"
+    },
+    {
+      "path": "prompts/a11.txt",
+      "sha256": "564266e2a88bd2e6b54dede672d7baf21d5ddbe056fc3b149fd8ffaaf7153b1e"
+    }
+  ],
+  "artifact_cleanup_utc": "2026-10-02 11:14:18 UTC",
+  "documentation_refreeze_utc": "2026-10-02 11:18:26 UTC",
+  "documentation_correction": "brief username/input terminology and completed-history wording aligned; fixture values distinguished from real behavior copy; prompt index explicitly preserves original tool cache; no selected PNG changed"
+}

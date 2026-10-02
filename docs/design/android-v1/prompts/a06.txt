@@ -1,0 +1,28 @@
+Use case: ui-mockup
+Asset type: one complete Android app portrait screen, high-fidelity candidate design concept only
+Input image role: a01-tasks-active-v3.png is STYLE REFERENCE ONLY, not an edit target and not content to copy. Generate a fresh complete screen for the specific content below.
+Style/medium: same restrained native Android Ferry visual language as reference: true white, charcoal Chinese sans serif text, restrained deep teal primary action, open sections and list rows with fine dividers, purposeful outline icons. No default rounded card grid, no marketing hero. Airy but practical and fully readable.
+Composition/framing: ONE edge-to-edge full portrait phone screen at approximately 9:20 ratio, no device bezel, no outer presentation board, no collage, no crop. Include Android status bar and bottom gesture area. Chinese copy must be clear and exact. Eventual UI must be Kotlin/Compose native text and controls, never shipped raster UI.
+Constraints: all values, file names, connected states and completion examples are illustrative design fixtures only, not real device/network/transfer evidence. No actual secrets, usernames, passwords, node data, private addresses or private images. No iOS UI, no automatic attach/background-service switch, no OpenDAL or cloud-drive buttons, no speed/ETA, no invented awards/badges/metrics. Preserve original camera files. Source is read-only; full persistent private phone copy precedes upload; only full remote SHA-256 readback permits completed; same-name existing content cannot be overwritten. Native controls feasible.
+Small footer, verbatim: 设计示例，非运行证据
+
+Primary request: Design complete M1 task detail in waiting-space state, source file not fully imported. Space block is clear, safe, recoverable and does NOT offer unsafe automatic deletion. A useful compact storage explanation with exact numeric fixtures, single primary action to recheck, and pause secondary. No invented storage charts or cleanup recommendations.
+Bottom navigation, verbatim: 任务 / 来源 / 目标 / 规则; selected 任务.
+Text (verbatim):
+Back chevron / 任务详情
+DEMO_006.mp4
+等待空间
+需要 6.0 GB，当前可用 3.2 GB
+未完成导入，不会开始上传
+来源 / SOURCE-DEMO · 只读
+目标 / NAS-DEMO · 应用内 Tailscale
+手机副本
+已有完整副本 9.2 GB
+未完成任务的副本会保留
+空间不足不会改为流式直传
+释放手机空间后，可重新检查
+Button: 重新检查空间
+Secondary button: 暂停任务
+人工暂停后需手动恢复
+Ferry 不会删除相机原文件
+Do not draw a delete-copy button, implied loss of previous complete files, or forced overwrite.

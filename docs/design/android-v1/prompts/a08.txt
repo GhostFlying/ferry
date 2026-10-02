@@ -1,0 +1,25 @@
+Use case: ui-mockup
+Asset type: one complete Android app portrait screen, high-fidelity candidate design concept only
+Input image role: a01-tasks-active-v3.png is STYLE REFERENCE ONLY, not an edit target and not content to copy. Generate a fresh complete screen for the specific content below.
+Style/medium: same restrained native Android Ferry visual language as reference: true white, charcoal Chinese sans serif text, restrained deep teal primary action, open sections and list rows with fine dividers, purposeful outline icons. No default rounded card grid, no marketing hero. Airy but practical and fully readable.
+Composition/framing: ONE edge-to-edge full portrait phone screen at approximately 9:20 ratio, no device bezel, no outer presentation board, no collage, no crop. Include Android status bar and bottom gesture area. Chinese copy must be clear and exact. Eventual UI must be Kotlin/Compose native text and controls, never shipped raster UI.
+Constraints: all values, file names, connected states and completion examples are illustrative design fixtures only, not real device/network/transfer evidence. No actual secrets, usernames, passwords, node data, private addresses or private images. No iOS UI, no automatic attach/background-service switch, no OpenDAL or cloud-drive buttons, no speed/ETA, no invented awards/badges/metrics. Preserve original camera files. Source is read-only; full persistent private phone copy precedes upload; only full remote SHA-256 readback permits completed; same-name existing content cannot be overwritten. Native controls feasible.
+Small footer, verbatim: 设计示例，非运行证据
+
+Primary request: Design complete M1 task home empty first-setup state, same exact navigation and header as A01 but zero tasks. Clear practical three-step initialization as simple numbered rows, no illustration, no metric dashboard, no imaginary synced data. Only initial native configuration links plus concise foreground conditions. This full empty-state image is necessary to cover onboarding without stacking small screenshots.
+Bottom navigation, verbatim: 任务 / 来源 / 目标 / 规则; selected 任务.
+Text (verbatim):
+Ferry / 任务
+还没有任务
+完成配置后，打开 Ferry 即可开始
+1 选择来源 / 系统目录授权 · 只读
+2 配置目标 / 飞牛 SMB · 局域网或应用内 Tailscale
+3 设置规则 / 预览匹配与目标路径
+Button: 选择来源
+工作方式
+先在手机保留完整副本
+上传后读回校验，通过才完成
+仅在前台运行，离开后保留任务
+人工暂停不会自动恢复
+相机原文件始终保留
+No background automatic-mode controls, no fake previously completed history.
