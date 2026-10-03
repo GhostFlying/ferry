@@ -16,7 +16,8 @@ The same full SHA must be passed as `FERRY_SOURCE_SHA` when invoking the smoke
 script directly. A missing or non-full SHA is a stop condition.
 
 `toolchains.env` is the human-readable lock input. The container smoke command
-must emit the resolved JDK, Android SDK platform/platform-tools/build-tools, NDK,
+must emit the resolved JDK, Android SDK platform/platform-tools/build-tools and
+download SHA-256 values, NDK,
 Go, Gradle, ABI, `minSdk`, apt dependency lock, source SHA, container identity,
 and artifact SHA-256 fields. A2 adds the pinned gomobile/gobind and Gradle
 wrapper fields when the bridge package is introduced.
