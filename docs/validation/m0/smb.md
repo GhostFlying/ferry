@@ -1,13 +1,20 @@
 # M0-A3 controlled SMB validation
 
-Status: A3 source implementation is pending independent implementation review;
-no SMB connection or transfer is claimed. The backend accepts an injected
+Status: A3 unit-test verification `PASS`; no real SMB connection or transfer
+is claimed. The backend accepts an injected
 `net.Conn` and uses go-smb2 v1.1.0. It does not open a host socket, mount a
 share through the host, or use a system VPN.
 
 Plan: `8e25dd36c50231346d21a77af8e73a75481ad5f3`; plan review `2cbbc75`.
 
-Required fixed-container commands after the Docker registry blocker is resolved:
+The fixed-container unit-test command was run on 2026-10-04 in the immutable
+local recovery image `ferry-m0-devcontainer:recovery-test`, source SHA
+`c766c06289db1e092c250602da7f3b3ce5087f8f`, with `make test` passing. The
+test uses the container's network proxy only to fetch the pinned module sums;
+no SMB server was contacted. A later bridge-only Makefile change advanced the
+branch to `82d9e15` without changing the SMB source or test result.
+
+Required fixed-container commands for repeatability:
 
 ```sh
 FERRY_SOURCE_SHA="$(git rev-parse HEAD)" devcontainer up --workspace-folder .

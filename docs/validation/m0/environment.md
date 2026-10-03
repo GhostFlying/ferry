@@ -1,17 +1,27 @@
 # M0 container environment
 
-Status: A1 implementation in progress. This document records the pinned
-container boundary; it is not APK, bridge, device, SMB, tsnet, or transfer
-evidence.
+Status: A1 toolchain verification `PASS` for the immutable local recovery
+image; the default upstream-registry build remains `BLOCKED` in this network
+environment. This document records only the pinned container boundary, not an
+APK, device, SMB, tsnet, or transfer pass.
 
-Current verification result: `BLOCKED`. On 2026-10-04, the exact command
+On 2026-10-04, the default command
 `docker build --pull=false --tag ferry-m0-devcontainer:20261004 --file
 .devcontainer/Dockerfile .` could not resolve the pinned Docker Hub manifest
-because the Docker daemon timed out reaching `registry-1.docker.io`. The same
-base image was retrieved through `skopeo` and imported into the daemon, but the
-digest-qualified `FROM` still required registry resolution. No host toolchain,
-unpinned tag, host-built APK, or substitute container was used; the build must
-be retried once daemon registry access is available.
+because the Docker daemon timed out reaching `registry-1.docker.io`. The
+verified upstream image was separately inspected and imported, and the local
+build then succeeded with this immutable config digest override:
+
+```sh
+docker build --pull=false \
+  --build-arg FERRY_BASE_IMAGE=sha256:b2a5b9c58fedbd66afc3b58fc99d7526673b6f45fbb1b25f2cda00933a293af3 \
+  --tag ferry-m0-devcontainer:recovery-test \
+  --file .devcontainer/Dockerfile .
+```
+
+This is the same verified Linux/amd64 base image chain recorded below, not an
+unpinned tag or a substitute image. CI retains the upstream digest-qualified
+`FROM`; the local override is a documented recovery path only.
 
 The source of truth is [`.devcontainer/Dockerfile`](../../../.devcontainer/Dockerfile)
 and [`experiments/toolchains.env`](../../../experiments/toolchains.env). The base
@@ -28,14 +38,17 @@ with download SHA-256 values where applicable. Android `minSdk` is 29 and the
 initial artifact ABI is `arm64-v8a`.
 
 The devcontainer uses rebuildable named volumes for Gradle and Go caches. The
-container smoke command is
+successful local recovery smoke command on 2026-10-04 used source SHA
+`82d9e15547448b4ad49d78454ec53c42c37eb75a` and reported JDK 17.0.20.1,
+Android platform 35, build-tools 35.0.0, NDK 27.2.12479018, compile/target
+SDK 35, Go 1.27.1, Gradle 8.10.2, SDK manager 1.0.16500706, minSdk 29 and
+ABI arm64-v8a. The container smoke command is
 [`scripts/ci/m0-toolchain-smoke.sh`](../../../scripts/ci/m0-toolchain-smoke.sh).
 It refuses to run unless `FERRY_DEVCONTAINER=1` is set and emits a redacted
-toolchain manifest. A source SHA, the pinned platform-tools revision, apt
-dependency lock, and `artifact_sha256=NOT_APPLICABLE` are
-expected until a real APK/AAR exists; this is not a build pass.
+toolchain manifest. Its `artifact_sha256=NOT_APPLICABLE` field applies only to
+the smoke check; A2 records the AAR hash separately.
 
-Verification status will be recorded as `PASS`, `FAIL`, `BLOCKED`, or
+Verification status is recorded as `PASS`, `FAIL`, `BLOCKED`, or
 `NOT_RUN`, with the container image identity, source SHA, toolchain fields, and
 artifact SHA-256. No host JDK, SDK, NDK, Go, Gradle, or host-built artifact can
 be used as evidence. gomobile/gobind and the Gradle wrapper are intentionally
