@@ -8,9 +8,11 @@ scope and does not start M1, M0 UI, iOS, Pocket USB, or device operations.
 
 A2 will provide one Go bridge package that can be built as an Android AAR and
 called by the probe. The package owns the stable operation contract and
-lifecycle semantics; its transfer backend is injected so A2 can be tested with
-a deterministic fake while A3 and A4 add the real SMB and App-internal tsnet
-backends. A2 does not claim SMB, tsnet, APK, Dora, or complete-transfer
+lifecycle semantics; its transfer backend is injected inside the package so A2
+can be tested with a deterministic fake. A3 and A4 add the real SMB and
+App-internal tsnet backends in their own packages; a later A2-owned composition
+file under `experiments/mobile-core/` wires those implementations into the
+internal seam. A2 does not claim SMB, tsnet, APK, Dora, or complete-transfer
 evidence by itself.
 
 The bridge contract contains a versioned operation ID, 64-bit byte counters,
@@ -33,8 +35,9 @@ states for later A5 reconciliation.
   and explicit blocked/untested boundaries.
 - `docs/plans/m0-a2-implementation.md`: this plan and its review history.
 
-No other package edits are allowed during A2. A3 owns the real SMB backend;
-A4 owns the tsnet backend; A5 owns the probe UI and source adapter.
+No other package edits are allowed during A2. A3 owns the real SMB backend and
+A4 owns the tsnet backend; the later A2 composition file is the sole bridge
+integration point. A5 owns the probe UI and source adapter.
 
 ## Dependencies and environment
 
