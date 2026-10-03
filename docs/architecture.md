@@ -114,6 +114,6 @@ OpenDAL 作为网盘／对象存储候选；当前查阅的公开 services 列�
 
 M0 的 host 受控 SMB 测试证明 `net.Conn` 注入／协议语义；Dora Android 物理设备实际验证 App 内 tsnet 到受控 SMB 的完整传输。Dora 与家庭 NAS／开发机不默认同网，直接 SMB 只在已批准私网路径真实可达时补测；不以公网暴露 TCP 445 换取可达性。构造素材的读回一致不证明 Pocket USB。
 
-M1 将生产规则、Android 导入／状态与传输接成可用前台路径；Pixel／Pocket／飞牛 LAN 与 tsnet、数据恢复与暂停分别验收。M2 不要求 iOS 回归。M3 才验证 Dora iOS 的安装、普通文件／网络与实际 Pocket → iPhone 17 Pro USB-C；macOS／Xcode、签名／注册和指定设备是 M3 前提，不能提前成为 Android gate。缺条件时对应阶段的规定验收保持未完成。
+M1 将生产规则、Android 导入／状态与传输接成可用 `on_open` 前台路径；Pixel／Pocket／飞牛主链路至少选择 LAN 或 tsnet 一条网络路径，并分别验收连接、内容读回、暂停和恢复。第二网络路径可作补充证据，不把未测路径变成 M1 硬 gate；完整故障注入移 M2。M2 不要求 iOS 回归。M3 才验证 Dora iOS 的安装、普通文件／网络与实际 Pocket → iPhone 17 Pro USB-C；macOS／Xcode、签名／注册和指定设备是 M3 前提，不能提前成为 Android gate。缺条件时对应阶段的规定验收保持未完成。
 
 视觉方案由专门design agent按 `build-web-apps:frontend-app-builder` 先生成图，经用户接受后再定义tokens／具体组件；架构中的职责与数据流不预先规定视觉布局。Android Compose和M3 SwiftUI保留原生实现，浏览器稿不代替原生截图／功能验证。
