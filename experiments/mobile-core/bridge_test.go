@@ -25,7 +25,7 @@ func (b scriptedBackend) Transfer(ctx context.Context, r Request, emit func(Prog
 func waitDone(t *testing.T, c *recordingCallback) { t.Helper(); select { case <-c.done: case <-time.After(time.Second): t.Fatal("callback timeout") } }
 
 func TestBridgeSuccessSerializesTerminalCallback(t *testing.T) {
-	b := newBridgeForTest(scriptedBackend{run: func(ctx context.Context, r Request, emit func(Progress)) error { emit(Progress{CompletedBytes: 1, TotalBytes: 2}); emit(Progress{CompletedBytes: 2, TotalBytes: 2}); return nil }})
+	b := newBridgeWithBackend(scriptedBackend{run: func(ctx context.Context, r Request, emit func(Progress)) error { emit(Progress{CompletedBytes: 1, TotalBytes: 2}); emit(Progress{CompletedBytes: 2, TotalBytes: 2}); return nil }})
 	c := newRecordingCallback()
 	if err := b.Start("op-1", 2, c); err != nil { t.Fatal(err) }
 	waitDone(t, c)
@@ -35,7 +35,7 @@ func TestBridgeSuccessSerializesTerminalCallback(t *testing.T) {
 
 func TestBridgeCancellationIsTerminalAndIdempotent(t *testing.T) {
 	started := make(chan struct{})
-	b := newBridgeForTest(scriptedBackend{run: func(ctx context.Context, r Request, emit func(Progress)) error { close(started); <-ctx.Done(); emit(Progress{CompletedBytes: 1, TotalBytes: 2}); return ctx.Err() }})
+	b := newBridgeWithBackend(scriptedBackend{run: func(ctx context.Context, r Request, emit func(Progress)) error { close(started); <-ctx.Done(); emit(Progress{CompletedBytes: 1, TotalBytes: 2}); return ctx.Err() }})
 	c := newRecordingCallback()
 	if err := b.Start("op-2", 2, c); err != nil { t.Fatal(err) }
 	<-started
@@ -46,7 +46,7 @@ func TestBridgeCancellationIsTerminalAndIdempotent(t *testing.T) {
 }
 
 func TestBridgeStructuredErrorAndLateEventIsolation(t *testing.T) {
-	b := newBridgeForTest(scriptedBackend{run: func(ctx context.Context, r Request, emit func(Progress)) error { emit(Progress{CompletedBytes: 2, TotalBytes: 1}); return &Error{Code: "readback_mismatch", Message: "hash differs"} }})
+	b := newBridgeWithBackend(scriptedBackend{run: func(ctx context.Context, r Request, emit func(Progress)) error { emit(Progress{CompletedBytes: 2, TotalBytes: 1}); return &Error{Code: "readback_mismatch", Message: "hash differs"} }})
 	c := newRecordingCallback()
 	if err := b.Start("op-3", 1, c); err != nil { t.Fatal(err) }
 	waitDone(t, c)
@@ -57,7 +57,7 @@ func TestBridgeStructuredErrorAndLateEventIsolation(t *testing.T) {
 
 func TestBridgeIgnoresBackendEventAfterTerminal(t *testing.T) {
 	var late func(Progress)
-	b := newBridgeForTest(scriptedBackend{run: func(ctx context.Context, r Request, emit func(Progress)) error {
+	b := newBridgeWithBackend(scriptedBackend{run: func(ctx context.Context, r Request, emit func(Progress)) error {
 		late = emit
 		return nil
 	}})

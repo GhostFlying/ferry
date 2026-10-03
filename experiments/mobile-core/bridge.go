@@ -66,7 +66,7 @@ func NewBridge() *Bridge {
 	return &Bridge{backend: unavailableBackend{}, ops: make(map[string]*operation)}
 }
 
-func newBridgeForTest(b backend) *Bridge {
+func newBridgeWithBackend(b backend) *Bridge {
 	return &Bridge{backend: b, ops: make(map[string]*operation)}
 }
 
