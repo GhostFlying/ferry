@@ -76,7 +76,7 @@ M2 承接完整故障矩阵，包括断网／切网、校验不一致、写完�
 - M1 飞牛共享名称、实际账号权限和 NAS 的 Tailnet 接入方式，以及 Pocket 3／Pixel 6 Pro USB 设备的操作条件。
 - M3 才确认 Pocket 3／iPhone 17 Pro USB-C 组合与相应飞牛实测条件。
 - M3 才确认 macOS／Xcode、iOS 安装签名与 Dora iOS 物理设备条件，不阻塞早期 Android。
-- Android 最低系统版本在早期工具链／实机实验后确定；iOS 最低系统版本留到 M3 桥接和实机实验。
+- Android 默认 `minSdk 29`（Android 10），不处理 Android 9 及更低版本兼容问题。`compileSdk`／`targetSdk` 可使用较新的稳定 API，但实际版本在实现开始前由 devcontainer 内锁定并记录；iOS 最低系统版本留到 M3 桥接和实机实验。
 - Android applicationId 建议 `io.github.ghostflying.ferry`，M0 诊断包后缀 `.probe`；随当前计划 review 确认。iOS bundle ID／profile／安装适用性留 M3。许可证已由用户选择 Apache-2.0，公开仓库为 `GhostFlying/ferry`。
 
 以上事项不阻碍形成方案；相关兼容性结论和发布承诺必须等待对应验证。

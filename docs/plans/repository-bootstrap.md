@@ -9,12 +9,27 @@
 1. 新建手写的 `AGENTS.md`，固定产品范围、协调与实现角色、独立审查、里程碑用户审阅、DAG／worktree、Git 身份和原子提交、凭据及设备证据边界。
 2. 新建 `docs/agent-workflow.md`，提供计划、任务、审查、阻塞和验收记录格式，并规定 GitHub issue／PR 的可追踪信息。
 3. 新建 `.github/ISSUE_TEMPLATE/task.yml`、`.github/ISSUE_TEMPLATE/blocker.yml` 和 `.github/pull_request_template.md`，使上述记录可以直接提交。
-4. 为 `README.md` 增加治理入口；不修改由规划代理负责的 `docs/implementation-plan.md`、`docs/plans/m0.md`、`docs/plans/m1.md`。
+4. 为 `README.md` 增加治理入口；阶段计划由对应规划任务维护。本轮仅按已登记的工具链约束同步 `docs/implementation-plan.md`、`docs/plans/m0.md`、`docs/plans/m1.md` 和 `docs/plans/m2.md`，不修改代码或构建工作流。
 5. 本轮只使用现有工具验证 Markdown 文件目标、JSON 示例语法和模板 YAML；不编写校验脚本或 Actions 代码。后续文档校验工具须另有明确范围和计划审查，不能表示应用构建通过。
 6. 独立实现审查和本地验收通过后，由协调代理安排原子提交、公开 `GhostFlying/ferry` 仓库、里程碑／任务 issue 和规划 PR；实施代理须收到协调代理的具体执行指令。用户已授权公开仓库建设，但 Android／Go 应用与 APK workflow 仍等待相应里程碑的用户审阅。
 7. 用户已明确选择 Apache-2.0。从 Apache 官方来源取得完整标准文本，核对内容和 SHA-256，并对新增 LICENSE 及事实更新独立复核；许可证作为单独原子提交进入规划 PR。
 8. 本次同步当前治理及 GitHub milestone／task／PR，保留原 issue 编号和旧 ID 迁移／拆分审计；每个阶段都明确工作、产物、环境、PASS 条件、证据、停止条件及用户关口。早期无 iOS 依赖，M3 承接真实 iOS 实施／USB；M2／M3 和每阶段设计任务也须登记，未排期 OpenDAL 不创建伪可执行阶段。
 9. 所有 UI 使用指定 frontend-app-builder／Image Gen，完整 screen／states → 用户接受 → tokens／独立 UI 实施计划 → 经阶段批准实现 → 实际原生截图／view_image 保真；设计文件由 design agent 单 owner，治理只记录 protocol 和链接，不预先定义视觉细节或生成图。
+
+## Android 工具链与 devcontainer 记录边界
+
+当前计划规定 Android 默认 `minSdk 29`（Android 10），不处理 Android 9 及更低
+版本。`compileSdk`／`targetSdk` 可以较新，但实际 API 号只能在实现开始前由
+devcontainer 内锁定的稳定工具链确定并记录。未来 M0–M2 的构建、单测、静态检查、
+Go／Android bridge 和 APK 产物必须在固定镜像 digest／manifest 或 Dockerfile
+定义的 devcontainer 内执行；依赖缓存用可重建卷，证据记录完整源码 SHA、工具链、
+ABI 和产物 SHA-256。
+
+宿主只启动容器并保存脱敏产物；Dora 只安装容器构建出的 APK，若需 ADB 转发则
+宿主仅做显式连接和设备操作。缺少容器运行时、固定定义或可重建依赖卷时，对应
+构建验收为 `BLOCKED`，不得回退到宿主 JDK／SDK／NDK／Go／Gradle 缓存。M0／M1／
+M2 计划分别列出容器内构建检查与设备／服务外部动作；该设计不增加低概率兼容
+矩阵或额外发布门槛。
 
 ## 仓库操作与顺序
 
@@ -34,6 +49,7 @@
 - 使用现有工具验证本地链接目标、JSON 示例和模板 YAML；记录命令和真实结果。没有本轮校验器实现，不以新测试或 Actions 运行作为当前交付。
 - 当前治理检查静态文件与规划文本；design agent 检查真实生成图的覆盖／可读性／fixture 边界及接受状态，最终由独立 reviewer 检查对应证据。不能宣称 Android／iOS 构建、USB、SMB、tsnet、原生 UI 或 Browser QA 已通过。
 - 新登记保留 M0 受控服务／Dora Android 协议验证；M1／M2 只 Android，iOS 及 macOS／签名／USB 依赖到 M3。既有 #12／#24／#26 迁移保留历史 ID，#28 的 iOS 部分显式映射新 M3-IOSV1；每阶段设计接受与实施授权分别记录，任务／验收／反向 Blocks 与当前计划一致。历史说明可以引用旧范围，但必须标明已迁移／拆分。
+- Android 工具链边界只在文档中登记；本轮不启动容器、构建、Dora 或设备验证。缺容器运行时时不能用当前机器结果替代，构建状态必须保留为 `BLOCKED`。
 - 许可证采用用户已明确选择的 Apache-2.0 标准全文，不修改许可条款。未获得用户决定前不得擅自选择许可证的一般规则继续适用。
 - 文档编写和独立审查阶段不进行提交／推送或修改远端登记。快照通过独立审查后，当前已获授权的文档发布由治理代理按协调指令原子提交／推送并同步现有 PR／issue；后续产品里程碑仍必须取得用户审阅决定。
 

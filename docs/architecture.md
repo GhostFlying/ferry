@@ -1,6 +1,6 @@
 # Ferry 架构提案
 
-本方案围绕 Pocket 3 OTG、飞牛 SMB 和内嵌 tsnet。M0 用 Android probe 与 Dora 云端物理设备验证协议；M1 交付 Android／Pixel 6 Pro 前台基础版，M2 补充自动模式与 Android 发行；M3 才实现 iOS／iPhone 17 Pro／USB-C。M0 后开展 Android Pocket USB 完整链路，iOS USB 留 M3。具体依赖版本在可行性实验后固定。
+本方案围绕 Pocket 3 OTG、飞牛 SMB 和内嵌 tsnet。M0 用 Android probe 与 Dora 云端物理设备验证协议；M1 交付 Android／Pixel 6 Pro 前台基础版，M2 补充自动模式与 Android 发行；M3 才实现 iOS／iPhone 17 Pro／USB-C。M0 后开展 Android Pocket USB 完整链路，iOS USB 留 M3。Android 默认 `minSdk 29`（Android 10），不处理 Android 9 及更低版本；`compileSdk`／`targetSdk` 等实际依赖版本在实现前由 devcontainer 锁定并记录，不以宿主环境作为构建证据。
 
 ## 模块边界
 
@@ -21,7 +21,7 @@ flowchart LR
 
 M1 Android 使用 Kotlin／Jetpack Compose；M3 iOS 使用 Swift／SwiftUI。来源授权、应用生命周期、前台服务和凭据存储由原生层负责。规则、确定性的路径规划、SMB 传输和 tsnet 放入共享 Go 核心，避免两端重复实现协议。Android 实现不能将平台 URI、Context 或服务对象泄漏进共享核心。
 
-M0 输出 Android AAR；M0–M2 只建立 Android 实际需要的接口，不提前实现 iOS bridge、平台服务抽象或生产适配。保持 Go 核心不依赖 Android 生命周期和保留规则向量即可。M3 再在 macOS／Xcode 上验证同一核心的 iOS Framework／XCFramework，按实际需要调整边界并集成 iOS App。iOS 构建和实际安装不能被 Android 构建通过替代。先验证 gomobile 对实际依赖的构建与运行情况；必要时使用单一 Go 产物的 C ABI。上游 libtailscale 的 iOS 构建是参考，不把两个各带 Go runtime 的独立静态库同时链接进 App。[gomobile 文档](https://pkg.go.dev/golang.org/x/mobile/cmd/gomobile)、[libtailscale 构建](https://github.com/tailscale/libtailscale/blob/main/Makefile)。
+M0 输出 Android AAR；M0–M2 只建立 Android 实际需要的接口，不提前实现 iOS bridge、平台服务抽象或生产适配。保持 Go 核心不依赖 Android 生命周期和保留规则向量即可。M0–M2 的 Android／Go／bridge 构建、单测、静态检查和 APK 产物均在固定 devcontainer 内执行，记录镜像 digest／manifest 或 Dockerfile、可重建依赖卷、源码 SHA、工具链、ABI 和产物 SHA-256；宿主只启动容器、保存脱敏产物或显式转发 ADB。缺容器运行时为 `BLOCKED`，不回退宿主 JDK／SDK／NDK／Go／Gradle。M3 再在 macOS／Xcode 上验证同一核心的 iOS Framework／XCFramework，按实际需要调整边界并集成 iOS App。iOS 构建和实际安装不能被 Android 构建通过替代。先验证 gomobile 对实际依赖的构建与运行情况；必要时使用单一 Go 产物的 C ABI。上游 libtailscale 的 iOS 构建是参考，不把两个各带 Go runtime 的独立静态库同时链接进 App。[gomobile 文档](https://pkg.go.dev/golang.org/x/mobile/cmd/gomobile)、[libtailscale 构建](https://github.com/tailscale/libtailscale/blob/main/Makefile)。
 
 桥接契约冻结协议版本、操作 ID、结构化错误、回调线程、64 位字节计数、取消完成回调、迟到事件隔离和文件所有权。桥接只传任务描述、沙盒文件路径、进度事件和取消指令。视频数据通过文件读取，不把整个视频转成桥接层字节数组。
 

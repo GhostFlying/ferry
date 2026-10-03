@@ -4,13 +4,28 @@
 
 本轮只做规划修订与供用户审阅的 Android 概念；无应用／CI 实现或设备占用。M0–M2 没有 macOS／Xcode、iOS 桥接／签名／回归 gate；Go 只保持正常模块边界和规则向量，不为 iOS 预建平台框架。
 
+## Android 工具链与容器边界
+
+Android 默认 `minSdk 29`（Android 10）；不处理 Android 9 及更低版本的兼容问题。
+允许使用较新的 `compileSdk`／`targetSdk`，但不在规划阶段锁定随日期变化的 API
+号；实现开始前由 devcontainer 内锁定稳定 SDK 工具链并记录实际版本。所有构建、
+单测、静态检查、APK、Go 和 Android bridge 构建都在该 devcontainer 内进行。固定
+镜像 digest／manifest 或 Dockerfile 必须锁住工具版本，依赖缓存使用可重建卷，
+并记录完整源码 SHA、工具链版本、ABI 和产物 SHA-256。
+
+宿主机只负责启动容器和保存脱敏产物；Dora 使用容器内构建出的 APK。需要 ADB
+转发时，宿主机只做显式连接和设备操作，不把宿主 JDK／SDK／NDK／Go／Gradle
+缓存或工具链结果算作构建证据。缺少容器运行时时，对应构建与测试为 `BLOCKED`，
+不得回退到当前环境。M0–M2 的容器内动作与服务／设备外部动作分别按各阶段文件
+记录；该边界不增加低概率兼容矩阵或额外发布门槛。
+
 ## 每阶段做什么、交付什么、怎样通过
 
 | milestone | 明确工作／实际产物 | 环境与可重复PASS | 阻塞／用户gate |
 | --- | --- | --- | --- |
-| [M0](plans/m0.md) Android受控协议 | 工具链、单 Go 核心、受控 SMB／tsnet、诊断 probe、Actions 真 APK、Dora physical 实验 | **硬 gate V01–V05**：真实 APK/AAR；Dora 安装／bridge；host `net.Conn` SMB no-replace 与读回；Dora App 内 tsnet 一次完整 SHA-256 读回；取消／终止不误完成且本地副本保留 | 连接与内容分开判定；V06–V08 为附加／条件性结果，V09 是强制安全收尾但不是协议 gate，M0-UI 独立；不因 >4 GiB、竞争、扩展身份或未接受视觉阻塞；用户批准 M1 |
-| [M1](plans/m1.md) Android前台基础版 | 规则／Room／源只读／完整副本、`on_open` 恢复、Pocket→Pixel→fnOS 主链路、第一网络路径、真实 APK | 核心 AV01–AV04、AV06、AV09：远端完整 SHA-256、no-replace、人工暂停和系统等待；第二网络补充，完整故障矩阵移 M2，M1-UI 独立 | 指定 USB／fnOS／第一路径缺失只阻塞对应主链路；AV05／AV07／AV08／AV11 如实 `OPTIONAL`／`CONDITIONAL`／`DEFERRED`／`NOT_RUN`；用户批准 M2 |
-| [M2](plans/m2.md) Android自动模式与发行准备 | 合法接入／FGS／停止通知、**M1 延后的完整故障矩阵**、Android 双语文档、许可通知、干净构建与发行候选 | 默认关闭、合法入口、停止即停、拒绝／超时／终止不误完成；完整矩阵和交付报告逐项 `PASS`／`FAIL`／`BLOCKED`／`NOT_RUN` | 适用场景未测或正式签名／渠道未定只阻塞对应项；用户 review 候选、发布动作和 M3 计划 |
+| [M0](plans/m0.md) Android受控协议 | 工具链、单 Go 核心、受控 SMB／tsnet、诊断 probe、devcontainer 内 Actions 真 APK、Dora physical 实验 | **硬 gate V01–V05**：容器内真实 APK/AAR；Dora 安装／bridge；host `net.Conn` SMB no-replace 与读回；Dora App 内 tsnet 一次完整 SHA-256 读回；取消／终止不误完成且本地副本保留 | 连接与内容分开判定；V06–V08 为附加／条件性结果，V09 是强制安全收尾但不是协议 gate，M0-UI 独立；缺容器运行时为 `BLOCKED`，不因 >4 GiB、竞争、扩展身份或未接受视觉阻塞；用户批准 M1 |
+| [M1](plans/m1.md) Android前台基础版 | 规则／Room／源只读／完整副本、`on_open` 恢复、Pocket→Pixel→fnOS 主链路、第一网络路径、devcontainer 内真实 APK | 核心 AV01–AV04、AV06、AV09：远端完整 SHA-256、no-replace、人工暂停和系统等待；第二网络补充，完整故障矩阵移 M2，M1-UI 独立 | 指定 USB／fnOS／第一路径缺失只阻塞对应主链路；AV05／AV07／AV08／AV11 如实 `OPTIONAL`／`CONDITIONAL`／`DEFERRED`／`NOT_RUN`；缺容器运行时为 `BLOCKED`；用户批准 M2 |
+| [M2](plans/m2.md) Android自动模式与发行准备 | 合法接入／FGS／停止通知、**M1 延后的完整故障矩阵**、Android 双语文档、devcontainer 内干净构建与发行候选 | 默认关闭、合法入口、停止即停、拒绝／超时／终止不误完成；完整矩阵和交付报告逐项 `PASS`／`FAIL`／`BLOCKED`／`NOT_RUN` | 适用场景未测或正式签名／渠道未定只阻塞对应项；缺容器运行时只阻塞构建节点；用户 review 候选、发布动作和 M3 计划 |
 | [M3](plans/m3.md) iOS可用版与双平台交付 | 此时才做iOS单Go桥接／工程／SwiftUI／来源／spool／SQLite／Keychain／前台网络；实际iOS包和双平台说明 | macOS签名安装；Dora iOS普通流程；Pocket→iPhone17 Pro USB-C→飞牛LAN／tsnet真实摘要一致，挂起／恢复／冲突通过；Android回归、规则一致、接受iOS图对照 | 缺macOS／签名／lease／指定USB则对应M3项阻塞；双平台包/hash/矩阵及独立review后用户决定具体发布和后续范围 |
 
 M2吸收Android发行准备是本次执行方案，随计划供用户review。正式签名／渠道尚未决定时保留相应发行阻塞，不把验证APK当正式发布。每份阶段文件有具体任务范围和逐项动作／预期／证据；不能仅以“支持／完善／稳定”判定通过。
@@ -84,9 +99,9 @@ agents承担规划、实现、验证和交付；用户负责阶段决定、设�
 | 生命周期 | M1 仅 Android `on_open`，人工暂停不解除；完整故障矩阵移 M2；M2 可选模式合法且可停止；M3 iOS 仍仅前台 |
 | 设计 | 接受图之后才有视觉 spec 与详细 UI 清单；M0-UI／M1-UI 独立于协议／主链路 gate；native 截图对照与交互分别验收，无假运行截图 |
 | 身份与秘密 | 不泄露凭据／节点状态；Dora 新 lease、每次操作核 session、finally 清理；扩展身份／生命周期低概率证据按 `OPTIONAL`／`CONDITIONAL`／`NOT_RUN` 记录 |
-| 产物与证据 | 真实 APK，M3 真实可安装 iOS 包；SHA／hash／环境／路径明确，host／Dora／用户 USB、第一路径／补充路径分别报告 |
+| 产物与证据 | 真实 APK，M3 真实可安装 iOS 包；完整源码 SHA／devcontainer 工具链／ABI／产物 SHA-256、环境／路径明确，host／Dora／用户 USB、第一路径／补充路径分别报告 |
 
-关键能力不成立、无合法网络／设备授权、用户尚未批准阶段、设计未接受却要做视觉细节时停止依赖步骤。独立节点只在已批准范围内继续。用户每次收到计划／PR／SHA、实际产物、独立review、逐项证据／未测、下一范围；明确批准后再进入下一milestone。
+关键能力不成立、无合法网络／设备授权、缺少 devcontainer 运行时、用户尚未批准阶段、设计未接受却要做视觉细节时停止依赖步骤。独立节点只在已批准范围内继续。用户每次收到计划／PR／SHA、实际产物、独立review、逐项证据／未测、下一范围；明确批准后再进入下一milestone。
 
 ## 未排期backlog
 
