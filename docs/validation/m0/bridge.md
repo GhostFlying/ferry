@@ -5,9 +5,10 @@ claimed yet because the fixed devcontainer remains blocked. The A2 scope is the 
 bridge packaging around an injectable backend. The fake backend in unit tests
 cannot satisfy SMB, tsnet, APK, Dora, or transfer gates.
 
-Plan target: `ad427c8d71b230ba38cd8014a37d40da50508b86`; plan review
-`80eaab3e353508b5fef3720c40f4629e3152d38c`. Implementation source is on the
-current branch and awaits A2 implementation review.
+Plan target: `fa7c2e5d16d9d64b11e61c4aa130f2128a82af0b`; the revised plan review
+is pending. The superseded plan review `80eaab3e353508b5fef3720c40f4629e3152d38c`
+does not cover this revision. Implementation source is on the current branch
+and awaits A2 implementation review.
 
 Required container commands, once the Docker registry blocker is resolved:
 
