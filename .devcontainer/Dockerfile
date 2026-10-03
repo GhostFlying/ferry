@@ -27,7 +27,7 @@ RUN apt-get update \
         make=4.3-4.1build1 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /opt/android-sdk/cmdline-tools /opt/gradle \
+RUN mkdir -p /opt/android-sdk/cmdline-tools \
     && curl -fsSL "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_CMDLINE_TOOLS_VERSION}_latest.zip" -o /tmp/android-cmdline-tools.zip \
     && echo "${ANDROID_CMDLINE_TOOLS_SHA256}  /tmp/android-cmdline-tools.zip" | sha256sum -c - \
     && unzip -q /tmp/android-cmdline-tools.zip -d /opt/android-sdk/cmdline-tools \

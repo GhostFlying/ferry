@@ -7,7 +7,14 @@ if [[ "${FERRY_DEVCONTAINER:-}" != "1" ]]; then
 fi
 
 source experiments/toolchains.env
-source_sha="$(git rev-parse HEAD)"
+source_sha="${FERRY_SOURCE_SHA:-}"
+if [[ -z "$source_sha" ]]; then
+  source_sha="$(git rev-parse HEAD)"
+fi
+if [[ ! "$source_sha" =~ ^[0-9a-f]{40}$ ]]; then
+  echo 'FERRY_SOURCE_SHA must be a full Git commit SHA' >&2
+  exit 2
+fi
 
 printf '%s\n' 'FERRY_TOOLCHAIN_MANIFEST'
 printf 'source_sha=%s\n' "$source_sha"

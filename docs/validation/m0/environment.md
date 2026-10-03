@@ -13,8 +13,8 @@ digest-qualified `FROM` still required registry resolution. No host toolchain,
 unpinned tag, host-built APK, or substitute container was used; the build must
 be retried once daemon registry access is available.
 
-The source of truth is [`.devcontainer/Dockerfile`](../../.devcontainer/Dockerfile)
-and [`experiments/toolchains.env`](../../experiments/toolchains.env). The base
+The source of truth is [`.devcontainer/Dockerfile`](../../../.devcontainer/Dockerfile)
+and [`experiments/toolchains.env`](../../../experiments/toolchains.env). The base
 image is pinned by digest. Android command-line tools, platform-tools 37.0.1
 (direct archive with SHA-256), platform 35, build-tools 35.0.0, NDK
 27.2.12479018, compileSdk/targetSdk 35, Go 1.27.1, and Gradle 8.10.2 are pinned
@@ -23,7 +23,7 @@ initial artifact ABI is `arm64-v8a`.
 
 The devcontainer uses rebuildable named volumes for Gradle and Go caches. The
 container smoke command is
-[`scripts/ci/m0-toolchain-smoke.sh`](../../scripts/ci/m0-toolchain-smoke.sh).
+[`scripts/ci/m0-toolchain-smoke.sh`](../../../scripts/ci/m0-toolchain-smoke.sh).
 It refuses to run unless `FERRY_DEVCONTAINER=1` is set and emits a redacted
 toolchain manifest. A source SHA, the pinned platform-tools revision, apt
 dependency lock, and `artifact_sha256=NOT_APPLICABLE` are
@@ -35,3 +35,11 @@ artifact SHA-256. No host JDK, SDK, NDK, Go, Gradle, or host-built artifact can
 be used as evidence. gomobile/gobind and the Gradle wrapper are intentionally
 deferred to A2, where the bridge package must pin and report them before bridge
 construction.
+
+For a bound Git worktree, its `.git` file points at host-only metadata. Set
+`FERRY_SOURCE_SHA="$(git rev-parse HEAD)"` before starting the devcontainer
+(the devcontainer definition forwards it), or pass the same full SHA when
+running the smoke script directly. The smoke script uses that explicit source
+identity; normal checkouts may resolve their mounted Git metadata directly.
+Reading Git metadata on the host only identifies the source and is not a
+toolchain verification step.

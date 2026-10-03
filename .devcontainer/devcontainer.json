@@ -12,7 +12,8 @@
   ],
   "remoteUser": "root",
   "containerEnv": {
-    "FERRY_DEVCONTAINER": "1"
+    "FERRY_DEVCONTAINER": "1",
+    "FERRY_SOURCE_SHA": "${localEnv:FERRY_SOURCE_SHA}"
   },
   "runArgs": ["--init"]
 }
