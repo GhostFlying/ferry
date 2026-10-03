@@ -26,7 +26,7 @@ docker run --rm -e FERRY_DEVCONTAINER=1 \
 ```
 
 The deterministic test pass at source SHA
-`2415047d10224308e49b81178d004c672018187c` covered target validation,
+`81785561d3c3f5cdb3f64f5905966fcd642357bc` covered target validation,
 start/ready/dial/closed status ordering, idempotent close, startup failure
 cleanup, state-directory removal, and login URL filtering. The source was
 formatted and tested in the container; the generated module lock contains all

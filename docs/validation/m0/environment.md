@@ -39,7 +39,7 @@ initial artifact ABI is `arm64-v8a`.
 
 The devcontainer uses rebuildable named volumes for Gradle and Go caches. The
 successful local recovery smoke command on 2026-10-04 used source SHA
-`2415047d10224308e49b81178d004c672018187c` and reported JDK 17.0.20.1,
+`81785561d3c3f5cdb3f64f5905966fcd642357bc` and reported JDK 17.0.20.1,
 Android platform 35, build-tools 35.0.0, NDK 27.2.12479018, compile/target
 SDK 35, Go 1.27.1, Gradle 8.10.2, SDK manager 1.0.16500706, minSdk 29 and
 ABI arm64-v8a. The container smoke command is

@@ -9,12 +9,12 @@ on the current branch and awaits independent implementation review.
 
 On 2026-10-04, in the immutable local recovery image
 `ferry-m0-devcontainer:recovery-test`, source SHA
-`82d9e15547448b4ad49d78454ec53c42c37eb75a`, `make test` passed and
+`81785561d3c3f5cdb3f64f5905966fcd642357bc`, `make test` passed and
 `make aar && make manifest` passed. The manifest reported gomobile/gobind
 `v0.0.0-20260908204917-8b95e45f8d3e`, Gradle wrapper 8.10.2 with distribution
 SHA-256 `31c55713e40233a8303827ceb42ca48a47267a0ad4bab9177123121e71524c26`,
 arm64-v8a, and AAR SHA-256
-`ce485261af57642bc154fde7ed25860e9757b8ab352c38a7500c7dc0232a0a3b`.
+`2c2ba1422bed047dfc6b5e22f9501a4f55734cfd629d6ae339b668f642739115`.
 
 The exact local-recovery command used for this run was:
 
