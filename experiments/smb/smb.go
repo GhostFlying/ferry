@@ -218,7 +218,7 @@ func readback(ctx context.Context, share *smb2.Share, destination string) (hash 
 		}
 	}()
 	digest := sha256.New()
-	count, err := copyWithContext(ctx, digest, file)
+	count, err = copyWithContext(ctx, digest, file)
 	if err != nil {
 		return "", count, err
 	}
