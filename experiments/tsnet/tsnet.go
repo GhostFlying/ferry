@@ -131,7 +131,9 @@ func (c *Client) Start(ctx context.Context) error {
 		c.mu.Lock()
 		c.closed = true
 		c.mu.Unlock()
-		_ = c.closeBackend()
+		if cleanupErr := c.closeBackend(); cleanupErr != nil {
+			return &StageError{Stage: StageStart, Err: errors.Join(err, cleanupErr)}
+		}
 		return &StageError{Stage: StageStart, Err: err}
 	}
 	if c.status != nil {
