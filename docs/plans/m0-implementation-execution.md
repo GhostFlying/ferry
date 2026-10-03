@@ -35,8 +35,8 @@ and process termination must not report completion without evidence, and a
 completed local copy must remain available for reconciliation.
 
 The execution owner is `/root`, which directly owns plan and implementation work
-in this session.  `android_toolchain_reviewer` is the independent review agent;
-it does not implement packages.  Each package has one implementation owner and
+in this session.  `/root/m0_plan_reviewer_astra` is the independent review
+agent; it does not implement packages.  Each package has one implementation owner and
 one reviewer.  The plan author and package author cannot be the independent
 plan, integrated, or device reviewer.  The coordinator records the reviewer
 identity, model/reasoning, commit SHA, findings, and recheck before calling a
