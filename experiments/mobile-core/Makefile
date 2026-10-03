@@ -2,6 +2,8 @@ GO_MODULE := github.com/GhostFlying/ferry/experiments/mobile-core
 GOMOBILE_VERSION := v0.0.0-20260908204917-8b95e45f8d3e
 GOBIND_VERSION := v0.0.0-20260908204917-8b95e45f8d3e
 GRADLE_VERSION := 8.10.2
+GOBIN := $(shell go env GOPATH)/bin
+export PATH := $(GOBIN):$(PATH)
 
 .PHONY: test aar manifest
 
@@ -19,7 +21,8 @@ aar:
 	go install golang.org/x/mobile/cmd/gomobile@$(GOMOBILE_VERSION)
 	go install golang.org/x/mobile/cmd/gobind@$(GOMOBILE_VERSION)
 	mkdir -p dist
-	gomobile bind -target=android -androidapi=29 -o dist/ferry-mobile-core.aar .
+	$(GOBIN)/gomobile init
+	$(GOBIN)/gomobile bind -target=android -androidapi=29 -o dist/ferry-mobile-core.aar .
 
 manifest:
 	$(call require_container)
