@@ -55,6 +55,21 @@ func TestBridgeStructuredErrorAndLateEventIsolation(t *testing.T) {
 	if b.Cancel("op-3") { t.Fatal("terminal operation must be removed") }
 }
 
+func TestBridgeIgnoresBackendEventAfterTerminal(t *testing.T) {
+	var late func(Progress)
+	b := newBridgeForTest(scriptedBackend{run: func(ctx context.Context, r Request, emit func(Progress)) error {
+		late = emit
+		return nil
+	}})
+	c := newRecordingCallback()
+	if err := b.Start("op-4", 1, c); err != nil { t.Fatal(err) }
+	waitDone(t, c)
+	late(Progress{CompletedBytes: 1, TotalBytes: 1})
+	time.Sleep(10 * time.Millisecond)
+	got := c.snapshot()
+	if len(got) != 1 || got[0] != "complete" { t.Fatalf("events=%v", got) }
+}
+
 func TestBridgeRejectsInvalidRequests(t *testing.T) {
 	b := NewBridge()
 	c := newRecordingCallback()

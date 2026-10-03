@@ -10,6 +10,7 @@ test:
 aar:
 	go install golang.org/x/mobile/cmd/gomobile@$(GOMOBILE_VERSION)
 	go install golang.org/x/mobile/cmd/gobind@$(GOMOBILE_VERSION)
+	mkdir -p dist
 	gomobile bind -target=android -androidapi=29 -o dist/ferry-mobile-core.aar .
 
 manifest:
