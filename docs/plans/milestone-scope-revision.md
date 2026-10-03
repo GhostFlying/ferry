@@ -1,5 +1,7 @@
 # 里程碑范围修订计划：Dora 协议验证与 M1 双平台基础版
 
+> **历史／superseded：本文件保留原范围、原 gate 与原 SHA，不是当前执行依据。** 当前 Android-first 收缩范围见 [scope-trim 执行计划](scope-trim.md) 与 [scope-trim review 准备记录](../reviews/scope-trim-review-prep.md)；下文 M1 双平台、M0 大文件／竞争／中断等旧要求不得用于当前 M0–M2 验收。
+
 状态：本轮文档修订的执行计划；独立 plan review 和最终变更 review 状态见[审查记录](../reviews/milestone-scope-revision-review.md)。本文件仅覆盖已授权范围内的文档修订；用户的新范围决定不等于批准 M0 应用、Actions 实现或设备占用。独立审查通过后才修改下列详细文档，完成后再进行独立变更 review。
 
 ## 用户决定与本次设计解释

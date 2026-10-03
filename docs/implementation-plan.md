@@ -1,6 +1,6 @@
 # Ferry 实施计划
 
-状态：**Android优先范围收缩提案，应用实现仍等待用户明确批准。** [本轮独立审查](reviews/android-first-design-revision-review.md)、本次 scope-trim 与用户决定分别记录。iOS 延迟 M3，早期不追求双平台；任何 UI 先用 `build-web-apps:frontend-app-builder` 生成完整设计图。旧 M1 双平台提案和其审批问题已经过期，历史记录保留原 SHA／范围。
+状态：**Android优先范围收缩提案，应用实现仍等待用户明确批准。** [Android-first 独立审查](reviews/android-first-design-revision-review.md)是历史范围记录；当前执行依据为 [scope-trim 执行计划](plans/scope-trim.md) 与 [scope-trim review 准备记录](reviews/scope-trim-review-prep.md)，本次修复的独立 review 待在新 SHA 上完成。iOS 延迟 M3，早期不追求双平台；任何 UI 先用 `build-web-apps:frontend-app-builder` 生成完整设计图。旧 M1 双平台提案和其审批问题已经过期，历史记录保留原 SHA／范围。
 
 本轮只做规划修订与供用户审阅的 Android 概念；无应用／CI 实现或设备占用。M0–M2 没有 macOS／Xcode、iOS 桥接／签名／回归 gate；Go 只保持正常模块边界和规则向量，不为 iOS 预建平台框架。
 
@@ -8,8 +8,8 @@
 
 | milestone | 明确工作／实际产物 | 环境与可重复PASS | 阻塞／用户gate |
 | --- | --- | --- | --- |
-| [M0](plans/m0.md) Android受控协议 | 工具链、单 Go 核心、受控 SMB／tsnet、诊断 probe、Actions 真 APK、Dora physical 实验 | **硬 gate V01–V05**：真实 APK/AAR；Dora 安装／bridge；host `net.Conn` SMB no-replace 与读回；Dora App 内 tsnet 一次完整 SHA-256 读回；取消／终止不误完成且本地副本保留 | 连接与内容分开判定；V06–V09 为附加／安全条件，M0-UI 独立，不因 >4 GiB、竞争、扩展身份或未接受视觉阻塞；用户批准 M1 |
-| [M1](plans/m1.md) Android前台基础版 | 规则／Room／源只读／完整副本、`on_open` 恢复、Pocket→Pixel→fnOS 主链路、第一网络路径、真实 APK | 核心 AV01–AV06／AV09：远端完整 SHA-256、no-replace、人工暂停和系统等待；第二网络补充，完整故障矩阵移 M2，M1-UI 独立 | 指定 USB／fnOS／第一路径缺失只阻塞对应主链路；AV07／AV08／AV11 如实 `OPTIONAL`／`DEFERRED`／`NOT_RUN`；用户批准 M2 |
+| [M0](plans/m0.md) Android受控协议 | 工具链、单 Go 核心、受控 SMB／tsnet、诊断 probe、Actions 真 APK、Dora physical 实验 | **硬 gate V01–V05**：真实 APK/AAR；Dora 安装／bridge；host `net.Conn` SMB no-replace 与读回；Dora App 内 tsnet 一次完整 SHA-256 读回；取消／终止不误完成且本地副本保留 | 连接与内容分开判定；V06–V08 为附加／条件性结果，V09 是强制安全收尾但不是协议 gate，M0-UI 独立；不因 >4 GiB、竞争、扩展身份或未接受视觉阻塞；用户批准 M1 |
+| [M1](plans/m1.md) Android前台基础版 | 规则／Room／源只读／完整副本、`on_open` 恢复、Pocket→Pixel→fnOS 主链路、第一网络路径、真实 APK | 核心 AV01–AV04、AV06、AV09：远端完整 SHA-256、no-replace、人工暂停和系统等待；第二网络补充，完整故障矩阵移 M2，M1-UI 独立 | 指定 USB／fnOS／第一路径缺失只阻塞对应主链路；AV05／AV07／AV08／AV11 如实 `OPTIONAL`／`CONDITIONAL`／`DEFERRED`／`NOT_RUN`；用户批准 M2 |
 | [M2](plans/m2.md) Android自动模式与发行准备 | 合法接入／FGS／停止通知、**M1 延后的完整故障矩阵**、Android 双语文档、许可通知、干净构建与发行候选 | 默认关闭、合法入口、停止即停、拒绝／超时／终止不误完成；完整矩阵和交付报告逐项 `PASS`／`FAIL`／`BLOCKED`／`NOT_RUN` | 适用场景未测或正式签名／渠道未定只阻塞对应项；用户 review 候选、发布动作和 M3 计划 |
 | [M3](plans/m3.md) iOS可用版与双平台交付 | 此时才做iOS单Go桥接／工程／SwiftUI／来源／spool／SQLite／Keychain／前台网络；实际iOS包和双平台说明 | macOS签名安装；Dora iOS普通流程；Pocket→iPhone17 Pro USB-C→飞牛LAN／tsnet真实摘要一致，挂起／恢复／冲突通过；Android回归、规则一致、接受iOS图对照 | 缺macOS／签名／lease／指定USB则对应M3项阻塞；双平台包/hash/矩阵及独立review后用户决定具体发布和后续范围 |
 

@@ -1,6 +1,6 @@
 # Ferry 代理协作与审查协议
 
-状态：未批准规划的范围修订，待新范围独立审查及用户审阅。项目约束见 [AGENTS.md](../AGENTS.md)，阶段与产品验收见 [实施计划](implementation-plan.md)，本次变更依据见 [Android 优先与设计先行修订计划](plans/android-first-design-revision.md)。
+状态：未批准规划的范围修订，待当前 scope-trim 独立审查及用户审阅。项目约束见 [AGENTS.md](../AGENTS.md)，阶段与产品验收见 [实施计划](implementation-plan.md)，当前执行依据见 [scope-trim 执行计划](plans/scope-trim.md) 与 [scope-trim review 准备记录](reviews/scope-trim-review-prep.md)。[Android 优先与设计先行修订计划](plans/android-first-design-revision.md) 仅保留为历史／superseded 记录。
 
 ## 授权与推进顺序
 
@@ -173,9 +173,9 @@ Task issue 使用 [任务模板](../.github/ISSUE_TEMPLATE/task.yml)，包含范
 
 验收记录绑定完整源码 SHA、命令、工具链、设备／系统、输入、期望和实际结果，并区分 `PASS`、`FAIL`、`BLOCKED`、`NOT_RUN`。必要的 USB 真机、飞牛和 tsnet 结果各自列证据来源；一般模拟器测试不证明 USB／供电或真实性能。
 
-M0 的 Dora Android 物理设备必须先有受控 SMB 和可达拓扑，再执行真实 probe 的连接、完整大文件传输、读回摘要、竞争和中断验收；连接与完整传输分开报告。受控 tsnet 路径不表示局域网已测，合成文件和云端物理设备不证明 Pocket OTG／指定 Pixel／飞牛。每个租约和每次操作遵守上级独立 session ID／cleanup 规则；当前规划修订不执行这些实验。
+M0 的 Dora Android 物理设备必须先有受控 SMB 和可达拓扑，再执行真实 probe 的连接、完整内容读回和取消／终止不误完成验收；连接与内容传输分开报告。当前硬 gate 为 M0-V01–V05：真实 APK/AAR、bridge、host `net.Conn` no-replace 与读回、Dora App 内 tsnet 至少一次完整 SHA-256 读回，以及本地副本保留。>4 GiB 压力、竞争和完整故障／身份矩阵属于 `OPTIONAL`／`CONDITIONAL`／`NOT_RUN` 附加结果，不成为当前协议 gate。受控 tsnet 路径不表示局域网已测，合成文件和云端物理设备不证明 Pocket OTG／指定 Pixel／飞牛。每个租约和每次操作遵守上级独立 session ID／cleanup 规则；当前规划修订不执行这些实验。
 
-M1 只验收 Android 实际 App、完整副本／传输、前台恢复和指定 Pocket／Pixel／飞牛；缺真实 USB／目标条件时不把完整链路标通过，不以 macOS／iOS 条件阻塞它。M2 只做 Android 自动模式／恢复及发行准备。M3 才验收 iOS 原生 App、来源／副本／传输／恢复、macOS／Xcode／签名安装和指定 Pocket／iPhone USB-C，以及双平台最终交付。将来源、手机、目标、网络方式和产物分别列证据，云端普通网络／UI 结果不能替代指定相机链路。
+M1 只验收 Android 实际 App、源只读／完整副本／远端读回、规则、人工暂停、`on_open` 基本恢复和指定 Pocket／Pixel／飞牛主链路；缺真实 USB／目标条件时不把完整链路标通过，不以 macOS／iOS 条件阻塞它。M1 的容量边界和基本安全行为按当前计划记录，完整故障注入（断网、校验不一致、边界 kill、重复插拔等）移至 M2；M2 只做 Android 自动模式／完整故障矩阵及发行准备。M3 才验收 iOS 原生 App、来源／副本／传输／恢复、macOS／Xcode／签名安装和指定 Pocket／iPhone USB-C，以及双平台最终交付。将来源、手机、目标、网络方式和产物分别列证据，云端普通网络／UI 结果不能替代指定相机链路。
 
 当前规划阶段验证文档、示例 JSON、仓库准备及概念事实／覆盖／可读性；生成概念不是实现或验收。文档 CI 不能命名或报告为 Android 构建通过。真实应用存在且对应里程碑批准后，Android Actions 应构建并保存可安装的 APK；AAR 是桥接中间产物，不是 APK 验收。
 

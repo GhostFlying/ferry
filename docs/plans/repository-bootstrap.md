@@ -2,7 +2,7 @@
 
 状态：原仓库准备与许可证已在历史 head 通过独立审查；当前按用户要求修订未批准规划，新范围待独立审查及用户审阅。范围为治理、GitHub 登记、文档验证和已授权概念图准备，不包含应用代码、APK／iOS 构建、服务启动或设备占用。
 
-当前修订依据为 [Android 优先与设计先行修订计划](android-first-design-revision.md)：M0 云端协议验证，M1 Android 前台版及指定 Pocket／Pixel／飞牛，M2 Android 自动模式／恢复和发行准备，M3 才开始 iOS 原生前台版／USB 验收与双平台交付。原 M1 双平台方案及审批问题被替代；历史计划／审查保留其原文件快照，不套用于本次新 head。
+当前修订依据为 [scope-trim 执行计划](scope-trim.md) 与 [scope-trim review 准备记录](../reviews/scope-trim-review-prep.md)：M0 V01–V05 受控协议硬 gate，M1 Android `on_open`／完整副本／远端读回／一条真实主链路，M2 承接完整故障注入、自动模式与发行准备，M3 才开始 iOS 原生前台版／USB 验收与双平台交付。[Android 优先与设计先行修订计划](android-first-design-revision.md) 仅是历史／superseded 提案；原 M1 双平台方案及审批问题被替代，历史计划／审查保留其原文件快照，不套用于当前 head。
 
 ## 目标与文件范围
 

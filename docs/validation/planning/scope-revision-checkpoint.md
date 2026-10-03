@@ -1,5 +1,7 @@
 # 未批准规划范围修订 checkpoint
 
+> **历史／superseded：本文件保留原范围、原 gate 与原 SHA，不是当前执行依据。** 当前 Android-first 收缩范围见 [scope-trim 执行计划](../../plans/scope-trim.md) 与 [scope-trim review 准备记录](../../reviews/scope-trim-review-prep.md)；下文 M1 双平台、M0 大文件／竞争／中断等旧要求不得用于当前 M0–M2 验收。
+
 日期：2026-10-02。状态：`awaiting_user_review`；本次仅修改规划、治理及任务登记，不是 M0／M1 实施批准。
 
 ## 用户范围决定与审查基线

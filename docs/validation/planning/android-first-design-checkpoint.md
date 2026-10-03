@@ -1,14 +1,25 @@
 # Android 优先与 UI 设计先行 checkpoint
 
-日期：2026-10-02。状态：`awaiting_user_review`；本轮只修订未批准规划、生成供审阅的概念图及准备公开登记，不是 M0 实施、UI 设计接受或发布授权。
+> **历史／superseded：本 checkpoint 不再定义当前验收。** 当前范围以 [scope-trim 执行计划](../../plans/scope-trim.md) 和 [scope-trim review 准备记录](../../reviews/scope-trim-review-prep.md) 为准；本文件保留 2026-10-02 的历史快照、旧 gate 和旧 SHA，不能据此执行 M0/M1 大文件、竞争、空间或 kill 验收。
 
-## 最新决定与审查基线
+日期：2026-10-02。状态：`historical/superseded`；当时只修订未批准规划、生成供审阅的概念图及准备公开登记，不是 M0 实施、UI 设计接受或发布授权。
 
-用户要求 iOS 延迟到 M3、早期不纠结双平台，以及任何 UI 方案使用 `build-web-apps:frontend-app-builder` 先生成设计图。当前执行依据为已独立 plan review PASS 的 [mini plan](../../plans/android-first-design-revision.md)，对应 SHA-256 `498e90a7fed2434078617caf19ebff746499f944783123db66a062e76d979268`。
+## 当前 scope-trim 映射（替代本历史表）
 
-修订起点为 `f86441ff3caa32f9eca2b47b0d32de6a99cad0e5`；[PR #21](https://github.com/GhostFlying/ferry/pull/21) 与 [用户关口 #1](https://github.com/GhostFlying/ferry/issues/1)继续承载当前审阅。此前 [M1 双平台修订 checkpoint](scope-revision-checkpoint.md)和旧 review 只记录其原快照；此次新范围、概念与登记重新独立审查，不能套旧 PASS。先前“完整 M0／仅 M0A”及上一版 Dora／M1 双平台审批问题均被当前方案替代。
+| 阶段 | 当前硬／独立边界 | 当前用户关口 |
+| --- | --- | --- |
+| M0 | V01–V05 为协议硬 gate；V06–V09 为附加／安全条件；M0-UI 独立，不以未接受图阻塞协议 | 独立 integrated/device review 后用户批准 M1 |
+| M1 | Android `on_open`、源只读、完整副本、远端 SHA-256 读回、规则、人工暂停、Pocket→Pixel→fnOS 一条主路径；第二路径补充，完整故障矩阵移 M2 | M1 integrated/device review 后用户批准 M2 |
+| M2 | Android 自动模式、完整故障注入、文档／发行准备 | 候选 review 后用户决定 M3／Android 发布动作 |
+| M3 | 此时才实现 iOS 与双平台最终交付 | 另行用户批准，不是 M0–M2 前置 |
 
-## 当前阶段与验收边界
+## 历史最新决定与审查基线
+
+用户要求 iOS 延迟到 M3、早期不纠结双平台，以及任何 UI 方案使用 `build-web-apps:frontend-app-builder` 先生成设计图。历史执行依据为当时独立 plan review PASS 的 [mini plan](../../plans/android-first-design-revision.md)，对应 SHA-256 `498e90a7fed2434078617caf19ebff746499f944783123db66a062e76d979268`；该结论不覆盖 scope-trim。
+
+修订起点为 `f86441ff3caa32f9eca2b47b0d32de6a99cad0e5`；[PR #21](https://github.com/GhostFlying/ferry/pull/21) 与 [用户关口 #1](https://github.com/GhostFlying/ferry/issues/1)只记录当时的历史审阅入口。此前 [M1 双平台修订 checkpoint](scope-revision-checkpoint.md)和旧 review 只记录其原快照；当前 scope-trim 的新范围、概念与登记必须在新 SHA 上重新独立审查，不能套旧 PASS。先前“完整 M0／仅 M0A”及上一版 Dora／M1 双平台审批问题均被当前方案替代。
+
+## 历史阶段与验收边界（不适用当前 scope-trim）
 
 | 阶段 | 工作／实际产物 | 验收／用户关口 |
 | --- | --- | --- |

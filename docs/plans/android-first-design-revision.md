@@ -1,6 +1,15 @@
 # Android 优先与先生成 UI 设计图：范围修订计划
 
-状态：本轮文档修订执行计划；独立plan与最终变更review状态见[本轮审查记录](../reviews/android-first-design-revision-review.md)。本轮只修订规划和生成供用户审阅的概念图，不视为批准 M0 应用／Actions 实现或设备实验。2026-10-02 最新决定优先于先前的 M1 双平台提案；旧审批问题已过期。
+> **历史／superseded：本文件不再是当前执行依据。** 当前范围以 [scope-trim 执行计划](scope-trim.md) 和 [scope-trim review 准备记录](../reviews/scope-trim-review-prep.md) 为准；本文件保留原提案、原 gate 和原 SHA 供历史追溯。旧 M0 大文件／竞争／完整中断、M1 双路径／空间边界不得从本文件重新执行。
+
+状态：历史范围修订执行计划；独立 plan 与最终变更 review 只适用于本文件当时的快照，不覆盖 scope-trim。2026-10-02 的 Android 优先决定仍保留为历史背景，当前用户 gate 与实现范围见 scope-trim。
+
+## Current scope-trim mapping
+
+- M0 协议硬 gate 仅为 V01–V05：真实 APK/AAR、Dora bridge、host `net.Conn` SMB no-replace／读回、Dora App 内 tsnet 至少一次完整 SHA-256 读回、取消／终止不误完成且本地副本保留。
+- >4 GiB、竞争、完整身份／持久安全、provider 生命周期和视觉结果是附加／条件性／`NOT_RUN`，M0-UI 独立且不阻塞协议 gate。
+- M1 只把 Android `on_open`、源只读／完整副本／远端读回／规则／人工暂停、Pocket→Pixel→fnOS 主链路和一条网络路径作为核心；第二路径补充，完整故障矩阵移 M2。
+- 用户仍须分别接受设计范围并批准 milestone；scope-trim 未获用户批准前不开始应用、Dora 或 SMB 实验。
 
 ## 用户决定与落实方案
 
@@ -58,7 +67,7 @@ design agent 拥有 `docs/design/`、概念图／设计状态记录及相应设�
 
 P6与I1早先通过BUILD0解决的循环不能在迁移时复活：M3 X1 → BUILD0 → I1 → M3-BUILD1最终包 → IOSV1／M3-V1；BUILD0完成后明确移交应用入口和构建文件owner。M1 P6只依赖Android实现；M1 P7只等Android产物、B1／B2／V1。设计任务的用户接受检查点是对应UI计划／实现的前置，不把所有核心工作串行阻塞在视觉上。
 
-## 各 milestone 必须具备的任务与验收
+## 历史各 milestone 任务与验收（不适用当前 scope-trim）
 
 | 阶段 | 任务／实际产物 | 环境与可重复PASS | 阻塞／证据／用户gate |
 | --- | --- | --- | --- |
