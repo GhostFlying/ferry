@@ -72,4 +72,3 @@ an APK/AAR, execute Go or Android tests, connect to Dora/ADB, occupy or release 
 lease, access SMB, exercise tsnet, or perform a real transfer. It therefore does
 not establish any V01–V05 runtime result; those gates still require the evidence
 and stop conditions stated in the plan.
-

@@ -79,4 +79,3 @@ build an APK/AAR, execute Go/Gradle/Android checks, connect to Dora or ADB,
 occupy a lease, access SMB or tsnet, or perform USB/device/transfer validation.
 Those remain blocked or untested until the documented daemon registry issue is
 resolved and the plan's runtime evidence is produced.
-

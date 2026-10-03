@@ -19,15 +19,15 @@ import (
 type Stage string
 
 const (
-	StageConnect   Stage = "connect"
+	StageConnect      Stage = "connect"
 	StageAuthenticate Stage = "authenticate"
-	StageCreate    Stage = "create"
-	StageWrite     Stage = "write"
-	StageFlush     Stage = "flush"
-	StageRename    Stage = "rename"
-	StageReadback  Stage = "readback"
-	StageCleanup   Stage = "cleanup"
-	StageCancelled Stage = "cancelled"
+	StageCreate       Stage = "create"
+	StageWrite        Stage = "write"
+	StageFlush        Stage = "flush"
+	StageRename       Stage = "rename"
+	StageReadback     Stage = "readback"
+	StageCleanup      Stage = "cleanup"
+	StageCancelled    Stage = "cancelled"
 )
 
 type Error struct {
@@ -39,9 +39,9 @@ func (e *Error) Error() string { return fmt.Sprintf("%s: %v", e.Stage, e.Err) }
 func (e *Error) Unwrap() error { return e.Err }
 
 type Result struct {
-	Destination string
-	Bytes       int64
-	LocalSHA256 string
+	Destination  string
+	Bytes        int64
+	LocalSHA256  string
 	RemoteSHA256 string
 }
 
@@ -135,6 +135,7 @@ func (c *Client) Upload(ctx context.Context, operationID, destination string, so
 		return Result{}, &Error{Stage: StageCreate, Err: err}
 	}
 	owned := true
+	fileClosed := false
 	cleanup := func() error {
 		if !owned {
 			return nil
@@ -142,6 +143,11 @@ func (c *Client) Upload(ctx context.Context, operationID, destination string, so
 		return share.Remove(temp)
 	}
 	defer func() {
+		if !fileClosed {
+			if closeErr := file.Close(); closeErr != nil && retErr == nil {
+				retErr = &Error{Stage: StageFlush, Err: closeErr}
+			}
+		}
 		if cleanupErr := cleanup(); cleanupErr != nil && retErr == nil {
 			result = Result{}
 			retErr = &Error{Stage: StageCleanup, Err: cleanupErr}
@@ -162,8 +168,10 @@ func (c *Client) Upload(ctx context.Context, operationID, destination string, so
 		return Result{}, &Error{Stage: StageFlush, Err: err}
 	}
 	if err := file.Close(); err != nil {
+		fileClosed = true
 		return Result{}, &Error{Stage: StageFlush, Err: err}
 	}
+	fileClosed = true
 	if err := share.Rename(temp, destination); err != nil {
 		return Result{}, &Error{Stage: StageRename, Err: err}
 	}

@@ -14,11 +14,13 @@ test uses the container's network proxy only to fetch the pinned module sums;
 no SMB server was contacted. A later bridge-only Makefile change advanced the
 branch to `82d9e15` without changing the SMB source or test result.
 
-Required fixed-container commands for repeatability:
+Required fixed-container command for repeatability:
 
 ```sh
-FERRY_SOURCE_SHA="$(git rev-parse HEAD)" devcontainer up --workspace-folder .
-devcontainer exec --workspace-folder . bash -lc \
+docker run --rm -e FERRY_DEVCONTAINER=1 \
+  -e FERRY_SOURCE_SHA="$(git rev-parse HEAD)" \
+  -v "$PWD:/workspace/ferry" -w /workspace/ferry \
+  ferry-m0-devcontainer:recovery-test bash -lc \
   'cd experiments/smb && make test'
 ```
 

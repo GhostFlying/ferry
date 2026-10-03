@@ -16,12 +16,13 @@ SHA-256 `31c55713e40233a8303827ceb42ca48a47267a0ad4bab9177123121e71524c26`,
 arm64-v8a, and AAR SHA-256
 `1604f60fc00629dcdb48ebbf22f21f671d464649a7cc62b29feb22d905f4d2b5`.
 
-Required container commands (the local immutable recovery image was used for
-this run):
+The exact local-recovery command used for this run was:
 
 ```sh
-FERRY_SOURCE_SHA="$(git rev-parse HEAD)" devcontainer up --workspace-folder .
-devcontainer exec --workspace-folder . bash -lc \
+docker run --rm -e FERRY_DEVCONTAINER=1 \
+  -e FERRY_SOURCE_SHA="$(git rev-parse HEAD)" \
+  -v "$PWD:/workspace/ferry" -w /workspace/ferry \
+  ferry-m0-devcontainer:recovery-test bash -lc \
   'cd experiments/mobile-core && make test && make aar && make manifest'
 ```
 

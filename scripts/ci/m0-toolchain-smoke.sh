@@ -9,7 +9,8 @@ fi
 source experiments/toolchains.env
 source_sha="${FERRY_SOURCE_SHA:-}"
 if [[ -z "$source_sha" ]]; then
-  source_sha="$(git rev-parse HEAD)"
+	echo 'FERRY_SOURCE_SHA must be provided explicitly' >&2
+	exit 2
 fi
 if [[ ! "$source_sha" =~ ^[0-9a-f]{40}$ ]]; then
   echo 'FERRY_SOURCE_SHA must be a full Git commit SHA' >&2
