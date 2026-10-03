@@ -16,7 +16,10 @@ operation that:
 2. creates a unique temporary remote name with exclusive create;
 3. streams the source while computing the local SHA-256 and byte count;
 4. calls SMB `Sync`, closes the temporary file, and renames it to the final
-   name only when the destination is still absent;
+   name only when the destination is still absent. go-smb2 v1.1.0's
+   `Share.Rename` sends `FileRenameInformation` with `ReplaceIfExists=0`, so
+   the no-replace decision is made by the SMB server and a destination
+   collision returns an error;
 5. reads the final object back through the same share and compares size and
    SHA-256 before returning complete; and
 6. removes only the operation-owned temporary file on failure or cancellation.
@@ -35,8 +38,12 @@ supplies real SMB service evidence.
   prerequisites, gate vectors, result fields, and blocked boundaries.
 
 A3 may not modify the bridge package, Android project, devcontainer, C1
-credentials, or device harness. A later A2-owned composition file wires this
-backend into `mobile-core`.
+credentials, or device harness. A3 remains a standalone Go module. After A3
+and A4 are available, the later A2-owned composition file will add local
+`require`/`replace` entries in `experiments/mobile-core/go.mod` for the A3/A4
+modules and adapt their exported backend types to the package-private seam.
+That composition change is owned by A2; A3 does not edit the mobile-core
+module.
 
 ## Dependencies and environment
 
@@ -58,7 +65,8 @@ backend into `mobile-core`.
 2. Implement connection/session/share construction from the injected
    `net.Conn`, with context-aware dialing and explicit close/unmount cleanup.
 3. Implement exclusive temporary create, streaming hash/count, `Sync`,
-   close, no-replace rename, final readback hash/count, and owned-temp cleanup.
+   close, the server-side no-replace rename described above, final readback
+   hash/count, and owned-temp cleanup.
 4. Add unit tests for path traversal, hash/count, temporary ownership,
    cancellation/error classification, and no-replace decision helpers.
 5. Write the validation record. Once C1 exists, run a real controlled SMB
@@ -69,10 +77,11 @@ backend into `mobile-core`.
 | ID | PASS condition | Evidence |
 | --- | --- | --- |
 | A3-01 | Go unit tests and static checks pass in the fixed devcontainer with go-smb2 sums locked | source SHA, container manifest, test/static output, module lock |
-| A3-02 | One upload uses only the injected `net.Conn`, creates an exclusive temp, flushes, no-replace renames, and returns local/remote hashes only after readback match | operation trace, byte counts, local/remote SHA-256, error stage |
+| A3-02 | One upload uses only the injected `net.Conn`, creates an exclusive temp, flushes, invokes go-smb2's server-side `ReplaceIfExists=0` rename, and returns local/remote hashes only after readback match | operation trace, byte counts, local/remote SHA-256, error stage, library request evidence |
 | A3-03 | Failure/cancel removes only the owned temp and never removes/replaces an existing final object | failure trace, remote listing/readback, cleanup result |
 | A3-04 | Controlled C1 SMB run is separated from pure implementation and records `BLOCKED`/`NOT_RUN` when fixture or container is unavailable | `docs/validation/m0/smb.md`, fixture identity, redacted logs |
 
-Missing container runtime, unpinned modules, absent C1 fixture, or missing
-fresh device lease blocks only the corresponding runtime gate; it cannot be
-converted into a pass with a host mount, mock-only result, or same-size write.
+Missing container runtime, unpinned modules, or absent C1 fixture blocks only
+the corresponding A3 runtime gate; it cannot be converted into a pass with a
+host mount, mock-only result, or same-size write. A fresh device lease belongs
+to C2/V04 and is not an A3 dependency.
