@@ -12,7 +12,7 @@ Required fixed-container commands after the Docker registry blocker is resolved:
 ```sh
 FERRY_SOURCE_SHA="$(git rev-parse HEAD)" devcontainer up --workspace-folder .
 devcontainer exec --workspace-folder . bash -lc \
-  'cd experiments/smb && go test ./...'
+  'cd experiments/smb && make test'
 ```
 
 The module lock must report go-smb2 v1.1.0 and all transitive sums. Unit tests
@@ -25,5 +25,8 @@ readback size/SHA-256, and cleanup.
 The go-smb2 v1.1.0 `Share.Rename` request sets SMB
 `FileRenameInformation.ReplaceIfExists=0`; a final-name collision must remain a
 server error. A same-size write or client-side existence check is not evidence
-of no-replace behavior. Missing container or C1 fixture is `BLOCKED`/`NOT_RUN`,
-not a pass.
+of no-replace behavior. `Upload` applies the per-call context to SMB share
+operations and `Client.Close` unmounts the share before logging off the session
+and closing the injected connection. Temporary cleanup errors are surfaced as
+`cleanup` stage failures; they are not discarded. Missing container or C1
+fixture is `BLOCKED`/`NOT_RUN`, not a pass.

@@ -20,6 +20,7 @@ type Stage string
 
 const (
 	StageConnect   Stage = "connect"
+	StageAuthenticate Stage = "authenticate"
 	StageCreate    Stage = "create"
 	StageWrite     Stage = "write"
 	StageFlush     Stage = "flush"
@@ -51,6 +52,9 @@ type Client struct {
 }
 
 func NewClient(ctx context.Context, conn net.Conn, username, password, shareName string) (*Client, error) {
+	if ctx == nil {
+		return nil, &Error{Stage: StageConnect, Err: errors.New("nil context")}
+	}
 	if conn == nil {
 		return nil, &Error{Stage: StageConnect, Err: errors.New("nil connection")}
 	}
@@ -60,9 +64,9 @@ func NewClient(ctx context.Context, conn net.Conn, username, password, shareName
 	dialer := &smb2.Dialer{Initiator: &smb2.NTLMInitiator{User: username, Password: password}}
 	session, err := dialer.DialContext(ctx, conn)
 	if err != nil {
-		return nil, &Error{Stage: StageConnect, Err: err}
+		return nil, &Error{Stage: StageAuthenticate, Err: err}
 	}
-	share, err := session.Mount(shareName)
+	share, err := session.WithContext(ctx).Mount(shareName)
 	if err != nil {
 		_ = session.Logoff()
 		return nil, &Error{Stage: StageConnect, Err: err}
@@ -72,8 +76,13 @@ func NewClient(ctx context.Context, conn net.Conn, username, password, shareName
 
 func (c *Client) Close() error {
 	var first error
+	if c.share != nil {
+		first = c.share.Umount()
+	}
 	if c.session != nil {
-		first = c.session.Logoff()
+		if err := c.session.Logoff(); first == nil {
+			first = err
+		}
 	}
 	if c.conn != nil {
 		if err := c.conn.Close(); first == nil {
@@ -106,7 +115,13 @@ func validateDestination(destination string) error {
 	return nil
 }
 
-func (c *Client) Upload(ctx context.Context, operationID, destination string, source io.Reader) (Result, error) {
+func (c *Client) Upload(ctx context.Context, operationID, destination string, source io.Reader) (result Result, retErr error) {
+	if ctx == nil {
+		return Result{}, &Error{Stage: StageCancelled, Err: errors.New("nil context")}
+	}
+	if source == nil {
+		return Result{}, &Error{Stage: StageWrite, Err: errors.New("nil source")}
+	}
 	temp, err := temporaryName(destination, operationID)
 	if err != nil {
 		return Result{}, &Error{Stage: StageCreate, Err: err}
@@ -114,7 +129,8 @@ func (c *Client) Upload(ctx context.Context, operationID, destination string, so
 	if err := ctx.Err(); err != nil {
 		return Result{}, &Error{Stage: StageCancelled, Err: err}
 	}
-	file, err := c.share.OpenFile(temp, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	share := c.share.WithContext(ctx)
+	file, err := share.OpenFile(temp, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
 	if err != nil {
 		return Result{}, &Error{Stage: StageCreate, Err: err}
 	}
@@ -123,10 +139,15 @@ func (c *Client) Upload(ctx context.Context, operationID, destination string, so
 		if !owned {
 			return nil
 		}
-		return c.share.Remove(temp)
+		return share.Remove(temp)
 	}
 	defer func() {
-		_ = cleanup()
+		if cleanupErr := cleanup(); cleanupErr != nil && retErr == nil {
+			result = Result{}
+			retErr = &Error{Stage: StageCleanup, Err: cleanupErr}
+		} else if cleanupErr != nil {
+			retErr = &Error{Stage: StageCleanup, Err: fmt.Errorf("%v; remove temporary object: %w", retErr, cleanupErr)}
+		}
 	}()
 
 	hash := sha256.New()
@@ -143,12 +164,12 @@ func (c *Client) Upload(ctx context.Context, operationID, destination string, so
 	if err := file.Close(); err != nil {
 		return Result{}, &Error{Stage: StageFlush, Err: err}
 	}
-	if err := c.share.Rename(temp, destination); err != nil {
+	if err := share.Rename(temp, destination); err != nil {
 		return Result{}, &Error{Stage: StageRename, Err: err}
 	}
 	owned = false
 
-	remoteHash, remoteCount, err := readback(ctx, c.share, destination)
+	remoteHash, remoteCount, err := readback(ctx, share, destination)
 	if err != nil {
 		return Result{}, &Error{Stage: StageReadback, Err: err}
 	}
@@ -186,16 +207,20 @@ func copyWithContext(ctx context.Context, dst io.Writer, src io.Reader) (int64, 
 	}
 }
 
-func readback(ctx context.Context, share *smb2.Share, destination string) (string, int64, error) {
+func readback(ctx context.Context, share *smb2.Share, destination string) (hash string, count int64, retErr error) {
 	file, err := share.OpenFile(destination, os.O_RDONLY, 0)
 	if err != nil {
 		return "", 0, err
 	}
-	defer file.Close()
-	hash := sha256.New()
-	count, err := copyWithContext(ctx, hash, file)
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil && retErr == nil {
+			retErr = closeErr
+		}
+	}()
+	digest := sha256.New()
+	count, err := copyWithContext(ctx, digest, file)
 	if err != nil {
 		return "", count, err
 	}
-	return hex.EncodeToString(hash.Sum(nil)), count, nil
+	return hex.EncodeToString(digest.Sum(nil)), count, nil
 }
