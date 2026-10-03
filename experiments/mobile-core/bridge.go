@@ -106,6 +106,10 @@ func (b *Bridge) Cancel(operationID string) bool {
 		return false
 	}
 	op.mu.Lock()
+	if op.finished {
+		op.mu.Unlock()
+		return false
+	}
 	op.cancelRequested = true
 	op.mu.Unlock()
 	op.cancel()
@@ -130,16 +134,16 @@ func (b *Bridge) run(ctx context.Context, op *operation, backend backend, reques
 	})
 
 	kind := terminalComplete
-	if ctx.Err() != nil {
-		kind = terminalCancelled
-		err = ctx.Err()
-	} else if err != nil {
-		kind = terminalError
-	}
 	op.mu.Lock()
 	if op.finished {
 		op.mu.Unlock()
 		return
+	}
+	if op.cancelRequested || ctx.Err() != nil {
+		kind = terminalCancelled
+		err = context.Canceled
+	} else if err != nil {
+		kind = terminalError
 	}
 	op.finished = true
 	op.mu.Unlock()
@@ -154,7 +158,7 @@ func (b *Bridge) dispatch(op *operation) {
 		item := <-op.events
 		if item.progress != nil {
 			op.mu.Lock()
-			terminal := op.delivered
+			terminal := op.delivered || op.cancelRequested
 			op.mu.Unlock()
 			if terminal {
 				continue

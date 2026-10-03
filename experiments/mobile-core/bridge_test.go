@@ -45,6 +45,24 @@ func TestBridgeCancellationIsTerminalAndIdempotent(t *testing.T) {
 	if len(got) != 1 || got[0] != "error:cancelled" { t.Fatalf("events=%v", got) }
 }
 
+func TestBridgeCancellationWinsBeforeBackendFinalization(t *testing.T) {
+	started := make(chan struct{})
+	release := make(chan struct{})
+	b := newBridgeWithBackend(scriptedBackend{run: func(ctx context.Context, r Request, emit func(Progress)) error {
+		close(started)
+		<-release
+		return nil
+	}})
+	c := newRecordingCallback()
+	if err := b.Start("op-race", 1, c); err != nil { t.Fatal(err) }
+	<-started
+	if !b.Cancel("op-race") { t.Fatal("cancel must win before backend finalization") }
+	close(release)
+	waitDone(t, c)
+	got := c.snapshot()
+	if len(got) != 1 || got[0] != "error:cancelled" { t.Fatalf("events=%v", got) }
+}
+
 func TestBridgeStructuredErrorAndLateEventIsolation(t *testing.T) {
 	b := newBridgeWithBackend(scriptedBackend{run: func(ctx context.Context, r Request, emit func(Progress)) error { emit(Progress{CompletedBytes: 2, TotalBytes: 1}); return &Error{Code: "readback_mismatch", Message: "hash differs"} }})
 	c := newRecordingCallback()
