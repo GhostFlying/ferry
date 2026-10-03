@@ -1,6 +1,6 @@
 # Ferry 实施计划
 
-状态：**Android优先范围收缩提案，应用实现仍等待用户明确批准。** [Android-first 独立审查](reviews/android-first-design-revision-review.md)是历史范围记录；当前执行依据为 [scope-trim 执行计划](plans/scope-trim.md) 与 [scope-trim review 准备记录](reviews/scope-trim-review-prep.md)，本次修复的独立 review 待在新 SHA 上完成。iOS 延迟 M3，早期不追求双平台；任何 UI 先用 `build-web-apps:frontend-app-builder` 生成完整设计图。旧 M1 双平台提案和其审批问题已经过期，历史记录保留原 SHA／范围。
+状态：**Android优先范围收缩提案，应用实现仍等待用户明确批准。** [scope-trim 独立审查](reviews/scope-trim-review.md) 与 [Android 工具链独立审查](reviews/android-toolchain-review.md) 已在各自目标提交上给出 PASS；这些 PASS 只表示文档和工具链约束通过独立复核，不是用户批准 M0。当前执行依据为 [scope-trim 执行计划](plans/scope-trim.md) 与 [scope-trim review 准备记录](reviews/scope-trim-review-prep.md)。iOS 延迟 M3，早期不追求双平台；任何 UI 先用 `build-web-apps:frontend-app-builder` 生成完整设计图。旧 M1 双平台提案和其审批问题已经过期，历史记录保留原 SHA／范围。
 
 本轮只做规划修订与供用户审阅的 Android 概念；无应用／CI 实现或设备占用。M0–M2 没有 macOS／Xcode、iOS 桥接／签名／回归 gate；Go 只保持正常模块边界和规则向量，不为 iOS 预建平台框架。
 

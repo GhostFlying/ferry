@@ -13,6 +13,12 @@
 - 保留相机原文件；“已完成”要求远端内容校验通过。不得通过大小相同、写入成功或虚拟设备结果声称真实素材链路已通过。
 - 当前状态和阶段入口见 [实施计划](docs/implementation-plan.md)；实现不得自行扩大范围或将未验证的平台能力写成支持承诺。
 
+## Android 工具链
+
+- Android 默认 `minSdk 29`（Android 10+），不处理 Android 9 及更低版本兼容问题；允许较新的稳定 `compileSdk`／`targetSdk`，在实现开始时由 devcontainer 固定并记录实际版本。
+- M0–M2 的 build、单测、静态检查、Go／Android bridge、APK 构建和安装命令均在 devcontainer 内使用容器工具链执行，不回退宿主工具链。宿主仅启动容器、提供显式设备连接／转发和取回脱敏产物，不执行安装、构建、测试或静态检查。
+- Dockerfile pin、可审计 manifest、逐项工具链／产物记录及缺少容器运行时的 `BLOCKED` 条件见 [Android 工具链与 devcontainer 约束计划](docs/plans/android-toolchain-constraint.md)。
+
 ## 所有 UI 先生成概念并取得接受
 
 - 任何 UI 方案必须使用用户指定的 `build-web-apps:frontend-app-builder` skill，并通过 Image Gen 生成完整主屏和必要状态／细节概念。覆盖 M0 probe、M1 Android 产品、M2 新增设置／通知与 M3 iOS；不得以文字描述、手绘代码或局部图代替所需完整概念，不得把设计图当作真实 App 截图。
