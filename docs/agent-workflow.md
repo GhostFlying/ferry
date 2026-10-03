@@ -1,6 +1,6 @@
 # Ferry 代理协作与审查协议
 
-状态：未批准规划的范围修订，待当前 scope-trim 独立审查及用户审阅。项目约束见 [AGENTS.md](../AGENTS.md)，阶段与产品验收见 [实施计划](implementation-plan.md)，当前执行依据见 [scope-trim 执行计划](plans/scope-trim.md) 与 [scope-trim review 准备记录](reviews/scope-trim-review-prep.md)。[Android 优先与设计先行修订计划](plans/android-first-design-revision.md) 仅保留为历史／superseded 记录。
+状态：M0 Android 受控协议已获用户批准，执行待独立 plan review；M1、M0-UI 与 iOS 仍待各自用户关口。项目约束见 [AGENTS.md](../AGENTS.md)，阶段与产品验收见 [实施计划](implementation-plan.md)，当前执行依据见 [scope-trim 执行计划](plans/scope-trim.md) 与 [scope-trim review 准备记录](reviews/scope-trim-review-prep.md)。[Android 优先与设计先行修订计划](plans/android-first-design-revision.md) 仅保留为历史／superseded 记录。
 
 ## 授权与推进顺序
 
@@ -8,14 +8,14 @@
 
 1. 将计划和 DAG 依赖落文件，分配任务 ID、文件所有权和独立 reviewer。
 2. 独立计划审查检查需求、依赖、文件范围、平台证据、验收和停止条件；修复阻断项后复核。
-3. 确认任务位于用户已批准的里程碑范围内。当前仓库／治理／issue／规划 PR 准备已获授权；M0 应用和 APK workflow 仍须用户明确批准。
+3. 确认任务位于用户已批准的里程碑范围内。当前仓库／治理／issue／规划 PR 准备已获授权；M0 Android 受控协议 V01–V05 已获用户批准，但应用和 APK workflow 仍须独立 plan review；M1、M0-UI 与 iOS 仍须用户明确批准。
 4. 在独立工作树实施，执行任务验收，留下完整 SHA 和证据。
 5. 独立实现审查检查真实 diff、边界和验证，复核修复；验收检查与待提交变更一致。
 6. 整理 milestone 的计划、PR、证据、未决项和下一阶段范围，交用户审阅。只有明确批准后才进入下一 milestone。
 
 内部 PASS、CI 通过、PR 合并、任务关闭和用户未回复不构成用户里程碑批准。可以完成已获授权的任务；不得把 `awaiting_user_review` 改写成 `accepted`。
 
-当前范围为 M0 受控服务／Dora Android 物理设备协议验证、M1 Android 前台基础版及 Pocket／Pixel／飞牛链路、M2 Android 自动模式／恢复与发行准备、M3 才做 iOS 前台版／Pocket USB 和双平台交付。M0–M2 不含 iOS／macOS／签名／回归依赖，也不提前实现未来平台抽象。本轮只修订规划和生成用户审阅概念，不启动 M0、Actions 或设备租约；M2 的发行安排仍是待审方案。用户明确批准规划与 M0 后，先合并规划 PR，让规则和计划进入 main，再从该已批准基线建立 M0 工作树。旧 M1 双平台审批问题已被当前范围替代。
+当前范围为 M0 受控服务／Dora Android 物理设备协议验证、M1 Android 前台基础版及 Pocket／Pixel／飞牛链路、M2 Android 自动模式／恢复与发行准备、M3 才做 iOS 前台版／Pocket USB 和双平台交付。M0–M2 不含 iOS／macOS／签名／回归依赖，也不提前实现未来平台抽象。本次治理提交只修订规划，不启动容器、构建或设备租约；M0 可在独立 plan review 后启动，M1、M0-UI 与 iOS 仍待各自用户关口，M2 的发行安排仍是待审方案。用户已批准 M0 后，先合并规划 PR，让规则和计划进入 main，再从该已批准基线建立 M0 工作树。旧 M1 双平台审批问题已被当前范围替代。
 
 ## UI 概念、接受与原生保真协议
 

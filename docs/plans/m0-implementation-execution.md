@@ -8,9 +8,22 @@ in [M0 plan](m0.md), [implementation plan](../implementation-plan.md), and
 CI result, or merge does not constitute the user's M0 approval.
 
 This file defines the execution boundary for the M0 Android probe and controlled
-SMB experiment.  The current task creates this plan only; it does not implement
+SMB experiment.  The current task revises planning/status documents only; it does not implement
 application code, build an APK, start a container, connect to a device, access
 SMB, or occupy a Dora lease.
+
+## Approval record
+
+- Decision text: “批准当前最终规划并启动 M0 Android 受控协议实现。”
+- Session reference: 本轮用户消息/response annotation 1
+- Recorded: 2026-10-03, Asia/Singapore
+- Approved scope: M0 Android controlled protocol gates V01–V05 only.
+- Explicitly not approved: M1, M0-UI, and iOS work; each retains its own user
+  gate.
+
+The approval authorizes starting the M0 execution process, not bypassing the
+independent plan review, the pinned devcontainer requirement, or any V01–V05
+evidence and stop condition.
 
 ## Objective and ownership
 
@@ -26,43 +39,46 @@ in the task register; the plan author is `android_toolchain_author` and the
 coordinator is `/root`.  Each package has one implementation owner and one
 reviewer.  The plan author and package author cannot be the independent plan,
 integrated, or device reviewer.  The coordinator assigns a non-author reviewer
-and records the reviewer identity, commit SHA, findings, and recheck before
-calling a gate passed.
+and records the reviewer identity, model/reasoning, commit SHA, findings, and
+recheck before calling a gate passed.
 
-The current plan commit owns only this file.  Later implementation commits must
-keep the file ownership below and must not mix unrelated UI, iOS, release, or
-GitHub changes into an M0 package.
+This approval/DAG revision owns only this file, `docs/implementation-plan.md`,
+`docs/plans/m0.md`, `docs/agent-workflow.md`,
+`docs/plans/repository-bootstrap.md`, and conflicting status lines in the
+project's handwritten `AGENTS.md`.  Later implementation commits must keep the
+file ownership below and must not mix unrelated UI, iOS, release, or GitHub
+changes into an M0 package.
 
 ## Dependencies and entry conditions
 
-Implementation may start only after all of these are recorded:
+The M0 implementation DAG has only these universal entry conditions:
 
-1. The base is verified as `5a4ca005bb9d1c15f5c87b915678af979ef8867d` and the
-   branch/worktree is registered for the implementation task.
-2. The merged planning documents and [toolchain review](../reviews/android-toolchain-review.md)
-   are available.  The review confirms documentation constraints; it does not
-   authorize an implementation.
-3. The user has explicitly approved M0 and its current V01–V05 scope.  Internal
-   review, an issue, a PR, or a successful CI run cannot substitute for this
-   decision.
-4. A usable devcontainer runtime and a lockable container definition are
-   available.  The Dockerfile must pin the `FROM` base-image digest and the
+1. The merged base is verified as `5a4ca005bb9d1c15f5c87b915678af979ef8867d`;
+   the assigned branch/worktree is recorded before the package edits.
+2. The user has explicitly approved M0 and its current V01–V05 scope as recorded
+   above.  Internal review, an issue, a PR, or a successful CI run cannot
+   substitute for this decision.
+3. A usable devcontainer runtime is available.  A1 may first write the pinned
+   container definition; that definition need not exist before A1 begins.
+   Every build, test, and SDK-installation verification waits until the
+   definition is fully pinned and the runtime is available, then runs only
+   inside the container.  The Dockerfile must pin the `FROM` base-image digest and the
    SDK/JDK/NDK/Go/Gradle/dependency versions, or an equivalent auditable manifest
    must do so.  An unpinned Dockerfile is not a locked toolchain.  Dependency
    caches must be rebuildable volumes.  If the runtime or lock is unavailable,
    build-related gates are `BLOCKED`; there is no host-toolchain fallback.
-5. M0-C1 has an authorized, isolated SMB fixture and network owner, a short-lived
-   scoped account, reproducible test input, no-replace behavior, readback access,
-   and an explicit cleanup procedure.  A home NAS, private material, or an
-   uncontrolled public SMB endpoint is not a fixture.
-6. M0-C2 has a fresh Dora Android **physical** device lease.  The candidate is
-   queried as `idle` and `online` with explicit Android and physical filters;
-   the lease/session and connection endpoint are verified before any operation.
-   A previous lease, an emulator, or a serial copied from an old record cannot
-   satisfy this dependency.
-7. If the M0 probe UI is implemented, the complete concept, user acceptance,
-   UI implementation plan, and independent UI review are recorded first.  The
-   UI subtask is separate from the V01–V05 protocol gates.
+
+The independent plan review remains a required process gate before implementation,
+but C1 service readiness and a Dora lease are not universal implementation
+dependencies.  M0-C1's authorized SMB fixture, service account, route, and
+cleanup procedure are required when running V03/V04/V05 and C2.  M0-C2's fresh
+Android physical lease is required only for the device experiment (V02/V04/V05
+and C2).  A2/A3/A4/A5/A6 may implement and verify their pure container or
+controlled-service contracts without those external resources; a missing fixture
+or lease blocks only the affected experiment gate.  A3 may use a container-local
+controlled SMB fixture/contract until C1 is available.  If the M0 probe UI is
+implemented, its concept acceptance and independent UI plan review remain
+separate from V01–V05.
 
 ## File ownership and package graph
 
@@ -71,21 +87,44 @@ before an agent edits a file.
 
 | Package | Owner-controlled files | Work and output | Dependencies |
 | --- | --- | --- | --- |
-| A1 toolchain/delivery | `experiments/README.md`, `experiments/toolchains.*`, devcontainer files, `docs/validation/m0/environment.md` | Lock the container and rebuildable cache volumes; emit the toolchain manifest and evidence-record format | Plan review, user M0 approval, container runtime |
+| A1 toolchain/delivery | `experiments/README.md`, `experiments/toolchains.*`, devcontainer files, `docs/validation/m0/environment.md` | Write and pin the container definition and rebuildable cache volumes; emit the toolchain manifest and evidence-record format before any build/test/SDK-installation verification | Available runtime; A1 creates the pinned definition |
 | A2 Go/Android bridge | `experiments/mobile-core/`, `docs/validation/m0/bridge.md` | Build the real Go AAR and bridge contract; exercise operation IDs, 64-bit counts, structured errors, callback-thread and cancellation behavior | A1 |
-| A3 controlled SMB | `experiments/smb/`, `docs/validation/m0/smb.md` | Use an injected `net.Conn`; enforce exclusive creation, flush, readback hash, and server no-replace behavior | A1 and C1 contract |
-| M0-C1 fixture/network | `experiments/test-smb/`, `docs/validation/m0/network-environment.md` | Prepare the isolated service, account, route, fixture, and cleanup evidence | A1; service owner approval |
-| A4 App-internal tsnet | `experiments/tsnet/`, `docs/validation/m0/tsnet.md` | Dial the controlled SMB service through the same Go `Server.Dial` boundary and report connection versus content separately | A2, A3, C1 |
-| A5 Android probe | `experiments/android-source/`, `docs/validation/m0/android-probe.md` | Read the test source, create a reproducible input, retain the local copy, call the bridge, show progress, and expose cancel/termination state | A1, A2, A4; UI subtask has its own design gate |
-| A6 CI delivery | `.github/workflows/m0-probe.yml`, `scripts/ci/m0-*` | Invoke the locked devcontainer, run real tests/static checks, build real arm64 debug APK/AAR, and publish redacted manifests/hashes | A1, A2, A4, A5 |
-| M0-C2 device harness | `experiments/device-harness/`, `docs/validation/m0/dora-android.md` | Use the fresh lease to install/call the container-built APK, run V02/V04/V05, and clean up in `finally` | A3, A4, A5, A6, C1, fresh lease |
+| A3 controlled SMB | `experiments/smb/`, `docs/validation/m0/smb.md` | Use an injected `net.Conn`; enforce exclusive creation, flush, readback hash, and server no-replace behavior | A1; container-local fixture/contract is sufficient before C1 |
+| M0-C1 fixture/network | `experiments/test-smb/`, `docs/validation/m0/network-environment.md` | Prepare the isolated service, account, route, fixture, and cleanup evidence | Universal entry conditions plus service-owner availability; does not block pure implementation |
+| A4 App-internal tsnet | `experiments/tsnet/`, `docs/validation/m0/tsnet.md` | Dial the controlled SMB service through the same Go `Server.Dial` boundary and report connection versus content separately | A2, A3; C1 is required only to run V04 |
+| A5 Android probe | `experiments/android-source/`, `docs/validation/m0/android-probe.md` | Read the test source, create a reproducible input, retain the local copy, call the bridge, show progress, and expose cancel/termination state | A2, A4; C1 and a Dora lease are not implementation prerequisites; UI subtask has its own design gate |
+| A6 CI delivery | `.github/workflows/m0-probe.yml`, `scripts/ci/m0-*` | Invoke the locked devcontainer, run real tests/static checks, build real arm64 debug APK/AAR, and publish redacted manifests/hashes | A2, A4, A5; C1 and a Dora lease are not required for the container workflow |
+| M0-C2 device harness | `experiments/device-harness/`, `docs/validation/m0/dora-android.md` | Use the fresh lease to install/call the container-built APK, run V02/V04/V05, and clean up in `finally` | A6, C1, fresh lease; A3/A4/A5 are transitive dependencies |
 | R0 integrated/device review | `docs/validation/m0/report.md` and review records | Recheck final SHA, paths, hashes, gate results, cleanup, and stop conditions | A1–A6, C1/C2 |
 
-A2, A3, C1, A4, and the non-UI portion of A5 may proceed in parallel after A1
-and their direct dependency is ready.  A6 starts after the real bridge and
-probe exist.  C2 is serialised to one device operator and one session-local
-lease.  R0 is always performed by an agent who did not author the reviewed
-implementation.
+After A1, A2 and A3 proceed in parallel by their direct dependencies; C1 may
+prepare its external fixture independently.  A4 starts after A2 and A3.  A5
+starts after its bridge/network direct dependencies (A2/A4), and A6 starts after
+the real bridge and probe exist.  C1 readiness and a fresh physical lease do
+not block A2/A3/A4/A5/A6 pure container or controlled-service work.  C2 starts
+only after A6, C1, and a freshly verified physical lease.  C2 is serialised to
+one device operator and one session-local lease.  R0 is always performed by an
+agent who did not author the reviewed implementation.
+
+Before implementation, the coordinator must populate this assignment record;
+an unassigned row is a stop condition and cannot be treated as permission to
+edit:
+
+| Package | Implementation owner | Independent reviewer | Model/reasoning | Branch/worktree | Task-register/issue reference |
+| --- | --- | --- | --- | --- | --- |
+| Execution plan | `android_toolchain_author` | Coordinator-assigned non-author plan reviewer (pending) | Coordinator records actual author/reviewer model and reasoning (pending) | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | This file; [task register](../implementation-plan.md) |
+| M0-A1 | Coordinator-assigned A1 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #3 |
+| M0-A2 | Coordinator-assigned A2 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #4 |
+| M0-A3 | Coordinator-assigned A3 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #5 |
+| M0-A4 | Coordinator-assigned A4 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #6 |
+| M0-A5 | Coordinator-assigned A5 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #7 |
+| M0-A6 | Coordinator-assigned A6 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #8 |
+| M0-C1 | Coordinator-assigned C1 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), issue reference pending assignment |
+| M0-C2 | Coordinator-assigned C2 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), issue reference pending assignment |
+| M0-R0 | Coordinator-assigned non-author integrated/device reviewer (pending) | Coordinator records findings/recheck (pending) | Actual review model and reasoning pending assignment | Review worktree fixed to reviewed SHA (pending) | [Task register](../implementation-plan.md), existing issue #13 |
+
+No package implementation may begin until its owner, reviewer, model/reasoning,
+branch/worktree, and task-register/issue fields are populated.
 
 ## Container and external action boundary
 
@@ -124,9 +163,9 @@ result is never inferred from another gate.
 
 | Gate | Implementation and container action | External action | Required artifact/evidence | PASS condition and stop rule |
 | --- | --- | --- | --- | --- |
-| **M0-V01 build and probe** | A1/A2/A5/A6 build the real Go AAR and arm64 APK in the locked container; run unit/integration tests and static checks there; make CI fail on a failing check | Host only starts the container and retrieves redacted outputs | APK/AAR, manifest, test/static reports, source/toolchain/ABI/artifact hashes, version and debug type | A real APK contains the bridge, checks pass, and hashes are reproducible. Missing runtime, unpinned toolchain, host-built output, or failed check is `BLOCKED`/`FAIL`; do not continue with host results |
+| **M0-V01 build and probe** | A1/A2/A5/A6 build the real Go AAR and arm64 APK in the locked container; run unit/integration tests and static checks there; make CI fail on a failing check | Host only starts the container and retrieves redacted outputs | APK/AAR, manifest, test/static reports, source/toolchain/ABI/artifact hashes, version and debug type | A real APK contains the bridge, checks pass, and artifact SHA-256 is computed, recorded, and rechecked inside the fixed devcontainer. This is artifact-hash evidence; it does not introduce a byte-for-byte deterministic-build gate. Missing runtime, unpinned toolchain, host-built output, or failed check is `BLOCKED`/`FAIL`; do not continue with host results |
 | **M0-V02 bridge on Dora** | Container invokes the installation and bridge calls through the explicit forwarded connection; parse structured progress, 64-bit counts, and errors | Dora control plane provides a fresh physical lease; verify Android version/API/ABI/network; host only starts the container and provides the explicit connection/forwarding, while lease records remain external control-plane evidence | Session ID/serial/endpoint, install/start/call logs, device properties, APK hash, structured bridge result | The container-built APK installs, starts, and returns the expected bridge result on the leased physical device. No matching session, incompatible ABI, or host-issued install is `BLOCKED`; stop device actions |
-| **M0-V03 controlled SMB** | Run client protocol tests using the injected `net.Conn`; upload/flush/read back the known input and exercise pre-existing target rejection | Authorized C1 service and cleanup; service owner retains no-replace evidence | Service/version, fixture and input hashes, byte counts, readback hash, no-replace response, redacted errors | Full readback SHA-256 equals input and an existing target cannot be replaced. Connection-only, size-only, rename-only, or an uncontrolled service does not pass |
+| **M0-V03 controlled SMB** | Implement/test the client protocol using a container-local controlled fixture/contract; run the gate through the injected `net.Conn` to C1, uploading/flushing/reading back the known input and rejecting a pre-existing target | Authorized C1 service and cleanup; service owner retains no-replace evidence | Service/version, fixture and input hashes, byte counts, readback hash, no-replace response, redacted errors | Full readback SHA-256 equals input and an existing target cannot be replaced. Missing C1 blocks this experiment only; container-local implementation/testing may continue. Connection-only, size-only, rename-only, or an uncontrolled service does not pass |
 | **M0-V04 App-internal tsnet transfer** | Container-built bridge and probe are used; parse and record App result without substituting a host network path | On the leased Dora device the App logs in to the authorized test Tailnet and dials C1 via App-internal tsnet | Redacted route/login state, device identity, service path, bytes, input/remote SHA-256, APK/source/toolchain hashes | At least one complete file is transferred and remote readback SHA-256 matches. TCP connect without full content, direct host SMB, emulator, or unreachable service is `BLOCKED` |
 | **M0-V05 cancel/termination recovery** | Generate the reproducible input in the container/test harness and parse restart/reconciliation output; preserve local completed copy | During Dora transfer cancel or terminate the App, then restart it and inspect state; clean up afterward | Cancel/termination timing, local-copy and remote-state hashes, restart state, no-false-complete result, cleanup log | Cancellation/termination never reports completion without remote evidence; completed local copy remains and restart can distinguish pending/complete. Lost local copy, false completion, or unsafe resubmit is `FAIL` and stops the gate |
 
@@ -185,14 +224,18 @@ introduced here.
 
 ## Stop conditions and explicit non-goals
 
-Stop the affected package and report `BLOCKED` when the devcontainer runtime,
-pin/manifest, rebuildable cache, C1 fixture, valid fresh lease, session match,
-compatible ABI, service reachability, no-replace proof, readback hash, or cancel
-reconciliation is missing.  Do not run a host build, use a host APK, install from
-host ADB, substitute an emulator for the physical-device gate, weaken the
-no-replace rule, or claim a connection as a complete transfer.  A secret or
-private-data exposure stops publication and triggers cleanup before any result
-is reported.
+Stop the affected implementation package and report `BLOCKED` when the
+devcontainer runtime or rebuildable cache is missing; a missing pin/manifest
+blocks build/test/SDK-installation verification while A1 may write the definition.
+Stop only
+the affected experiment gate when the C1 fixture, valid fresh lease, session
+match, compatible ABI, service reachability, no-replace proof, readback hash, or
+cancel reconciliation is missing; those external resources do not block pure
+container or controlled-service implementation.  Do not run a host build, use
+a host APK, install from host ADB, substitute an emulator for the
+physical-device gate, weaken the no-replace rule, or claim a connection as a
+complete transfer.  A secret or private-data exposure stops publication and
+triggers cleanup before any result is reported.
 
 M0 implementation deliberately does not include V06–V08 as hard requirements,
 M0-UI, Pocket/Pixel/fnOS full chain, production task management, M1 foreground
@@ -206,9 +249,10 @@ gate, or an additional publication gate.
 The execution sequence is:
 
 1. Review this plan independently; resolve findings and record a review SHA.
-2. Obtain explicit user M0 approval while preserving the current scope and gate
-   IDs.
-3. Implement A1 and pass the container/toolchain review.
+2. Confirm the approval record and complete the independent plan review while
+   preserving the current scope and gate IDs.
+3. Populate each package's owner/reviewer/model/branch/worktree/task-register
+   fields, then implement A1 and pass the container/toolchain review.
 4. Implement A2, A3, C1, A4, and the non-UI portion of A5 in dependency order;
    keep each package in an atomic conventional commit with one file owner.
 5. Integrate A6 only after the real bridge and probe exist; run the complete
@@ -222,9 +266,9 @@ The execution sequence is:
    next-stage proposal to the user.  Do not start M1 or any excluded chain until
    the user gives a separate explicit approval.
 
-For this planning task the only permitted commit is the new plan file with a
-Conventional Commit message such as `docs: define M0 Android implementation
-execution`, using the repository's GhostFlying identity and no co-author.  The
+For this approval/DAG revision the permitted commit contains only the six
+planning/status documents listed above, using the repository's GhostFlying
+identity, a Conventional Commit message, and no co-author.  The
 required checks are `git diff --check`, Markdown link-target existence checks
 for the existing documents referenced above, and a final status check proving
 that no other file changed.  No runtime, build, device, network, GitHub, or
