@@ -15,11 +15,11 @@ of Android UI and URI types. Own only this module, its tests/Makefile, and
 inside `mobile-core` and adds local module `require`/`replace` entries.
 
 Dependencies: A1 pinned toolchain and A2/A3 source work. A2 reviewed target is
-`94c2df793f247b79d3828fb47c60df35a90714b7` (review `ba00ee2`); A3 source is
-currently at `c766c06289db1e092c250602da7f3b3ce5087f8f` with unit-test evidence
-awaiting the cumulative implementation review. Builds/tests run in the Ferry
-devcontainer only. Missing C1/lease blocks experiments rather than source work.
-All module versions/sums are recorded before build evidence.
+`94c2df793f247b79d3828fb47c60df35a90714b7` (review `ba00ee2`); the cumulative
+A3 source and cleanup fix are included in `81785561d3c3f5cdb3f64f5905966fcd642357bc`
+and are covered by the current implementation review. Builds/tests run in the
+Ferry devcontainer only. Missing C1/lease blocks experiments rather than source
+work. All module versions/sums are recorded before build evidence.
 
 ## Contract and implementation
 
