@@ -15,9 +15,9 @@ be retried once daemon registry access is available.
 
 The source of truth is [`.devcontainer/Dockerfile`](../../.devcontainer/Dockerfile)
 and [`experiments/toolchains.env`](../../experiments/toolchains.env). The base
-image is pinned by digest. Android command-line tools, platform 35,
-build-tools 35.0.0, NDK 27.2.12479018, compileSdk/targetSdk 35, Go 1.27.1,
-and Gradle 8.10.2 are pinned
+image is pinned by digest. Android command-line tools, platform-tools 37.0.1
+(direct archive with SHA-256), platform 35, build-tools 35.0.0, NDK
+27.2.12479018, compileSdk/targetSdk 35, Go 1.27.1, and Gradle 8.10.2 are pinned
 with download SHA-256 values where applicable. Android `minSdk` is 29 and the
 initial artifact ABI is `arm64-v8a`.
 
@@ -25,10 +25,13 @@ The devcontainer uses rebuildable named volumes for Gradle and Go caches. The
 container smoke command is
 [`scripts/ci/m0-toolchain-smoke.sh`](../../scripts/ci/m0-toolchain-smoke.sh).
 It refuses to run unless `FERRY_DEVCONTAINER=1` is set and emits a redacted
-toolchain manifest. A source SHA and `artifact_sha256=NOT_APPLICABLE` are
+toolchain manifest. A source SHA, the pinned platform-tools revision, apt
+dependency lock, and `artifact_sha256=NOT_APPLICABLE` are
 expected until a real APK/AAR exists; this is not a build pass.
 
 Verification status will be recorded as `PASS`, `FAIL`, `BLOCKED`, or
 `NOT_RUN`, with the container image identity, source SHA, toolchain fields, and
 artifact SHA-256. No host JDK, SDK, NDK, Go, Gradle, or host-built artifact can
-be used as evidence.
+be used as evidence. gomobile/gobind and the Gradle wrapper are intentionally
+deferred to A2, where the bridge package must pin and report them before bridge
+construction.

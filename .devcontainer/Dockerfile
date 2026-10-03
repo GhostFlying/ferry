@@ -2,6 +2,8 @@ FROM eclipse-temurin:17-jdk-jammy@sha256:43f4431cc895d37ceb115e2e1f160545ec45cae
 
 ARG ANDROID_CMDLINE_TOOLS_VERSION=16111833
 ARG ANDROID_CMDLINE_TOOLS_SHA256=0877a1d048fe4a24efe2eff536ca4223f7adeb58648bb81909d33c446918cfa8
+ARG ANDROID_PLATFORM_TOOLS_VERSION=37.0.1
+ARG ANDROID_PLATFORM_TOOLS_SHA256=d230f13842f60f782a8645f9c813f8f845bf36089ea7289f28c48f17979313f1
 ARG ANDROID_PLATFORM_VERSION=35
 ARG ANDROID_BUILD_TOOLS_VERSION=35.0.0
 ARG ANDROID_NDK_VERSION=27.2.12479018
@@ -37,6 +39,11 @@ RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go
     && tar -C /usr/local -xzf /tmp/go.tar.gz \
     && rm /tmp/go.tar.gz
 
+RUN curl -fsSL "https://dl.google.com/android/repository/platform-tools_r${ANDROID_PLATFORM_TOOLS_VERSION}-linux.zip" -o /tmp/platform-tools.zip \
+    && echo "${ANDROID_PLATFORM_TOOLS_SHA256}  /tmp/platform-tools.zip" | sha256sum -c - \
+    && unzip -q /tmp/platform-tools.zip -d /opt/android-sdk \
+    && rm /tmp/platform-tools.zip
+
 RUN curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/gradle.zip \
     && echo "${GRADLE_SHA256}  /tmp/gradle.zip" | sha256sum -c - \
     && unzip -q /tmp/gradle.zip -d /opt \
@@ -44,7 +51,7 @@ RUN curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSIO
     && rm /tmp/gradle.zip
 
 RUN yes | sdkmanager --licenses >/dev/null \
-    && sdkmanager "platform-tools" "platforms;android-${ANDROID_PLATFORM_VERSION}" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "ndk;${ANDROID_NDK_VERSION}" \
+    && sdkmanager "platforms;android-${ANDROID_PLATFORM_VERSION}" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "ndk;${ANDROID_NDK_VERSION}" \
     && yes | sdkmanager --licenses >/dev/null
 
 WORKDIR /workspace/ferry
