@@ -12,8 +12,9 @@
 
 所有构建、单测、静态检查、APK 产物和 Go／Android bridge 构建均在
 devcontainer 内执行。宿主机只负责启动容器、做显式设备连接／转发和取回脱敏产物；
-Dora 设备使用容器构建出的 APK。构建／测试流程不使用宿主工具链；若宿主 ADB
-执行安装，也只能安装容器产物，宿主连接／安装操作不单独构成构建或应用验收证据。
+Dora 设备使用容器构建出的 APK，安装命令由 devcontainer 内通过该显式连接／转发
+执行。宿主不执行安装、构建、单测或静态检查；连接／转发不单独构成构建或应用验收
+证据。
 
 本计划不引入 Android 9 及以下的兼容矩阵，不提前增加发布签名／渠道门槛，也不
 改变 M0–M2 的设备、SMB、USB 或用户批准关口。iOS／macOS 仍属于 M3，本任务不
@@ -41,18 +42,19 @@ Dora 设备使用容器构建出的 APK。构建／测试流程不使用宿主�
 4. 写明 devcontainer 的设计验收：Dockerfile 必须 pin `FROM` 的 base image digest
    以及 SDK／JDK／NDK／Go／Gradle／依赖版本，或使用等价的可审计 manifest；仅提供
    未 pin 的 Dockerfile 不满足锁定要求。依赖缓存使用可重建卷；toolchain manifest／
-   产物清单逐项记录 `minSdk`、`compileSdk`、`targetSdk`、JDK、Gradle、NDK、Go、
-   ABI、完整源码 SHA、工具链版本、产物 SHA-256；缺少容器运行时即 `BLOCKED`，不得
-   回退到宿主环境。
+   产物清单逐项记录 `minSdk`、`compileSdk`、`targetSdk`、JDK、SDK（含平台／
+   build-tools 等实际版本）、Gradle、NDK、Go、依赖（含锁文件／依赖版本）、ABI、
+   完整源码 SHA、工具链版本、产物 SHA-256；缺少容器运行时即 `BLOCKED`，不得回退
+   到宿主环境。
 5. 做文档级一致性检查并提交单个 conventional commit；不运行代码、设备、容器或
    GitHub 命令。
 
 ## 验收与证据
 
-- `rg` 检查上述文件都明确 `minSdk 29`、devcontainer 内构建／测试边界、宿主机
-  仅启动容器／显式连接或转发设备／取回脱敏产物、Dora 使用容器 APK、工具链／ABI／
-  产物哈希记录及“缺容器运行时为 BLOCKED、不得回退”；宿主连接／安装操作不单独
-  构成构建或应用验收证据。
+- `rg` 检查上述文件都明确 `minSdk 29`、devcontainer 内构建／测试／安装边界、宿主机
+  仅启动容器／显式连接或转发设备／取回脱敏产物、安装命令由容器执行、Dora 使用
+  容器 APK、工具链／ABI／产物哈希记录及“缺容器运行时为 BLOCKED、不得回退”；宿主
+  连接／转发不单独构成构建或应用验收证据。
 - 检查 M0、M1、M2 各自区分容器内验收和设备／服务外部动作；没有把容器引入低
   概率兼容矩阵或新的发布门槛。
 - 检查 Markdown 链接和表格仍可读，`git diff --check` 通过；记录修改文件和
@@ -63,6 +65,8 @@ Dora 设备使用容器构建出的 APK。构建／测试流程不使用宿主�
 
 - 发现容器运行时、已 pin 的 Dockerfile／可审计 manifest 或可重建依赖卷尚未提供时，
   只将实现／构建节点标为 `BLOCKED`，不在宿主机尝试构建或用宿主产物替代。
+- 设备安装需要执行命令时，必须由 devcontainer 通过显式设备连接／转发完成；宿主
+  不执行安装、构建、单测或静态检查。否则停止对应验收并标为 `BLOCKED`。
 - 发现文档修改会改变现有 M0–M2 功能范围、设备要求、数据保留、用户 gate 或
   M3 边界时停止并交主代理重新审阅；不借本任务启动实现。
 - 不修改代码、Actions、设计文件、AGENTS.md、GitHub issue／PR，也不运行任何
