@@ -1,0 +1,3 @@
+Use case: text-localization
+Asset type: candidate Android task home concept, functional consistency correction
+Input image: a01-tasks-active-v2.png is edit target. Keep all layout, typography, hierarchy, background, accent, icons, actions, bottom navigation, progress and all other text unchanged. Change ONLY the second row in the task list, for DEMO_002.mp4: replace "内容校验中 · 读回 0.8 GB / 2.0 GB" with "待上传 · 手机完整副本已就绪". The main DEMO_003.mp4 is the only active SMB network operation; DEMO_004.mp4 is the only active import. Do not create concurrent readback plus upload. Do not show a completion check for the queued row. One large readable full screen; no crop or collage. This is a design fixture, not running evidence. Keep review-only footer "设计示例，非运行证据".

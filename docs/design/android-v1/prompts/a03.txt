@@ -1,0 +1,27 @@
+Use case: ui-mockup
+Asset type: one complete Android app portrait screen, high-fidelity candidate design concept only
+Input image role: a01-tasks-active-v2.png is STYLE REFERENCE ONLY, not an edit target and not content to copy. Generate a fresh complete screen for the specific content below.
+Style/medium: same restrained native Android Ferry visual language as reference: true white, charcoal Chinese sans serif text, restrained deep teal primary action, open sections and list rows with fine dividers, purposeful outline icons. No default rounded card grid, no marketing hero. Airy but practical and fully readable.
+Composition/framing: ONE edge-to-edge full portrait phone screen at approximately 9:20 ratio, no device bezel, no outer presentation board, no collage, no crop. Include Android status bar and bottom gesture area. Chinese copy must be clear and exact. Eventual UI must be Kotlin/Compose native text and controls, never shipped raster UI.
+Constraints: all values, file names, connected states and completion examples are illustrative design fixtures only, not real device/network/transfer evidence. No actual secrets, usernames, passwords, node data, private addresses or private images. No iOS UI, no automatic attach/background-service switch, no OpenDAL or cloud-drive buttons, no speed/ETA, no invented awards/badges/metrics. Preserve original camera files. Source is read-only; full persistent private phone copy precedes upload; only full remote SHA-256 readback permits completed; same-name existing content cannot be overwritten. Native controls feasible.
+Small footer, verbatim: 设计示例，非运行证据
+
+Primary request: Design the M1 source page in a source permission lost/first authorization waiting state. A system directory selection is a native action. Logical name is not authenticated camera identity. Clearly explain only new imports wait and intact phone copies are still uploadable. Complete source authorization page, no decorative camera photograph.
+Bottom navigation, verbatim: 任务 / 来源 / 目标 / 规则; selected 来源.
+Text (verbatim):
+Ferry / 来源
+SOURCE-DEMO
+等待授权
+目录访问权限已失效，请重新选择
+已选目录 / DCIM/DEMO
+访问方式 / Android 系统目录授权
+读取权限 / 只读
+Button: 重新选择目录
+来源不可用时
+新文件导入等待来源与授权
+已完整导入的手机副本可继续上传
+原文件始终保留
+Ferry 不写入、不改名、不删除来源文件
+共享引用只代表已选目录，不证明相机身份
+Button: 添加来源
+No new USB permission claim, no statement of Pocket connection success.

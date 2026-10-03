@@ -1,0 +1,3 @@
+Use case: text-localization
+Asset type: candidate Android source page concept
+Input image: a03-source-authorization.png is edit target. Preserve all layout, labels, typography, palette, controls, first source permission-lost status, and bottom navigation. Change ONLY the last informational row before 添加来源: replace its heading "共享引用只代表已选目录，不证明相机身份" with "重新接入后仍无法访问？"; replace its explanatory body with "重新选择目录以继续导入，完整手机副本会保留". This is actionable user copy. Remove the link/reference identity metaphor in this row if needed and use a simple folder/refresh outline symbol consistent with existing icons. Keep everything else unchanged. Full readable phone screen, no crop. Review-only footer remains. Every DEMO name/state is a fixture, not evidence.

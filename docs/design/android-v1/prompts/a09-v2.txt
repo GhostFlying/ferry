@@ -1,0 +1,3 @@
+Use case: text-localization
+Asset type: candidate Android user-paused task detail
+Input image: a09-user-paused.png is edit target. Preserve all layout, foreground conditions, manual-pause state, pause-before progress 0.4 GB / 1.0 GB, retained phone copy, pending readback, target/network labels, bottom navigation, actions and review-only footer. Add ONE concise readable explanation immediately above or below the primary "恢复任务" button: "恢复后将从头重新上传此文件". Adjust nearby whitespace only as needed, not screen content order. Historical 0.4 GB is not a byte-range resume promise. Keep "再次打开 App 仍保持暂停" and "网络恢复或回到前台不会自动继续" unchanged. All fixtures not real data. Full complete readable phone screen, no crop.

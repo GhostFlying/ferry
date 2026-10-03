@@ -1,0 +1,6 @@
+Use case: text-localization
+Asset type: candidate Android task waiting-space detail
+Input image: a06-waiting-space.png is edit target. Preserve layout, typography, accent, all actions and statuses, source and target names, bottom navigation, readonly-original and manual-pause behavior. Change ONLY two lines in 手机副本 section:
+Replace "已有完整副本 9.2 GB" with "其他任务已保存的副本 9.2 GB".
+Replace "空间不足不会改为流式直传" with "请先释放空间，再继续导入".
+Current DEMO_006.mp4 remains waiting for space and NOT yet completely imported, so the 9.2 GB belongs to OTHER tasks, not this file. No automatic deletion of saved copies. Keep "未完成任务的副本会保留" and main warning exactly. All UI readable, no crop, one full phone screen. Review-only footer remains.

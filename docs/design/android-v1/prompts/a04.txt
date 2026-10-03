@@ -1,0 +1,30 @@
+Use case: ui-mockup
+Asset type: one complete Android app portrait screen, high-fidelity candidate design concept only
+Input image role: a01-tasks-active-v2.png is STYLE REFERENCE ONLY, not an edit target and not content to copy. Generate a fresh complete screen for the specific content below.
+Style/medium: same restrained native Android Ferry visual language as reference: true white, charcoal Chinese sans serif text, restrained deep teal primary action, open sections and list rows with fine dividers, purposeful outline icons. No default rounded card grid, no marketing hero. Airy but practical and fully readable.
+Composition/framing: ONE edge-to-edge full portrait phone screen at approximately 9:20 ratio, no device bezel, no outer presentation board, no collage, no crop. Include Android status bar and bottom gesture area. Chinese copy must be clear and exact. Eventual UI must be Kotlin/Compose native text and controls, never shipped raster UI.
+Constraints: all values, file names, connected states and completion examples are illustrative design fixtures only, not real device/network/transfer evidence. No actual secrets, usernames, passwords, node data, private addresses or private images. No iOS UI, no automatic attach/background-service switch, no OpenDAL or cloud-drive buttons, no speed/ETA, no invented awards/badges/metrics. Preserve original camera files. Source is read-only; full persistent private phone copy precedes upload; only full remote SHA-256 readback permits completed; same-name existing content cannot be overwritten. Native controls feasible.
+Small footer, verbatim: 设计示例，非运行证据
+
+Primary request: Design a complete M1 destination configuration form, first setup, with fictional safe placeholders. SMB fields and explicit LAN/embedded-Tailscale selection, login and test/save controls all must be visible. Native input fields and simple radio row groups, not dashboard cards. Credentials must be protected and never in logs. State of tsnet is NOT logged in. Show underlying Wi-Fi constraint separately from network path. No real IP or node name.
+Bottom navigation, verbatim: 任务 / 来源 / 目标 / 规则; selected 目标.
+Text (verbatim):
+Ferry / 目标
+飞牛 SMB
+配置名称 / NAS-DEMO
+主机 / <SMB_HOST>
+共享名称 / <SHARE_NAME>
+目标根目录 / /Ferry-demo
+账号 / <ACCOUNT_REF>
+密码 / 输入后安全保存
+网络方式
+局域网
+应用内 Tailscale
+未登录
+Button: 浏览器登录
+局域网与应用内 Tailscale 不自动切换
+上传条件 / 仅 Wi-Fi
+Tailscale 登录不代表 SMB 权限已通过
+Buttons: 测试连接 / 保存目标
+连接成功不代表文件已校验
+Use selected radio for 应用内 Tailscale; input for password may show placeholder, no fake bullet password or actual user name.

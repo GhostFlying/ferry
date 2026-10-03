@@ -1,0 +1,10 @@
+Use case: text-localization
+Asset type: candidate Android SMB destination configuration, native UI concept
+Input image: a04-target-config.png is edit target and style reference. Preserve Ferry / 目标 header, white background, typography character, open form rows, deep teal accent, bottom navigation, SMB purpose, field labels, buttons and explicit LAN / in-app Tailscale choices. Apply these limited product usability changes, recomposing lower spacing gracefully while keeping whole screen readable:
+1. Replace 主机 placeholder "<SMB_HOST>" with gray placeholder "SMB 主机名或地址".
+2. Replace 共享名称 placeholder "<SHARE_NAME>" with gray placeholder "共享文件夹名称".
+3. Replace 账号 placeholder "<ACCOUNT_REF>" with gray placeholder "NAS 账号用户名". Inputs are empty placeholders, not secret/reference editors.
+4. Replace the isolated radio under 上传条件 with an actual native switch, ON, labelled "仅使用 Wi-Fi 上传". Switch can express the real default upload condition.
+5. Keep the short explanation "局域网与应用内 Tailscale 不自动切换" because it explains user's network choice.
+6. Remove the always-visible explanatory rows "Tailscale 登录不代表 SMB 权限已通过" and "连接成功不代表文件已校验". In their place show ONE factual pending connection-status row: "连接状态 / 尚未测试连接". No fake connected or verified result. Login remains 未登录 with 浏览器登录.
+Keep 测试连接 and 保存目标 as native buttons. Keep review-only footer "设计示例，非运行证据". No actual IP, host, username, password or node data. Do not add cloud targets, automatic modes, pills or decorative cards. Full edge-to-edge phone screen, no crop. This is candidate design only, not run evidence.

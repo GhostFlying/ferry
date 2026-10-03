@@ -1,0 +1,31 @@
+Use case: ui-mockup
+Asset type: one complete Android app portrait screen, high-fidelity candidate design concept only
+Input image role: a01-tasks-active-v3.png is STYLE REFERENCE ONLY, not an edit target and not content to copy. Generate a fresh complete screen for the specific content below.
+Style/medium: same restrained native Android Ferry visual language as reference: true white, charcoal Chinese sans serif text, restrained deep teal primary action, open sections and list rows with fine dividers, purposeful outline icons. No default rounded card grid, no marketing hero. Airy but practical and fully readable.
+Composition/framing: ONE edge-to-edge full portrait phone screen at approximately 9:20 ratio, no device bezel, no outer presentation board, no collage, no crop. Include Android status bar and bottom gesture area. Chinese copy must be clear and exact. Eventual UI must be Kotlin/Compose native text and controls, never shipped raster UI.
+Constraints: all values, file names, connected states and completion examples are illustrative design fixtures only, not real device/network/transfer evidence. No actual secrets, usernames, passwords, node data, private addresses or private images. No iOS UI, no automatic attach/background-service switch, no OpenDAL or cloud-drive buttons, no speed/ETA, no invented awards/badges/metrics. Preserve original camera files. Source is read-only; full persistent private phone copy precedes upload; only full remote SHA-256 readback permits completed; same-name existing content cannot be overwritten. Native controls feasible.
+Small footer, verbatim: 设计示例，非运行证据
+
+Primary request: Design complete M1 task detail in recoverable remote-content verification failure. Clearly not completed. Complete phone copy still exists, remote readback hash differs, offer whole-file retry and user pause. Compact stage rail and useful target/network fields. No secret values or huge private path. Hash fixture labels can just show local verified/different remote rather than full hash, but never imply equality or success.
+Bottom navigation, verbatim: 任务 / 来源 / 目标 / 规则; selected 任务.
+Text (verbatim):
+Back chevron / 任务详情
+DEMO_003.mp4
+校验失败
+远端读回 SHA-256 与手机副本不一致
+任务未完成
+手机完整副本 / 已保留 · 4.8 GB
+目标 / NAS-DEMO
+目标目录 / /Ferry-demo/unknown-date/
+网络 / 应用内 Tailscale · Wi-Fi
+阶段记录
+导入 / 完整副本已就绪
+上传 / 已写入，待校验
+读回校验 / 内容不一致
+完成 / 未提交
+修复连接后可从完整副本重新上传
+Button: 重新上传此文件
+Secondary button: 暂停任务
+不会覆盖目标中的同名内容
+来源原文件保持不变
+Do not show completed ticks for readback or final commit. This is candidate failure copy, not an actual run.

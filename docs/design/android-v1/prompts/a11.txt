@@ -1,0 +1,32 @@
+Use case: ui-mockup
+Asset type: one complete Android app portrait screen, high-fidelity candidate design concept only
+Input image role: a01-tasks-active-v3.png is STYLE REFERENCE ONLY, not an edit target and not content to copy. Generate a fresh complete screen for the specific content below.
+Style/medium: same restrained native Android Ferry visual language as reference: true white, charcoal Chinese sans serif text, restrained deep teal primary action, open sections and list rows with fine dividers, purposeful outline icons. No default rounded card grid, no marketing hero. Airy but practical and fully readable.
+Composition/framing: ONE edge-to-edge full portrait phone screen at approximately 9:20 ratio, no device bezel, no outer presentation board, no collage, no crop. Include Android status bar and bottom gesture area. Chinese copy must be clear and exact. Eventual UI must be Kotlin/Compose native text and controls, never shipped raster UI.
+Constraints: all values, file names, connected states and completion examples are illustrative design fixtures only, not real device/network/transfer evidence. No actual secrets, usernames, passwords, node data, private addresses or private images. No iOS UI, no automatic attach/background-service switch, no OpenDAL or cloud-drive buttons, no speed/ETA, no invented awards/badges/metrics. Preserve original camera files. Source is read-only; full persistent private phone copy precedes upload; only full remote SHA-256 readback permits completed; same-name existing content cannot be overwritten. Native controls feasible.
+Small footer, verbatim: 设计示例，非运行证据
+
+Primary request: Generate the initial complete M0 diagnostic probe screen BEFORE any tests have run. It is a separate diagnostic surface, not M1 four-tab product. Initial controlled service setup, network, source selection, test file creation, bridge check, and disabled start-test action all need legible native controls. All pending, no fake success. Compact form/list rail, no decorative cards.
+Text (verbatim):
+Ferry / 诊断 Probe
+仅测试素材 · Pocket USB 未验证
+测试服务 / HOST-DEMO / SHARE-DEMO
+Button: 配置测试服务
+网络方式 / 内嵌 tsnet · 受控测试路径
+测试会话 / 未连接
+Button: 建立测试连接
+测试来源
+构造测试文件
+已授权目录 · 只读
+Button: 选择只读目录
+文件规格 / 5 GiB · 非稀疏
+Button: 生成测试文件
+测试文件 / 尚未生成
+参考 SHA-256 / 待完整生成
+Android ↔ Go / 尚未检查
+Button: 运行桥接检查
+前置条件未就绪
+需要测试会话、桥接检查与完整手机副本
+Disabled button: 开始传输与读回
+测试写入成功不代表内容校验通过
+No product bottom navigation. Choose radio for 构造测试文件 and not for directory option; 选择只读目录 remains alternate source control. Mark only start transmission disabled. No completed/connected checks. Credentials are supplied through protected service setup, never displayed. These controls are conceptual only, not implemented or verified.
