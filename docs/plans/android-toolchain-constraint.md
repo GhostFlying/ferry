@@ -1,10 +1,11 @@
 # Android 工具链与 devcontainer 约束计划
 
 状态：**工具链约束文档已在 `aac686b7db0a63aed8a797b81172983cb2488ca5` 通过独立
-审查 PASS；本次治理同步仍待非作者复核和用户里程碑审阅。** 详见 [scope-trim 独立
+审查 PASS；M0 V01–V05 已获用户批准，当前执行仍待 M0 plan review。** 详见 [scope-trim 独立
 审查](../reviews/scope-trim-review.md) 与 [Android 工具链独立审查](../reviews/android-toolchain-review.md)。本计划基线仍为
-`0b8c87ec4fe42088ffd0d631831547872d40ab60`；审查 PASS 只表示文档约束成立，不批准
-M0 实现。本任务只修改文档，不启动应用、容器、设备或 GitHub 操作。
+`0b8c87ec4fe42088ffd0d631831547872d40ab60`；审查 PASS 不代替用户批准，当前批准记录见
+[M0 execution plan](m0-implementation-execution.md)。本文件只记录工具链约束，不启动容器、设备或
+GitHub 操作。
 
 ## 目标与边界
 
@@ -35,7 +36,7 @@ Dora 设备使用容器构建出的 APK，安装命令由 devcontainer 内通过
   上的 [独立工具链审查 PASS](../reviews/android-toolchain-review.md)：仅追加项目手写
   `AGENTS.md` 的简短 Android 工具链条款，并同步 `docs/implementation-plan.md` 与
   本文件的实际审查状态。三文件归本任务单 owner；不复制完整清单，不改变范围、UI、
-  验收或用户 gate。新提交仍由非作者复核，审查 PASS 不批准 M0 实现。
+验收或用户 gate。新提交仍由非作者复核，M0 执行仍须通过当前 plan review。
 
 ## 依赖与实现步骤
 
@@ -58,7 +59,7 @@ Dora 设备使用容器构建出的 APK，安装命令由 devcontainer 内通过
 6. 治理收尾先登记上述三文件范围，再将已审查的工具链约束同步到项目手写规则，
    引用 [scope-trim 审查](../reviews/scope-trim-review.md) 和
    [工具链审查](../reviews/android-toolchain-review.md) 的实际 PASS／适用提交，明确
-   仍等待用户批准 M0；检查三文件 diff 和本地链接后原子提交，交非作者复核。
+   M0 已获用户批准但仍等待当前 execution plan review；检查三文件 diff 和本地链接后原子提交，交非作者复核。
 
 ## 验收与证据
 
@@ -72,7 +73,7 @@ Dora 设备使用容器构建出的 APK，安装命令由 devcontainer 内通过
   提交的完整 SHA。上述检查只证明文档一致性，不证明容器、APK、Go、Android、
   USB、SMB、Dora 或发布验证已通过。
 - 治理收尾仅修改 `AGENTS.md`、`docs/implementation-plan.md` 和本文件；规则的工具链
-  条款与已审查约束一致，状态链接指向真实 PASS 记录并明确等待用户批准 M0。
+  条款与已审查约束一致，状态链接指向真实 PASS 记录并明确 M0 已批准、execution plan review 仍待完成。
 
 ## 停止条件
 
@@ -88,7 +89,7 @@ Dora 设备使用容器构建出的 APK，安装命令由 devcontainer 内通过
 
 ## 用户 gate
 
-本计划及其文档修订完成独立计划／实现审查后，交用户审阅当前 Android 工具链
-约束和 M0–M2 验收边界。用户明确批准对应 milestone 前，不开始 Android／Go
-实现、真实 APK 构建、Dora 设备验证或发布准备；内部 review、提交或 CI 不代替
-用户决定。
+本计划及其文档修订已交用户审阅；M0 V01–V05 的用户批准记录在
+`docs/plans/m0-implementation-execution.md`。在该 execution plan 通过独立 plan
+review 前，不开始 Android／Go 实现、真实 APK 构建或 Dora 设备验证；M1、M0-UI、M2
+和 M3 仍各自需要用户决定。内部 review、提交或 CI 不代替后续用户决定。

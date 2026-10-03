@@ -34,20 +34,21 @@ device.  The remote content must be read back and compared by SHA-256.  Cancel
 and process termination must not report completion without evidence, and a
 completed local copy must remain available for reconciliation.
 
-The execution owner is the M0 implementation agent recorded by the coordinator
-in the task register; the plan author is `android_toolchain_author` and the
-coordinator is `/root`.  Each package has one implementation owner and one
-reviewer.  The plan author and package author cannot be the independent plan,
-integrated, or device reviewer.  The coordinator assigns a non-author reviewer
-and records the reviewer identity, model/reasoning, commit SHA, findings, and
-recheck before calling a gate passed.
+The execution owner is `/root`, which directly owns plan and implementation work
+in this session.  `android_toolchain_reviewer` is the independent review agent;
+it does not implement packages.  Each package has one implementation owner and
+one reviewer.  The plan author and package author cannot be the independent
+plan, integrated, or device reviewer.  The coordinator records the reviewer
+identity, model/reasoning, commit SHA, findings, and recheck before calling a
+gate passed.
 
-This approval/DAG revision owns only this file, `docs/implementation-plan.md`,
-`docs/plans/m0.md`, `docs/agent-workflow.md`,
-`docs/plans/repository-bootstrap.md`, and conflicting status lines in the
-project's handwritten `AGENTS.md`.  Later implementation commits must keep the
-file ownership below and must not mix unrelated UI, iOS, release, or GitHub
-changes into an M0 package.
+This approval/DAG revision owns only the current-status edits in
+`AGENTS.md`, `README.md`, `docs/implementation-plan.md`, `docs/agent-workflow.md`,
+`docs/plans/m0.md`, `docs/plans/scope-trim.md`,
+`docs/plans/android-toolchain-constraint.md`,
+`docs/plans/repository-bootstrap.md`, and this execution plan.  Later
+implementation commits must keep the file ownership below and must not mix
+unrelated UI, iOS, release, or GitHub changes into an M0 package.
 
 ## Dependencies and entry conditions
 
@@ -112,19 +113,20 @@ edit:
 
 | Package | Implementation owner | Independent reviewer | Model/reasoning | Branch/worktree | Task-register/issue reference |
 | --- | --- | --- | --- | --- | --- |
-| Execution plan | `android_toolchain_author` | Coordinator-assigned non-author plan reviewer (pending) | Coordinator records actual author/reviewer model and reasoning (pending) | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | This file; [task register](../implementation-plan.md) |
-| M0-A1 | Coordinator-assigned A1 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #3 |
-| M0-A2 | Coordinator-assigned A2 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #4 |
-| M0-A3 | Coordinator-assigned A3 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #5 |
-| M0-A4 | Coordinator-assigned A4 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #6 |
-| M0-A5 | Coordinator-assigned A5 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #7 |
-| M0-A6 | Coordinator-assigned A6 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), existing issue #8 |
-| M0-C1 | Coordinator-assigned C1 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), issue reference pending assignment |
-| M0-C2 | Coordinator-assigned C2 owner (pending) | Coordinator-assigned non-author reviewer (pending) | Actual implementation/review model and reasoning pending assignment | Package branch/worktree pending assignment | [Task register](../implementation-plan.md), issue reference pending assignment |
-| M0-R0 | Coordinator-assigned non-author integrated/device reviewer (pending) | Coordinator records findings/recheck (pending) | Actual review model and reasoning pending assignment | Review worktree fixed to reviewed SHA (pending) | [Task register](../implementation-plan.md), existing issue #13 |
+| Execution plan | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | This file; [task register](../implementation-plan.md) |
+| M0-A1 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #3 |
+| M0-A2 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #4 |
+| M0-A3 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #5 |
+| M0-A4 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #6 |
+| M0-A5 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #7 |
+| M0-A6 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #8 |
+| M0-C1 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #22 |
+| M0-C2 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #23 |
+| M0-R0 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | Review worktree fixed to reviewed SHA | [Task register](../implementation-plan.md), issue #13 |
 
-No package implementation may begin until its owner, reviewer, model/reasoning,
-branch/worktree, and task-register/issue fields are populated.
+All package owner, reviewer, model/reasoning, branch/worktree, and
+task-register/issue fields are now populated above.  A later change to those
+assignments requires a coordinator update and affected review before editing.
 
 ## Container and external action boundary
 
