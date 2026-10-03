@@ -22,10 +22,11 @@ record server identity, isolated share, short-lived credential reference,
 connection path, temporary create, `Sync`, server-side no-replace rename,
 readback size/SHA-256, and cleanup.
 
-The caller owns the injected TCP connection. go-smb2 combines SMB negotiation
-and NTLM authentication in `DialContext`, so those errors are reported as
-`authenticate`; share mounting is reported as `connect`. The client does not
-guess a finer split from error text.
+The caller provides the injected TCP connection and ownership transfers to a
+successfully constructed `Client`; `Client.Close` unmounts, logs off, and closes
+it. go-smb2 combines SMB negotiation and NTLM authentication in `DialContext`,
+so those errors are reported as `authenticate`; share mounting is reported as
+`connect`. The client does not guess a finer split from error text.
 
 The go-smb2 v1.1.0 `Share.Rename` request sets SMB
 `FileRenameInformation.ReplaceIfExists=0`; a final-name collision must remain a

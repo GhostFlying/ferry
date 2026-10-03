@@ -7,8 +7,10 @@ start A4 tsnet, A5 probe UI, M0-C1 credentials, Dora operations, M1, or iOS.
 ## Goal and boundaries
 
 A3 will implement the controlled SMB upload backend used by the bridge. The
-client receives an already-created `net.Conn`; it never opens a second socket,
-uses a host mount, or relies on a system VPN. It will use the pinned
+client receives an already-created `net.Conn` and takes ownership of it after
+successful construction; `Client.Close` unmounts, logs off, and closes that
+connection. It never opens a second socket, uses a host mount, or relies on a
+system VPN. It will use the pinned
 `github.com/hirochachacha/go-smb2 v1.1.0` client and expose a small upload
 operation that:
 
