@@ -14,7 +14,7 @@ On 2026-10-04, in the immutable local recovery image
 `v0.0.0-20260908204917-8b95e45f8d3e`, Gradle wrapper 8.10.2 with distribution
 SHA-256 `31c55713e40233a8303827ceb42ca48a47267a0ad4bab9177123121e71524c26`,
 arm64-v8a, and AAR SHA-256
-`1604f60fc00629dcdb48ebbf22f21f671d464649a7cc62b29feb22d905f4d2b5`.
+`ce485261af57642bc154fde7ed25860e9757b8ab352c38a7500c7dc0232a0a3b`.
 
 The exact local-recovery command used for this run was:
 
