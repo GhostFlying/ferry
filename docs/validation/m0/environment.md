@@ -16,7 +16,8 @@ be retried once daemon registry access is available.
 The source of truth is [`.devcontainer/Dockerfile`](../../.devcontainer/Dockerfile)
 and [`experiments/toolchains.env`](../../experiments/toolchains.env). The base
 image is pinned by digest. Android command-line tools, platform 35,
-build-tools 35.0.0, NDK 27.2.12479018, Go 1.27.1, and Gradle 8.10.2 are pinned
+build-tools 35.0.0, NDK 27.2.12479018, compileSdk/targetSdk 35, Go 1.27.1,
+and Gradle 8.10.2 are pinned
 with download SHA-256 values where applicable. Android `minSdk` is 29 and the
 initial artifact ABI is `arm64-v8a`.
 

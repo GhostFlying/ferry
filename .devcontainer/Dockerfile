@@ -16,7 +16,13 @@ ENV ANDROID_HOME=/opt/android-sdk \
     PATH=/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:/opt/gradle/bin:/usr/local/go/bin:/go/bin:${PATH}
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y ca-certificates curl git unzip xz-utils bash coreutils make \
+    && apt-get install --no-install-recommends -y \
+        ca-certificates=20260601~22.04.1 \
+        curl=7.81.0-1ubuntu1.29 \
+        git=1:2.34.1-1ubuntu1.17 \
+        unzip=6.0-26ubuntu3.2 \
+        xz-utils=5.2.5-2ubuntu1.1 \
+        make=4.3-4.1build1 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /opt/android-sdk/cmdline-tools /opt/gradle \
