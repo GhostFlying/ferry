@@ -1,76 +1,59 @@
 # M0-A4 App-internal tsnet implementation plan
 
-Status: `proposed`; write this plan before implementation and obtain an
-independent review. A4 stays within the approved M0 Android protocol scope;
-it does not start A5 probe UI, M1 automation, iOS, or device operations.
+Status: `proposed`; revised after independent review of `65a8392`.
+A4 implements the approved M0 Android protocol path. It does not start UI,
+M1 automation, iOS, device operations, or a general network policy engine.
 
-## Goal and boundaries
+## Work and ownership
 
-A4 will provide a small Go module that owns an embedded `tailscale.com/tsnet`
-server and returns a `net.Conn` from its `Server.Dial` path for the A3 SMB
-backend. The module will pin a released Tailscale version, accept an explicit
-short-lived auth-key reference/value and target address from its caller, keep
-the state directory ephemeral for the M0 experiment, and close the server on
-all normal and failure paths. It will report login, dial, and close stages
-separately without logging keys, peer lists, or private Tailnet state.
+Use pinned `tailscale.com v1.104.0` in `experiments/tsnet/` to start an embedded
+`tsnet.Server`, expose interactive login to the caller, and dial the C1 test
+SMB endpoint with `Server.Dial(ctx, "tcp", target)`. Keep Go code independent
+of Android UI and URI types. Own only this module, its tests/Makefile, and
+`docs/validation/m0/tsnet.md`. Later A2 composition adapts the exported API
+inside `mobile-core` and adds local module `require`/`replace` entries.
 
-A4 does not add a system VPN, host `tailscale` CLI dependency, direct host SMB
-socket, credential storage, persistent identity, or a second network path. A
-fake dialer seam covers state/error behavior in unit tests; C1/V04 is the only
-real tsnet-to-SMB evidence. `tsnet` connectivity alone is not content-transfer
-success.
+Dependencies: A1 pinned toolchain and A2/A3 source work. A2 reviewed target is
+`94c2df793f247b79d3828fb47c60df35a90714b7` (review `ba00ee2`); A3 final target
+is `c887980a8f96deea138e3f869fab3baa319200d5` (review `3cdab7a`). Builds/tests
+run in the Ferry devcontainer only. Missing C1/lease blocks experiments rather
+than source work. All module versions/sums are recorded before build evidence.
 
-## Files and ownership
+## Contract and implementation
 
-- `experiments/tsnet/go.mod`, `go.sum`, and Go source/tests: pinned tsnet
-  lifecycle, dial boundary, redacted status, and fake dialer tests.
-- `docs/validation/m0/tsnet.md`: fixed-container commands, injected secret
-  contract, route evidence, C1/V04 procedure, and blocked/untested boundaries.
+1. A caller-owned client handle owns one tsnet server and an A4-created,
+   already-existing temporary state directory. Caller sets a diagnostic
+   hostname and the exact C1-authorized endpoint. No exit node, fallback
+   socket, system VPN, or host CLI is configured. Validate host:port syntax;
+   do not introduce broad address firewalls or additional route policies.
+2. Preserve the M0 interactive-login requirement. The client exposes a login
+   URL via a dedicated callback to open on the device, and emits only simple
+   login/dial/closed status. Login URLs, raw auth keys, peers and node state
+   must not go to public logs or manifests. An optional short-lived key may
+   be supplied by the caller from a protected secret reference; A4 does not
+   read ambient keys or invent secret storage.
+3. `Up`/login runs under caller context; `DialSMB` uses the same embedded
+   server. Dial success is a connection result, never upload completion.
+4. A3 takes ownership of a successfully injected connection. Caller closes
+   A3 Client first, then A4 handle. A4 handle `Close` stops its server and
+   removes only its own temporary directory. Failed startup/dial paths close
+   the A4 handle. `Close` is idempotent and is not concurrent with startup;
+   this M0 probe does not need a generic lifecycle framework.
+5. Silence tsnet debug/user logging by default, explicitly forwarding the
+   login URL through the private callback. Wrap errors at login/dial/close
+   boundaries and do not log raw library errors with private node state.
 
-A4 may not modify A2 bridge, A3 SMB, Android project, devcontainer, C1
-credentials, or device harness. A later A2-owned composition file wires the
-exported dial result into the mobile-core backend seam.
+## Acceptance
 
-## Dependencies and environment
-
-- A1 PASS target `3921c4959c9b50eab5b18dae1839dfcfb77bdb1f` and review
-  `c5f6103ae63d9c2042225390c6c3f5dcdeddc262`.
-- A2 final boundary `c887980a8f96deea138e3f869fab3baa319200d5` and A3 final
-  implementation `f3c830811197857f3bfebba2d2556f173bbc1102`; A4 does not edit
-  either module.
-- Fixed Ferry devcontainer and explicit `FERRY_SOURCE_SHA`; no host Go or
-  network result is evidence. The current Docker registry timeout blocks
-  runtime checks.
-- `tailscale.com v1.104.0` and transitive sums are pinned. Auth keys and
-  Tailnet addresses are test inputs only and never committed or printed.
-
-## Implementation steps
-
-1. Add the module and pin `tailscale.com v1.104.0`; define a small `Config`
-   with injected auth-key reference, hostname, state-directory policy, and
-   target address, rejecting empty or malformed values.
-2. Start `tsnet.Server`, call `Up` with the supplied context, and expose a
-   `DialSMB` method that uses `Server.Dial(ctx, "tcp", target)`; wrap errors
-   with login/dial stages and return only the connection, never credentials.
-3. Implement idempotent close and cleanup for partial startup, cancellation,
-   and successful dial; ensure the ephemeral state directory is removed by
-   the owner after close.
-4. Add fake dialer/lifecycle tests for config validation, login/dial error
-   mapping, cancellation, close idempotence, and secret redaction. Do not
-   claim a real Tailnet route in unit tests.
-5. Write the C1/V04 validation procedure separating tsnet dial success from
-   SMB content readback; mark it `NOT_RUN` until an authorized fixture and
-   fresh Dora lease exist.
-
-## Acceptance and evidence
-
-| ID | PASS condition | Evidence |
+| ID | PASS condition | Evidence and environment |
 | --- | --- | --- |
-| A4-01 | Locked-container Go tests pass with tsnet module sums and no host CLI dependency | source SHA, container manifest, test/static output, module lock |
-| A4-02 | App-internal tsnet starts with injected short-lived input and `Server.Dial` returns the expected target connection; status is redacted | lifecycle trace, target/route identity without secrets, stage result |
-| A4-03 | Cancellation, partial startup, and close remove ephemeral state and do not leak auth key or peer data | cleanup trace, redacted logs, state-directory check |
-| A4-04 | C1/V04 separately proves tsnet connection and complete SMB upload/readback SHA-256 | Dora lease, route evidence, local/remote hash, cleanup; otherwise `BLOCKED`/`NOT_RUN` |
+| A4-01 | Fake-server tests verify lifecycle, callback/status and error stages; syntax/config checks reject missing inputs; container checks pass | pinned devcontainer, full SHA, module lock, test report |
+| A4-02 | Real tsnet starts and logs in interactively, then dials the exact C1 endpoint through its `Server.Dial` | C1 + fresh Dora lease; private login interaction, redacted route/result; otherwise NOT_RUN |
+| A4-03 | Success/error/cancel close sequences remove only A4-owned temporary state and keep secrets out of output | deterministic lifecycle tests; device cleanup record separately |
+| A4-04 | SMB upload/readback is separately recorded with matching SHA-256 | A3/C1/C2; a TCP-only or fake-dial success cannot pass V04 |
 
-Missing container, auth-key reference, authorized Tailnet route, C1 fixture, or
-fresh Dora lease blocks only the corresponding runtime gate. A fake dialer or
-successful TCP connection cannot be reported as complete SMB transfer.
+Stop on unsupported Android build, leaked secret, failed cleanup, or erroneous
+completion claim. Missing container/C1/interactive login/physical lease keeps
+only the corresponding runtime check BLOCKED/NOT_RUN. Root implements; an
+independent reviewer checks plan and resulting code. No milestone scope or
+user acceptance criteria change.
