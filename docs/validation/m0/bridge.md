@@ -25,5 +25,8 @@ Gradle, Java, Android SDK, or host-built AAR output is not evidence.
 Expected vectors are: successful fake transfer emits progress then one complete;
 cancellation emits one `cancelled` terminal error and no complete; structured
 backend errors preserve their code/message; invalid progress is ignored; and
-late progress after terminal state is ignored. SMB and tsnet results remain
+late progress after terminal state is ignored. Callback methods are invoked by
+the bridge's dedicated per-operation dispatcher goroutine, never directly by
+the backend worker; a future Android adapter must marshal them to its required
+executor. SMB and tsnet results remain
 `NOT_RUN` until A3/A4 integration.

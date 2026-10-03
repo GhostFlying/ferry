@@ -1,5 +1,6 @@
 GO_MODULE := github.com/GhostFlying/ferry/experiments/mobile-core
 GOMOBILE_VERSION := v0.0.0-20260908204917-8b95e45f8d3e
+GOBIND_VERSION := v0.0.0-20260908204917-8b95e45f8d3e
 GRADLE_VERSION := 8.10.2
 
 .PHONY: test aar manifest
@@ -22,4 +23,4 @@ aar:
 
 manifest:
 	$(call require_container)
-	./manifest.sh dist/ferry-mobile-core.aar
+	GOMOBILE_VERSION=$(GOMOBILE_VERSION) GOBIND_VERSION=$(GOBIND_VERSION) ./manifest.sh dist/ferry-mobile-core.aar

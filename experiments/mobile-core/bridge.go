@@ -10,6 +10,9 @@ import (
 const ContractVersion = "m0.bridge.v1"
 
 type Callback interface {
+	// Methods are invoked by the bridge's per-operation dispatcher goroutine,
+	// never directly from the backend worker. Android adapters may marshal them
+	// to their required UI or service executor.
 	OnProgress(operationID string, completedBytes int64, totalBytes int64)
 	OnComplete(operationID string)
 	OnError(operationID string, code string, message string)
