@@ -39,6 +39,6 @@ printf 'apt_dependencies=%s\n' "$APT_DEPENDENCIES"
 printf 'artifact_sha256=NOT_APPLICABLE\n'
 printf 'java_version='; java -version 2>&1 | head -1
 printf 'go_version='; go version
-printf 'gradle_version='; gradle --version | awk '/Gradle / { print $2; exit }'
-printf 'sdkmanager_version='; sdkmanager --version
+printf 'gradle_version='; gradle --version 2>/dev/null | awk '/^Gradle [0-9]/ { print $2; exit }'
+printf 'sdkmanager_version='; sdkmanager --version 2>/dev/null | awk '/^[0-9]/ { print; exit }'
 printf '%s\n' 'FERRY_TOOLCHAIN_MANIFEST_END'
