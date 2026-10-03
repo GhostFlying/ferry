@@ -24,7 +24,8 @@ operation that:
    SHA-256 before returning complete; and
 6. removes only the operation-owned temporary file on failure or cancellation.
 
-The backend reports connection/authentication, remote-create, write/flush,
+The backend reports injected-connection/share-mount, SMB negotiation/authentication,
+remote-create, write/flush,
 rename/no-replace, readback, and cancellation errors separately. It does not
 delete or replace an existing final object. A unit-test seam covers path rules,
 temporary-name ownership, hash accounting, and error mapping; only C1/V03
@@ -44,6 +45,12 @@ and A4 are available, the later A2-owned composition file will add local
 modules and adapt their exported backend types to the package-private seam.
 That composition change is owned by A2; A3 does not edit the mobile-core
 module.
+
+Because the injected TCP connection is already established and go-smb2's
+`DialContext` combines SMB negotiation with NTLM authentication in one call,
+those two wire stages are reported as `authenticate`; share mounting is
+reported as `connect`. The implementation does not infer a finer-grained
+transport/auth split from library error text.
 
 ## Dependencies and environment
 
