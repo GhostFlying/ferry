@@ -4,6 +4,15 @@ Status: A1 implementation in progress. This document records the pinned
 container boundary; it is not APK, bridge, device, SMB, tsnet, or transfer
 evidence.
 
+Current verification result: `BLOCKED`. On 2026-10-04, the exact command
+`docker build --pull=false --tag ferry-m0-devcontainer:20261004 --file
+.devcontainer/Dockerfile .` could not resolve the pinned Docker Hub manifest
+because the Docker daemon timed out reaching `registry-1.docker.io`. The same
+base image was retrieved through `skopeo` and imported into the daemon, but the
+digest-qualified `FROM` still required registry resolution. No host toolchain,
+unpinned tag, host-built APK, or substitute container was used; the build must
+be retried once daemon registry access is available.
+
 The source of truth is [`.devcontainer/Dockerfile`](../../.devcontainer/Dockerfile)
 and [`experiments/toolchains.env`](../../experiments/toolchains.env). The base
 image is pinned by digest. Android command-line tools, platform 35,
