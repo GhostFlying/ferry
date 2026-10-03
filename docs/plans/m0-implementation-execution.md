@@ -59,11 +59,10 @@ The M0 implementation DAG has only these universal entry conditions:
 2. The user has explicitly approved M0 and its current V01–V05 scope as recorded
    above.  Internal review, an issue, a PR, or a successful CI run cannot
    substitute for this decision.
-3. A usable devcontainer runtime is available.  A1 may first write the pinned
-   container definition; that definition need not exist before A1 begins.
-   Every build, test, and SDK-installation verification waits until the
-   definition is fully pinned and the runtime is available, then runs only
-   inside the container.  The Dockerfile must pin the `FROM` base-image digest and the
+3. A1 has an assigned owner and may write the pinned container definition without
+   a local runtime.  Every build, test, and SDK-installation verification waits
+   until the definition is fully pinned and a usable runtime is available, then
+   runs only inside the container.  The Dockerfile must pin the `FROM` base-image digest and the
    SDK/JDK/NDK/Go/Gradle/dependency versions, or an equivalent auditable manifest
    must do so.  An unpinned Dockerfile is not a locked toolchain.  Dependency
    caches must be rebuildable volumes.  If the runtime or lock is unavailable,
@@ -88,7 +87,7 @@ before an agent edits a file.
 
 | Package | Owner-controlled files | Work and output | Dependencies |
 | --- | --- | --- | --- |
-| A1 toolchain/delivery | `experiments/README.md`, `experiments/toolchains.*`, devcontainer files, `docs/validation/m0/environment.md` | Write and pin the container definition and rebuildable cache volumes; emit the toolchain manifest and evidence-record format before any build/test/SDK-installation verification | Available runtime; A1 creates the pinned definition |
+| A1 toolchain/delivery | `experiments/README.md`, `experiments/toolchains.*`, devcontainer files, `docs/validation/m0/environment.md` | Write and pin the container definition and rebuildable cache volumes; emit the toolchain manifest and evidence-record format before any build/test/SDK-installation verification | Assigned owner; runtime is required only for subsequent container verification |
 | A2 Go/Android bridge | `experiments/mobile-core/`, `docs/validation/m0/bridge.md` | Build the real Go AAR and bridge contract; exercise operation IDs, 64-bit counts, structured errors, callback-thread and cancellation behavior | A1 |
 | A3 controlled SMB | `experiments/smb/`, `docs/validation/m0/smb.md` | Use an injected `net.Conn`; enforce exclusive creation, flush, readback hash, and server no-replace behavior | A1; container-local fixture/contract is sufficient before C1 |
 | M0-C1 fixture/network | `experiments/test-smb/`, `docs/validation/m0/network-environment.md` | Prepare the isolated service, account, route, fixture, and cleanup evidence | Universal entry conditions plus service-owner availability; does not block pure implementation |
@@ -98,14 +97,14 @@ before an agent edits a file.
 | M0-C2 device harness | `experiments/device-harness/`, `docs/validation/m0/dora-android.md` | Use the fresh lease to install/call the container-built APK, run V02/V04/V05, and clean up in `finally` | A6, C1, fresh lease; A3/A4/A5 are transitive dependencies |
 | R0 integrated/device review | `docs/validation/m0/report.md` and review records | Recheck final SHA, paths, hashes, gate results, cleanup, and stop conditions | A1–A6, C1/C2 |
 
-After A1, A2 and A3 proceed in parallel by their direct dependencies; C1 may
-prepare its external fixture independently.  A4 starts after A2 and A3.  A5
-starts after its bridge/network direct dependencies (A2/A4), and A6 starts after
-the real bridge and probe exist.  C1 readiness and a fresh physical lease do
-not block A2/A3/A4/A5/A6 pure container or controlled-service work.  C2 starts
-only after A6, C1, and a freshly verified physical lease.  C2 is serialised to
-one device operator and one session-local lease.  R0 is always performed by an
-agent who did not author the reviewed implementation.
+To keep one owner and one worktree auditable, `/root` executes A1, A2, A3, A4,
+A5, and A6 sequentially in the registered worktree; no parallel implementation
+tasks share that worktree.  C1 service preparation is an external prerequisite
+only for its later experiment and does not block the sequential container work.
+A4 starts after A2 and A3, A5 after A2 and A4, and A6 after the real bridge and
+probe exist.  C2 starts only after A6, C1, and a freshly verified physical
+lease, and is serialised to one device operator and one session-local lease. R0
+is always performed by an agent who did not author the reviewed implementation.
 
 Before implementation, the coordinator must populate this assignment record;
 an unassigned row is a stop condition and cannot be treated as permission to
@@ -113,16 +112,16 @@ edit:
 
 | Package | Implementation owner | Independent reviewer | Model/reasoning | Branch/worktree | Task-register/issue reference |
 | --- | --- | --- | --- | --- | --- |
-| Execution plan | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | This file; [task register](../implementation-plan.md) |
-| M0-A1 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #3 |
-| M0-A2 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #4 |
-| M0-A3 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #5 |
-| M0-A4 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #6 |
-| M0-A5 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #7 |
-| M0-A6 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #8 |
-| M0-C1 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #22 |
-| M0-C2 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #23 |
-| M0-R0 | `/root` | `android_toolchain_reviewer` | Root: current session model/reasoning; reviewer: recorded in review report | Review worktree fixed to reviewed SHA | [Task register](../implementation-plan.md), issue #13 |
+| Execution plan | `/root` | `/root/m0_plan_reviewer_astra` | Root: inherited session model, no override; reviewer: `gpt-6-astra/high` | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | This file; [task register](../implementation-plan.md) |
+| M0-A1 | `/root` | `/root/m0_plan_reviewer_astra` | Root: inherited session model, no override; reviewer: `gpt-6-astra/high` | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #3 |
+| M0-A2 | `/root` | `/root/m0_plan_reviewer_astra` | Root: inherited session model, no override; reviewer: `gpt-6-astra/high` | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #4 |
+| M0-A3 | `/root` | `/root/m0_plan_reviewer_astra` | Root: inherited session model, no override; reviewer: `gpt-6-astra/high` | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #5 |
+| M0-A4 | `/root` | `/root/m0_plan_reviewer_astra` | Root: inherited session model, no override; reviewer: `gpt-6-astra/high` | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #6 |
+| M0-A5 | `/root` | `/root/m0_plan_reviewer_astra` | Root: inherited session model, no override; reviewer: `gpt-6-astra/high` | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #7 |
+| M0-A6 | `/root` | `/root/m0_plan_reviewer_astra` | Root: inherited session model, no override; reviewer: `gpt-6-astra/high` | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #8 |
+| M0-C1 | `/root` | `/root/m0_plan_reviewer_astra` | Root: inherited session model, no override; reviewer: `gpt-6-astra/high` | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #22 |
+| M0-C2 | `/root` | `/root/m0_plan_reviewer_astra` | Root: inherited session model, no override; reviewer: `gpt-6-astra/high` | `feat/m0-android-protocol`; `../ferry-worktrees/m0-implementation-20261003` | [Task register](../implementation-plan.md), issue #23 |
+| M0-R0 | `/root` | `/root/m0_plan_reviewer_astra` | Root: inherited session model, no override; reviewer: `gpt-6-astra/high` | Review worktree fixed to reviewed SHA | [Task register](../implementation-plan.md), issue #13 |
 
 All package owner, reviewer, model/reasoning, branch/worktree, and
 task-register/issue fields are now populated above.  A later change to those
