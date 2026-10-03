@@ -9,7 +9,7 @@ Plan: `8e25dd36c50231346d21a77af8e73a75481ad5f3`; plan review `2cbbc75`.
 
 The fixed-container unit-test command was run on 2026-10-04 in the immutable
 local recovery image `ferry-m0-devcontainer:recovery-test`, source SHA
-`2415047d10224308e49b81178d004c672018187c`, with `make test` passing. The
+`81785561d3c3f5cdb3f64f5905966fcd642357bc`, with `make test` passing. The
 test uses the container's network proxy only to fetch the pinned module sums;
 no SMB server was contacted.
 
