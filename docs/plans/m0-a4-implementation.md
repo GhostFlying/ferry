@@ -1,6 +1,7 @@
 # M0-A4 App-internal tsnet implementation plan
 
-Status: `proposed`; revised after independent review of `65a8392`.
+Status: `approved for implementation`; independently reviewed `PASS` in
+`9ebd146` against the revised contract at `62c3160`.
 A4 implements the approved M0 Android protocol path. It does not start UI,
 M1 automation, iOS, device operations, or a general network policy engine.
 
@@ -14,10 +15,11 @@ of Android UI and URI types. Own only this module, its tests/Makefile, and
 inside `mobile-core` and adds local module `require`/`replace` entries.
 
 Dependencies: A1 pinned toolchain and A2/A3 source work. A2 reviewed target is
-`94c2df793f247b79d3828fb47c60df35a90714b7` (review `ba00ee2`); A3 final target
-is `c887980a8f96deea138e3f869fab3baa319200d5` (review `3cdab7a`). Builds/tests
-run in the Ferry devcontainer only. Missing C1/lease blocks experiments rather
-than source work. All module versions/sums are recorded before build evidence.
+`94c2df793f247b79d3828fb47c60df35a90714b7` (review `ba00ee2`); A3 source is
+currently at `c766c06289db1e092c250602da7f3b3ce5087f8f` with unit-test evidence
+awaiting the cumulative implementation review. Builds/tests run in the Ferry
+devcontainer only. Missing C1/lease blocks experiments rather than source work.
+All module versions/sums are recorded before build evidence.
 
 ## Contract and implementation
 
