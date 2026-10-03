@@ -67,7 +67,7 @@ func TestLifecycleAndDial(t *testing.T) {
 	dir := t.TempDir()
 	fake := &fakeBackend{}
 	var statuses []string
-	client := newClientForTest(fake, dir, func(status string) { statuses = append(statuses, status) })
+	client := newClientForTest(fake, dir, "server:445", func(status string) { statuses = append(statuses, status) })
 	if err := client.Start(context.Background()); err != nil {
 		t.Fatalf("Start: %v", err)
 	}
@@ -93,13 +93,47 @@ func TestLifecycleAndDial(t *testing.T) {
 	}
 }
 
+func TestDialRequiresStartedConfiguredTargetAndContext(t *testing.T) {
+	client := newClientForTest(&fakeBackend{}, t.TempDir(), "server:445", nil)
+	if _, err := client.DialSMB(context.Background(), "other:445"); err == nil {
+		t.Fatal("DialSMB accepted an alternate endpoint")
+	}
+	if _, err := client.DialSMB(context.Background(), "server:445"); err == nil {
+		t.Fatal("DialSMB started an unstarted client")
+	}
+	if err := client.Start(nil); err == nil {
+		t.Fatal("Start accepted nil context")
+	}
+	if _, err := client.DialSMB(nil, "server:445"); err == nil {
+		t.Fatal("DialSMB accepted nil context")
+	}
+}
+
+func TestCloseBeforeStartOnlyRemovesState(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "state")
+	if err := os.Mkdir(dir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	fake := &fakeBackend{}
+	client := newClientForTest(fake, dir, "server:445", nil)
+	if err := client.Close(); err != nil {
+		t.Fatalf("Close: %v", err)
+	}
+	if fake.closeCalls != 0 {
+		t.Fatalf("close calls = %d, want 0", fake.closeCalls)
+	}
+	if _, err := os.Stat(dir); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("state dir still exists: %v", err)
+	}
+}
+
 func TestStartErrorClosesAndRemovesState(t *testing.T) {
 	dir := filepath.Join(t.TempDir(), "state")
 	if err := os.Mkdir(dir, 0o700); err != nil {
 		t.Fatal(err)
 	}
 	fake := &fakeBackend{upErr: errors.New("login failed")}
-	client := newClientForTest(fake, dir, nil)
+	client := newClientForTest(fake, dir, "server:445", nil)
 	err := client.Start(context.Background())
 	var stageErr *StageError
 	if !errors.As(err, &stageErr) || stageErr.Stage != StageStart {

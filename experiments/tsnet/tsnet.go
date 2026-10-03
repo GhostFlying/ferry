@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"sync"
 
 	"tailscale.com/ipn/ipnstate"
@@ -53,10 +54,12 @@ type backend interface {
 type Client struct {
 	backend backend
 	dir     string
+	target  string
 	status  func(string)
 
-	mu     sync.Mutex
-	closed bool
+	mu      sync.Mutex
+	closed  bool
+	started bool
 }
 
 func New(cfg Config) (*Client, error) {
@@ -77,7 +80,7 @@ func New(cfg Config) (*Client, error) {
 		AuthKey:  cfg.AuthKey,
 		UserLogf: userLogf(cfg.OnLoginURL),
 	}
-	return &Client{backend: server, dir: dir, status: cfg.OnStatus}, nil
+	return &Client{backend: server, dir: dir, target: cfg.Target, status: cfg.OnStatus}, nil
 }
 
 func validateConfig(cfg Config) error {
@@ -87,6 +90,10 @@ func validateConfig(cfg Config) error {
 	host, port, err := net.SplitHostPort(cfg.Target)
 	if err != nil || host == "" || port == "" {
 		return fmt.Errorf("target must be host:port: %q", cfg.Target)
+	}
+	portNumber, err := strconv.ParseUint(port, 10, 16)
+	if err != nil || portNumber == 0 {
+		return fmt.Errorf("target must use a numeric port: %q", cfg.Target)
 	}
 	if parsed, err := url.Parse("tcp://" + cfg.Target); err != nil || parsed.Host != cfg.Target {
 		return fmt.Errorf("target must be a tcp host:port: %q", cfg.Target)
@@ -107,11 +114,15 @@ func userLogf(onLoginURL func(string)) func(string, ...any) {
 }
 
 func (c *Client) Start(ctx context.Context) error {
+	if ctx == nil {
+		return &StageError{Stage: StageStart, Err: errors.New("nil context")}
+	}
 	c.mu.Lock()
 	if c.closed {
 		c.mu.Unlock()
 		return &StageError{Stage: StageStart, Err: net.ErrClosed}
 	}
+	c.started = true
 	c.mu.Unlock()
 	if c.status != nil {
 		c.status("starting")
@@ -130,17 +141,26 @@ func (c *Client) Start(ctx context.Context) error {
 }
 
 func (c *Client) DialSMB(ctx context.Context, target string) (net.Conn, error) {
+	if ctx == nil {
+		return nil, &StageError{Stage: StageDial, Err: errors.New("nil context")}
+	}
 	if target == "" {
 		return nil, &StageError{Stage: StageConfig, Err: errors.New("target is required")}
 	}
 	if err := validateConfig(Config{Target: target}); err != nil {
 		return nil, &StageError{Stage: StageConfig, Err: err}
 	}
+	if target != c.target {
+		return nil, &StageError{Stage: StageConfig, Err: fmt.Errorf("target does not match configured endpoint: %q", target)}
+	}
 	c.mu.Lock()
-	closed := c.closed
+	closed, started := c.closed, c.started
 	c.mu.Unlock()
 	if closed {
 		return nil, &StageError{Stage: StageDial, Err: net.ErrClosed}
+	}
+	if !started {
+		return nil, &StageError{Stage: StageDial, Err: errors.New("client is not started")}
 	}
 	if c.status != nil {
 		c.status("dialing")
@@ -165,8 +185,13 @@ func (c *Client) Close() error {
 
 func (c *Client) closeBackend() error {
 	var errs []error
-	if err := c.backend.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
-		errs = append(errs, &StageError{Stage: StageClose, Err: err})
+	c.mu.Lock()
+	started := c.started
+	c.mu.Unlock()
+	if started {
+		if err := c.backend.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
+			errs = append(errs, &StageError{Stage: StageClose, Err: err})
+		}
 	}
 	if c.dir != "" {
 		if err := os.RemoveAll(filepath.Clean(c.dir)); err != nil {
@@ -179,6 +204,6 @@ func (c *Client) closeBackend() error {
 	return errors.Join(errs...)
 }
 
-func newClientForTest(b backend, dir string, status func(string)) *Client {
-	return &Client{backend: b, dir: dir, status: status}
+func newClientForTest(b backend, dir, target string, status func(string)) *Client {
+	return &Client{backend: b, dir: dir, target: target, status: status}
 }
