@@ -21,15 +21,18 @@
 当前计划规定 Android 默认 `minSdk 29`（Android 10），不处理 Android 9 及更低
 版本。`compileSdk`／`targetSdk` 可以较新，但实际 API 号只能在实现开始前由
 devcontainer 内锁定的稳定工具链确定并记录。未来 M0–M2 的构建、单测、静态检查、
-Go／Android bridge 和 APK 产物必须在固定镜像 digest／manifest 或 Dockerfile
-定义的 devcontainer 内执行；依赖缓存用可重建卷，证据记录完整源码 SHA、工具链、
-ABI 和产物 SHA-256。
+Go／Android bridge 和 APK 产物必须在 devcontainer 内执行；其 Dockerfile 必须 pin
+`FROM` 的 base image digest 以及 SDK／JDK／NDK／Go／Gradle／依赖版本，或使用等价的
+可审计 manifest；仅提供未 pin 的 Dockerfile 不满足锁定要求。依赖缓存用可重建卷，
+toolchain manifest／产物清单逐项记录 `minSdk`、`compileSdk`、`targetSdk`、JDK、
+Gradle、NDK、Go、ABI、完整源码 SHA、工具链和产物 SHA-256。
 
-宿主只启动容器并保存脱敏产物；Dora 只安装容器构建出的 APK，若需 ADB 转发则
-宿主仅做显式连接和设备操作。缺少容器运行时、固定定义或可重建依赖卷时，对应
-构建验收为 `BLOCKED`，不得回退到宿主 JDK／SDK／NDK／Go／Gradle 缓存。M0／M1／
-M2 计划分别列出容器内构建检查与设备／服务外部动作；该设计不增加低概率兼容
-矩阵或额外发布门槛。
+宿主只启动容器、做显式设备连接／转发、取回脱敏产物；Dora 只安装容器构建出的
+APK，构建／测试流程不使用宿主 JDK／SDK／NDK／Go／Gradle。若宿主 ADB 执行安装，
+也只能安装容器产物，宿主连接／安装操作不单独构成构建或应用验收证据。缺少容器
+运行时、已 pin 的 Dockerfile／可审计 manifest 或可重建依赖卷时，对应构建验收为
+`BLOCKED`，不得回退到宿主工具链。M0／M1／M2 计划分别列出容器内构建检查与设备／
+服务外部动作；该设计不增加低概率兼容矩阵或额外发布门槛。
 
 ## 仓库操作与顺序
 
@@ -49,7 +52,7 @@ M2 计划分别列出容器内构建检查与设备／服务外部动作；该�
 - 使用现有工具验证本地链接目标、JSON 示例和模板 YAML；记录命令和真实结果。没有本轮校验器实现，不以新测试或 Actions 运行作为当前交付。
 - 当前治理检查静态文件与规划文本；design agent 检查真实生成图的覆盖／可读性／fixture 边界及接受状态，最终由独立 reviewer 检查对应证据。不能宣称 Android／iOS 构建、USB、SMB、tsnet、原生 UI 或 Browser QA 已通过。
 - 新登记保留 M0 受控服务／Dora Android 协议验证；M1／M2 只 Android，iOS 及 macOS／签名／USB 依赖到 M3。既有 #12／#24／#26 迁移保留历史 ID，#28 的 iOS 部分显式映射新 M3-IOSV1；每阶段设计接受与实施授权分别记录，任务／验收／反向 Blocks 与当前计划一致。历史说明可以引用旧范围，但必须标明已迁移／拆分。
-- Android 工具链边界只在文档中登记；本轮不启动容器、构建、Dora 或设备验证。缺容器运行时时不能用当前机器结果替代，构建状态必须保留为 `BLOCKED`。
+- Android 工具链边界只在文档中登记；本轮不启动容器、构建、Dora 或设备验证。缺容器运行时时不能用当前机器结果替代，宿主设备连接／安装操作也不构成构建或应用验收证据，构建状态必须保留为 `BLOCKED`。
 - 许可证采用用户已明确选择的 Apache-2.0 标准全文，不修改许可条款。未获得用户决定前不得擅自选择许可证的一般规则继续适用。
 - 文档编写和独立审查阶段不进行提交／推送或修改远端登记。快照通过独立审查后，当前已获授权的文档发布由治理代理按协调指令原子提交／推送并同步现有 PR／issue；后续产品里程碑仍必须取得用户审阅决定。
 

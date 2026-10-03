@@ -10,14 +10,17 @@ Android 默认 `minSdk 29`（Android 10）；不处理 Android 9 及更低版本
 允许使用较新的 `compileSdk`／`targetSdk`，但不在规划阶段锁定随日期变化的 API
 号；实现开始前由 devcontainer 内锁定稳定 SDK 工具链并记录实际版本。所有构建、
 单测、静态检查、APK、Go 和 Android bridge 构建都在该 devcontainer 内进行。固定
-镜像 digest／manifest 或 Dockerfile 必须锁住工具版本，依赖缓存使用可重建卷，
-并记录完整源码 SHA、工具链版本、ABI 和产物 SHA-256。
+使用 Dockerfile 并 pin `FROM` 的 base image digest 以及 SDK／JDK／NDK／Go／Gradle／
+依赖版本，或使用等价的可审计 manifest；仅提供未 pin 的 Dockerfile 不满足锁定要求。
+依赖缓存使用可重建卷；toolchain manifest／产物清单逐项记录 `minSdk`、`compileSdk`、
+`targetSdk`、JDK、Gradle、NDK、Go、ABI、完整源码 SHA、工具链版本和产物 SHA-256。
 
-宿主机只负责启动容器和保存脱敏产物；Dora 使用容器内构建出的 APK。需要 ADB
-转发时，宿主机只做显式连接和设备操作，不把宿主 JDK／SDK／NDK／Go／Gradle
-缓存或工具链结果算作构建证据。缺少容器运行时时，对应构建与测试为 `BLOCKED`，
-不得回退到当前环境。M0–M2 的容器内动作与服务／设备外部动作分别按各阶段文件
-记录；该边界不增加低概率兼容矩阵或额外发布门槛。
+宿主机只负责启动容器、做显式设备连接／转发、取回脱敏产物；Dora 只使用容器内
+构建出的 APK。构建、单测、静态检查和工具链流程不使用宿主 JDK／SDK／NDK／Go／
+Gradle；若宿主 ADB 执行安装，也只能安装容器产物，宿主连接／安装操作不单独构成
+构建或应用验收证据。缺少容器运行时时，对应构建与测试为 `BLOCKED`，不得回退到
+当前环境。M0–M2 的容器内动作与服务／设备外部动作分别按各阶段文件记录；该边界
+不增加低概率兼容矩阵或额外发布门槛。
 
 ## 每阶段做什么、交付什么、怎样通过
 
