@@ -36,7 +36,7 @@ M2吸收Android发行准备是本次执行方案，随计划供用户review。�
 
 ## UI设计关口
 
-专门design agent使用指定skill／Image Gen，先生成完整surface与必要状态，再供用户接受。只有接受之后才提取tokens、组件、可见文案和详细UI实施清单，独立review后在已批准阶段中实施。设计接受与milestone批准是两个记录，互不代替。
+主代理使用指定skill／Image Gen，先生成完整surface与必要状态，再供用户接受。只有接受之后才提取tokens、组件、可见文案和详细UI实施清单，独立review后在已批准阶段中实施。设计接受与milestone批准是两个记录，互不代替。
 
 本轮概念 brief 覆盖 M0 诊断主屏与 M1 任务／来源／目标／规则及关键暂停／完成／权限／空间／中断状态，图数按覆盖和可读性决定。概念中的 fixture 数字不代表设备连接或真实上传。M2 新增设置／通知、M3 iOS 必须各自先图与接受，不能因复用 Android 语言而自动通过。当前图集未覆盖或未被接受的状态只阻塞对应 UI 子任务；M0-UI 与 M1-UI 是独立结果，不能阻塞各自协议／主链路 gate。UI 实施仍必须先完整图、用户接受、详细 UI 计划和独立 UI review。
 
@@ -69,7 +69,7 @@ flowchart TD
 
 ## 任务执行、文件owner与review
 
-agents承担规划、实现、验证和交付；用户负责阶段决定、设计接受与必要物理操作。每阶段先落一份 execution plan 并做一次独立 plan review，再实现；实现完成后做最终 integrated/device/release review。作者不能审自己的变更，旧 PASS 不覆盖新范围／SHA。UI 计划仍由对应 UI reviewer 独立审查，但不把未接受图变成协议或主链路 gate。
+主代理 `/root` 直接推进规划、实现、验证和交付；除独立 plan／implementation review 外不委派子代理。用户负责阶段决定、设计接受与必要物理操作。每阶段先落一份 execution plan 并做一次独立 plan review，再实现；实现完成后做最终 integrated/device/release review。作者不能审自己的变更，旧 PASS 不覆盖新范围／SHA。UI 计划仍由独立 reviewer 审查，但不把未接受图变成协议或主链路 gate。
 
 每包登记稳定issue ID、直接依赖／blocks、branch／base／worktree、文件owner、产物和可判验收。接口冻结且前置满足后并行；同文件单owner，构建配置显式移交，Dora租约单会话owner。PR基线更新后重跑受影响检查。
 
