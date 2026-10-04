@@ -72,4 +72,3 @@ Pixel, fnOS, SMB service, tsnet, network transfer, remote readback, or native
 screenshot was run. The report records plan consistency only; M0 runtime
 conditions and all M1 device/service gates still require their stated
 environment, user approval, and evidence.
-
