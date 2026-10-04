@@ -1,0 +1,65 @@
+name: Android build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "android/**"
+      - "go/**"
+      - "go.mod"
+      - "go.sum"
+      - "scripts/**"
+      - ".devcontainer/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle/**"
+  pull_request:
+    paths:
+      - "android/**"
+      - "go/**"
+      - "go.mod"
+      - "go.sum"
+      - "scripts/**"
+      - ".devcontainer/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build pinned Ferry devcontainer
+        run: docker build --pull=false --file .devcontainer/Dockerfile --tag ferry-m1-devcontainer:${GITHUB_SHA} .
+
+      - name: Build and test inside devcontainer
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          IMAGE_ID="$(docker image inspect "ferry-m1-devcontainer:${SOURCE_SHA}" --format '{{.Id}}')"
+          docker run --rm --init \
+            --env FERRY_DEVCONTAINER=1 \
+            --env FERRY_SOURCE_SHA="${SOURCE_SHA}" \
+            --env FERRY_CONTAINER_IMAGE_ID="${IMAGE_ID}" \
+            --volume "${GITHUB_WORKSPACE}:/workspace/ferry" \
+            --workdir /workspace/ferry \
+            "ferry-m1-devcontainer:${SOURCE_SHA}" \
+            ./scripts/ci/android.sh
+
+      - name: Upload debug APK and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: ferry-m1-${{ github.sha }}
+          path: |
+            dist/ferry-m1-debug.apk
+            dist/ferry-m1-debug.apk.sha256
+            dist/toolchain.txt
+            dist/android-sdk-installed.txt
+            dist/gradle-lockfile
+            dist/gradle-verification-metadata.xml
