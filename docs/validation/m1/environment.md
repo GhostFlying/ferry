@@ -31,3 +31,10 @@ metadata (including module metadata checksums) were consumed read-only and
 copied into the provenance bundle. The APK is a debug technical shell, not
 product UI or device evidence. The exact run output remains a local artifact;
 public records contain hashes and redacted toolchain fields only.
+
+GitHub Actions run
+`https://github.com/GhostFlying/ferry/actions/runs/37179125508` passed from
+source SHA `22e6ebc4c3927e23899a6e5add3a6e57ee3aa83c`. Its container build,
+strict verification and uploaded provenance are the CI evidence; the local
+recovery image result above is kept separate because it uses a different image
+tag and cache environment.

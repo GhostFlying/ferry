@@ -1,6 +1,6 @@
 # M1 implementation checkpoint — 2026-10-04
 
-Status: **foundation implementation candidate; independent review and device/service gates pending.**
+Status: **foundation implementation review PASS; device/service/UI gates pending.**
 
 ## Approved scope
 
@@ -54,6 +54,12 @@ PASS, Android unit tests PASS, strict dependency verification PASS,
 The provenance bundle includes the committed `gradle.lockfile` and
 `verification-metadata.xml`, including Gradle module metadata checksums; the
 build does not write dependency trust data.
+
+GitHub Actions run [37179125508](https://github.com/GhostFlying/ferry/actions/runs/37179125508)
+also passed from source SHA `22e6ebc4c3927e23899a6e5add3a6e57ee3aa83c`, using
+the pinned CI image and the same strict read-only verification workflow. The
+local recovery APK above remains the artifact whose hash is recorded in this
+checkpoint; the Actions artifact is separately provenance-bound to its run.
 
 The APK is a technical launch shell pending accepted M1 UI concepts. It is not
 native fidelity evidence.
