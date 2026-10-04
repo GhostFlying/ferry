@@ -1,6 +1,6 @@
 # M1 implementation checkpoint — 2026-10-04
 
-Status: **pre-device foundation implementation review PASS; accepted-surface UI plan under review; device/service gates pending.**
+Status: **accepted-surface Android UI implementation review PASS; device/service/native-fidelity gates pending.**
 
 ## Approved scope
 
@@ -37,6 +37,11 @@ not claim M1 Pocket／Pixel／fnOS or SMB runtime completion.
 - The user accepted the shown M1 concepts A01 and A03–A10 on 2026-10-04. The
   accepted-surface UI implementation plan is recorded separately; no native UI
   implementation or fidelity result is claimed yet.
+- The accepted-surface Compose implementation is now present: four navigation tabs,
+  empty setup, task snapshot/detail states, manual pause, explicit unconfigured
+  source/target/rules pages and disabled actions whose interfaces are not yet wired.
+  The implementation review for `08c8b2e` is PASS; native screenshot fidelity remains
+  unmeasured.
 
 ## Container evidence
 
@@ -47,7 +52,7 @@ toolchain:
 ./scripts/ci/android.sh
 ```
 
-Source SHA: `a3d5779428405ad6c3da345416c395b8aea2b8db`.
+Source SHA: `08c8b2e7c7d95c69280e07629fc1fc03b38652aa`.
 
 Container image ID: `sha256:1600111f150b1a1f54b2e02129f71711bd0eb923e4204699e0b3fcfcef28a8af`.
 
@@ -57,7 +62,7 @@ build-tools 35.0.0, minSdk 29, arm64-v8a.
 Results: Go unit tests PASS, `go vet ./...` PASS, gomobile AAR generation
 PASS, Android unit tests PASS, strict dependency verification PASS,
 `:android:app:assembleDebug` PASS. APK SHA-256:
-`b981402a4b88ab0ef8e86f873d61bd0cb446f9019f3dca36bf498f122aff49b6`.
+`213eac66ecb67cfda2cc5091f2300a73009ce7348945a583a49cc609540e73ac`.
 The provenance bundle includes the committed `gradle.lockfile` and
 `verification-metadata.xml`, including Gradle module metadata checksums; the
 build does not write dependency trust data.
@@ -68,8 +73,8 @@ the pinned CI image and the same strict read-only verification workflow. The
 local recovery APK above remains the artifact whose hash is recorded in this
 checkpoint; the Actions artifact is separately provenance-bound to its run.
 
-The APK is still a technical launch shell pending native implementation of the
-accepted M1 surface. It is not native fidelity evidence.
+The APK contains the accepted-surface Compose implementation and remains a debug
+technical build. It is not native fidelity evidence.
 
 ## Not run or blocked
 
@@ -79,12 +84,11 @@ accepted M1 surface. It is not native fidelity evidence.
   end-to-end run.
 - No live SMB adapter fixture run; generic storage tests do not prove fnOS
   server behavior.
-- No M1 native UI fidelity comparison; accepted concept coverage is recorded, but
-  the UI implementation plan is still awaiting independent review.
+- No M1 native UI fidelity comparison; the accepted concepts and UI implementation
+  review are recorded, but no real Android screenshot has been compared.
 - Docker daemon could not resolve the pinned upstream base manifest in this
   environment; the local recovery image was used for the container evidence.
 
 These boundaries are evidence limits, not claims that the omitted gates pass.
-The next implementation step is to complete the independently reviewed accepted
-UI surface. The specified device/service gates run when the user supplies the
-environment.
+The next step is the user review of this M1 implementation result. Device/service
+gates and native screenshot fidelity run when the user supplies the environment.
