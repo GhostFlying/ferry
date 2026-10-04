@@ -20,14 +20,14 @@ build. A container image failure blocks build evidence; it does not justify a
 host build.
 
 The latest complete container run used source SHA
-`e011f2915f545746a1deff044cd84fb3ac7a0c54`, image ID
+`128f5553f93b81b8e4893a3a2834decbf8333b65`, image ID
 `sha256:1600111f150b1a1f54b2e02129f71711bd0eb923e4204699e0b3fcfcef28a8af`,
 and produced an arm64-v8a debug APK with SHA-256
-`c56fd95993fd4b200b8155e2249c964812df8486b26bd65abd13dc5d464ed364`.
+`83b6e317c68f6b6a81fdaf162d01d26b818463f6a7c11588654c9085365103af`.
 The run executed `scripts/ci/android.sh`; Go tests, `go vet`, gomobile AAR
 generation, Gradle unit tests, strict dependency verification and
 `:android:app:assembleDebug` all passed. The committed lock and verification
-metadata were consumed read-only and copied into the provenance bundle. The
-APK is a debug technical shell, not product UI or device evidence. The exact
-run output remains a local artifact; public records contain hashes and redacted
-toolchain fields only.
+metadata (including module metadata checksums) were consumed read-only and
+copied into the provenance bundle. The APK is a debug technical shell, not
+product UI or device evidence. The exact run output remains a local artifact;
+public records contain hashes and redacted toolchain fields only.

@@ -25,7 +25,9 @@ not claim M1 Pocket／Pixel／fnOS or SMB runtime completion.
 - M1-T1 storage no-replace contract and SMB client package adapted from the
   accepted M0 transport implementation; temporary write, flush, remote
   readback, SHA-256, exclusive final create and cancellation boundaries have
-  unit coverage. The live fnOS adapter remains unverified.
+  generic unit coverage. The live fnOS SMB adapter behavior and crash-time
+  final partial recovery remain unverified; complete kill recovery is deferred
+  to M2.
 - P6 dependency locking, Gradle verification metadata and Actions container
   build workflow.
 
@@ -38,7 +40,7 @@ toolchain:
 ./scripts/ci/android.sh
 ```
 
-Source SHA: `e011f2915f545746a1deff044cd84fb3ac7a0c54`.
+Source SHA: `128f5553f93b81b8e4893a3a2834decbf8333b65`.
 
 Container image ID: `sha256:1600111f150b1a1f54b2e02129f71711bd0eb923e4204699e0b3fcfcef28a8af`.
 
@@ -48,9 +50,10 @@ build-tools 35.0.0, minSdk 29, arm64-v8a.
 Results: Go unit tests PASS, `go vet ./...` PASS, gomobile AAR generation
 PASS, Android unit tests PASS, strict dependency verification PASS,
 `:android:app:assembleDebug` PASS. APK SHA-256:
-`c56fd95993fd4b200b8155e2249c964812df8486b26bd65abd13dc5d464ed364`.
+`83b6e317c68f6b6a81fdaf162d01d26b818463f6a7c11588654c9085365103af`.
 The provenance bundle includes the committed `gradle.lockfile` and
-`verification-metadata.xml`; the build does not write dependency trust data.
+`verification-metadata.xml`, including Gradle module metadata checksums; the
+build does not write dependency trust data.
 
 The APK is a technical launch shell pending accepted M1 UI concepts. It is not
 native fidelity evidence.
@@ -61,6 +64,8 @@ native fidelity evidence.
 - No Pocket 3 USB／OTG source authorization or real素材 import.
 - No fnOS SMB credentials, server session, remote readback or no-replace
   end-to-end run.
+- No live SMB adapter fixture run; generic storage tests do not prove fnOS
+  server behavior.
 - No M1 native UI fidelity comparison; the concept manifest remains
   `awaiting-user-acceptance`.
 - Docker daemon could not resolve the pinned upstream base manifest in this
