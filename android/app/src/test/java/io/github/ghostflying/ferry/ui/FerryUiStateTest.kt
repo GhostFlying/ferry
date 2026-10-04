@@ -19,6 +19,12 @@ class FerryUiStateTest {
     @Test
     fun configurationStartsUnconfiguredAndFailedStateIsClassified() {
         assertEquals("尚未配置", UiConfigurationSnapshot().sourceLabel)
+        assertEquals(FerryTab.TASKS, FerryUiState().tab)
+        assertEquals(listOf(FerryTab.TASKS, FerryTab.SOURCES, FerryTab.TARGETS, FerryTab.RULES), FerryTab.entries)
+        assertFalse(FerryUnsupportedActions.canResume)
+        assertFalse(FerryUnsupportedActions.canRetry)
+        assertFalse(FerryUnsupportedActions.canRecheckSpace)
+        assertFalse(FerryUnsupportedActions.canSaveConfiguration)
         assertTrue(isVerificationFailure("remote readback SHA-256 mismatch"))
         assertFalse(isVerificationFailure("network timeout"))
         assertTrue(operationLabel(operation("one", phase = "failed", error = "network timeout"))
@@ -47,6 +53,17 @@ class FerryUiStateTest {
     }
 
     @Test
+    fun operationLabelsCoverAcceptedTaskStatesWithoutFakeProgress() {
+        assertTrue(operationLabel(operation("one", phase = "imported")).startsWith("待上传"))
+        assertTrue(operationLabel(operation("one", phase = "waiting")).startsWith("等待前台运行"))
+        assertTrue(operationLabel(operation("one", phase = "uploading")).startsWith("正在上传"))
+        assertTrue(operationLabel(operation("one", phase = "verifying")).contains("内容校验中"))
+        assertFalse(operationLabel(operation("one", phase = "verifying")).contains("GB"))
+        assertTrue(operationLabel(operation("one", phase = "completed")).startsWith("已完成"))
+        assertTrue(operationLabel(operation("one", phase = "paused").copy(manualPaused = true)).startsWith("用户暂停"))
+    }
+
+    @Test
     fun pauseActionPersistsManualPauseAndReloadsState() = runBlocking {
         val dao = FakeUiDao(operation("one", phase = "waiting"))
         val repository = OperationRepository(dao)
@@ -62,6 +79,24 @@ class FerryUiStateTest {
         assertTrue(controller.state.value.operations.single().manualPaused)
         assertEquals("paused", controller.state.value.operations.single().phase)
         coordinator.onStop()
+    }
+
+    @Test
+    fun lifecycleStartStopKeepsWorkForegroundOnly() = runBlocking {
+        val dao = FakeUiDao(operation("one", phase = "imported"))
+        val repository = OperationRepository(dao)
+        val coordinator = ForegroundExecutionCoordinator(
+            repository,
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            upload = null,
+        )
+        val controller = FerryUiController(repository, coordinator)
+
+        controller.onStart()
+        assertEquals("imported", controller.state.value.operations.single().phase)
+        controller.onStop()
+
+        assertEquals("waiting", controller.state.value.operations.single().phase)
     }
 
     private fun operation(id: String, phase: String, error: String? = null) = OperationEntity(
@@ -103,7 +138,17 @@ class FerryUiStateTest {
             operations[index] = operations[index].copy(manualPaused = true, phase = "paused", updatedAt = updatedAt)
             return 1
         }
-        override suspend fun markSystemWaiting(updatedAt: Long): Int = 0
+        override suspend fun markSystemWaiting(updatedAt: Long): Int {
+            var changed = 0
+            operations.indices.forEach { index ->
+                val current = operations[index]
+                if (!current.manualPaused && current.phase in setOf("imported", "uploading", "verifying", "waiting")) {
+                    operations[index] = current.copy(phase = "waiting", updatedAt = updatedAt)
+                    changed++
+                }
+            }
+            return changed
+        }
         override suspend fun markCompleted(id: String, revision: Long, remoteSha256: String, updatedAt: Long): Int = 0
         override suspend fun markFailed(id: String, revision: Long, error: String, updatedAt: Long): Int = 0
     }

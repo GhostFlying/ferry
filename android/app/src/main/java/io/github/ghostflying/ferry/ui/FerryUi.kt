@@ -43,7 +43,10 @@ import io.github.ghostflying.ferry.lifecycle.ForegroundExecutionCoordinator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 private val FerryTeal = Color(0xFF008F87)
 private val FerryInk = Color(0xFF172236)
@@ -69,40 +72,62 @@ data class FerryUiState(
     val operations: List<OperationEntity> = emptyList(),
     val selectedOperationId: String? = null,
     val configuration: UiConfigurationSnapshot = UiConfigurationSnapshot(),
-)
+) {
+    val showsFirstSetup: Boolean get() = operations.isEmpty()
+}
 
 class FerryUiController(
     private val repository: OperationRepository,
     private val coordinator: ForegroundExecutionCoordinator,
 ) {
     private val mutableState = MutableStateFlow(FerryUiState())
+    private val lifecycleMutex = Mutex()
     val state: StateFlow<FerryUiState> = mutableState.asStateFlow()
 
-    suspend fun onOpen() {
+    suspend fun onStart() = lifecycleMutex.withLock {
         coordinator.onOpen()
-        reload()
+        reloadSnapshot()
     }
 
-    suspend fun reload() {
-        mutableState.value = mutableState.value.copy(operations = repository.allOperations())
+    suspend fun onStop() = lifecycleMutex.withLock {
+        coordinator.onStop()
+        reloadSnapshot()
+    }
+
+    suspend fun shutdown() = lifecycleMutex.withLock {
+        coordinator.onStop()
+    }
+
+    suspend fun reload() = lifecycleMutex.withLock { reloadSnapshot() }
+
+    private suspend fun reloadSnapshot() {
+        val operations = repository.allOperations()
+        mutableState.update { it.copy(operations = operations) }
     }
 
     fun selectTab(tab: FerryTab) {
-        mutableState.value = mutableState.value.copy(tab = tab, selectedOperationId = null)
+        mutableState.update { it.copy(tab = tab, selectedOperationId = null) }
     }
 
     fun selectOperation(operationId: String) {
-        mutableState.value = mutableState.value.copy(selectedOperationId = operationId)
+        mutableState.update { it.copy(selectedOperationId = operationId) }
     }
 
     fun closeOperation() {
-        mutableState.value = mutableState.value.copy(selectedOperationId = null)
+        mutableState.update { it.copy(selectedOperationId = null) }
     }
 
-    suspend fun pause(operationId: String) {
+    suspend fun pause(operationId: String) = lifecycleMutex.withLock {
         coordinator.pause(operationId)
-        reload()
+        reloadSnapshot()
     }
+}
+
+internal object FerryUnsupportedActions {
+    const val canResume = false
+    const val canRetry = false
+    const val canRecheckSpace = false
+    const val canSaveConfiguration = false
 }
 
 @Composable
@@ -150,7 +175,7 @@ private fun TasksScreen(state: FerryUiState, controller: FerryUiController) {
         OperationDetail(selected, controller)
         return
     }
-    if (state.operations.isEmpty()) {
+    if (state.showsFirstSetup) {
         EmptySetup(controller)
         return
     }
@@ -250,10 +275,10 @@ private fun OperationDetail(operation: OperationEntity, controller: FerryUiContr
                 Text("Ⅱ  暂停任务")
             }
         } else if (operation.manualPaused) {
-            OutlinedButton(onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth()) { Text("恢复任务（待接入）") }
+            OutlinedButton(onClick = {}, enabled = FerryUnsupportedActions.canResume, modifier = Modifier.fillMaxWidth()) { Text("恢复任务（待接入）") }
         }
         if (operation.phase == "failed") {
-            OutlinedButton(onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) { Text("重新上传（待接入）") }
+            OutlinedButton(onClick = {}, enabled = FerryUnsupportedActions.canRetry, modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) { Text("重新上传（待接入）") }
         }
         Spacer(Modifier.height(20.dp))
         Text("Ferry 不会删除相机原文件", color = FerryMuted)
@@ -272,7 +297,7 @@ private fun ConfigurationScreen(title: String, value: String, unavailable: Strin
         Spacer(Modifier.height(24.dp))
         InfoRow("ⓘ", "此页面只显示已配置状态；配置接口尚未接入")
         Spacer(Modifier.height(24.dp))
-        Button(onClick = {}, enabled = false, modifier = Modifier.fillMaxWidth()) { Text("配置（待接入）") }
+        Button(onClick = {}, enabled = FerryUnsupportedActions.canSaveConfiguration, modifier = Modifier.fillMaxWidth()) { Text("配置（待接入）") }
     }
 }
 
@@ -294,14 +319,17 @@ internal fun operationLabel(operation: OperationEntity): String = when {
     operation.phase == "failed" && isVerificationFailure(operation.lastError) -> "校验失败 · 远端读回 SHA-256 不一致"
     operation.phase == "failed" -> "任务未完成 · ${operation.lastError.orEmpty()}"
     operation.manualPaused -> "用户暂停 · 打开 App 不会恢复"
-    operation.phase == "uploading" || operation.phase == "verifying" -> "内容校验中 · 不填造进度"
-    operation.phase == "waiting" -> "等待前台运行 · 手机完整副本已就绪"
-    else -> "导入中 · 手机完整副本待就绪"
+    operation.phase == "uploading" -> "正在上传"
+    operation.phase == "verifying" -> "内容校验中 · 正在读回远端内容"
+    operation.phase == "waiting" -> "等待前台运行"
+    operation.phase == "imported" && operation.sourceSha256.isNotEmpty() -> "待上传 · 手机完整副本已就绪"
+    else -> "等待导入 · 手机完整副本待就绪"
 }
 
 internal fun isVerificationFailure(error: String?): Boolean {
     val value = error.orEmpty().lowercase()
-    return listOf("readback", "sha-256", "sha256", "mismatch", "校验").any(value::contains)
+    return value == "remote sha-256 did not match the private copy" ||
+        (value.contains("readback") && (value.contains("mismatch") || value.contains("did not match")))
 }
 
 private fun phaseColor(operation: OperationEntity): Color = when {

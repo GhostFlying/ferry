@@ -27,13 +27,17 @@ class MainActivity : ComponentActivity() {
         val coordinator = ForegroundExecutionCoordinator(
             repository = repository,
             scope = activityScope,
-            upload = { error("upload action is not wired in the pre-device UI build") },
+            upload = null,
         )
         controller = FerryUiController(repository, coordinator)
         setContent {
             FerryApp(controller)
         }
-        activityScope.launch { controller.onOpen() }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (::controller.isInitialized) activityScope.launch { controller.onStart() }
     }
 
     override fun onResume() {
@@ -41,9 +45,20 @@ class MainActivity : ComponentActivity() {
         if (::controller.isInitialized) activityScope.launch { controller.reload() }
     }
 
+    override fun onStop() {
+        if (::controller.isInitialized) activityScope.launch { controller.onStop() }
+        super.onStop()
+    }
+
     override fun onDestroy() {
-        activityScope.cancel()
-        if (::database.isInitialized) database.close()
+        activityScope.launch {
+            try {
+                if (::controller.isInitialized) controller.shutdown()
+            } finally {
+                if (::database.isInitialized) database.close()
+                activityScope.cancel()
+            }
+        }
         super.onDestroy()
     }
 }

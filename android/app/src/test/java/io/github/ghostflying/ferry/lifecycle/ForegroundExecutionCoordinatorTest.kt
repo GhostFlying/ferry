@@ -167,6 +167,24 @@ class ForegroundExecutionCoordinatorTest {
     }
 
     @Test
+    fun missingUploadActionDoesNotClaimOrFailReadyOperation() = runBlocking {
+        val dao = FakeOperationDao(listOf(operation("one")))
+        val repository = OperationRepository(dao, clock)
+        val coordinator = ForegroundExecutionCoordinator(
+            repository,
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            upload = null,
+        )
+
+        coordinator.onOpen()
+        delay(50)
+
+        assertEquals("imported", dao.operations.single().phase)
+        assertEquals(null, dao.operations.single().lastError)
+        coordinator.onStop()
+    }
+
+    @Test
     fun lateActionResultCannotCompletePausedOperation() = runBlocking {
         val started = CompletableDeferred<Unit>()
         val dao = FakeOperationDao(listOf(operation("one")))

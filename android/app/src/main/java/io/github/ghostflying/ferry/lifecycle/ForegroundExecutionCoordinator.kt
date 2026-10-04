@@ -13,6 +13,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -20,7 +21,7 @@ import kotlinx.coroutines.sync.withLock
 class ForegroundExecutionCoordinator(
     private val repository: OperationRepository,
     private val scope: CoroutineScope,
-    private val upload: suspend (OperationEntity) -> String,
+    private val upload: (suspend (OperationEntity) -> String)?,
 ) {
     private val lifecycleMutex = Mutex()
     private var worker: Job? = null
@@ -57,19 +58,20 @@ class ForegroundExecutionCoordinator(
         return changed
     }
 
-    private suspend fun runLoop() {
+    private suspend fun runLoop() = supervisorScope {
         while (currentCoroutineContext().isActive && !stopped) {
+            val uploadAction = upload ?: return@supervisorScope
             val dispatch = lifecycleMutex.withLock {
                 if (stopped) return@withLock null
                 val candidate = repository.eligibleOperations().firstOrNull() ?: return@withLock null
                 if (!repository.claimForUpload(candidate)) return@withLock Dispatch(null, null)
                 activeOperationId = candidate.id
                 val action = CoroutineScope(currentCoroutineContext()).async(start = CoroutineStart.LAZY) {
-                    upload(candidate)
+                    uploadAction(candidate)
                 }
-                this.action = action
+                this@ForegroundExecutionCoordinator.action = action
                 Dispatch(candidate, action)
-            } ?: return
+            } ?: return@supervisorScope
             val candidate = dispatch.operation ?: continue
             val currentAction = dispatch.action ?: continue
             try {

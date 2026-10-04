@@ -1,12 +1,12 @@
 # M1 Android accepted-surface UI plan review — 2026-10-04
 
-审查对象：`docs/plans/m1-ui-implementation-20261004.md`，审查快照 SHA-256
-`38b45982a8b8048fce459e46915384788aa3824478a0c31ce8a97defcd47b834`。
-审查人：`/root/m1_foundation_reviewer`，独立只读审查。
+审查对象：`docs/plans/m1-ui-implementation-20261004.md`，修订审查快照 SHA-256
+`17d739b0ca44da2c7f4548d16d958aff1ec6e433fdb738290ef791ee1cf5c87e`。
+审查人：`/root/m1_ui_review_fallback`，独立只读审查。
 
 ## 结论
 
-**PASS**，无剩余 P1/P2 计划问题，可进入实现。
+**PASS**，无剩余 P1/P2 计划问题，可继续实现修复。
 
 ## 复核要点
 
@@ -18,3 +18,5 @@
   两类映射均有测试要求。
 - fixture／生产状态、Compose 测试／native 截图、容器构建／真实设备证据边界和
   `NOT_RUN`／`BLOCKED` 用户关口均明确。
+- Activity `onStart`／`onStop` 生命周期、无 upload action 时不 claim／不启动／不
+  failed，以及 onStop 允许正常 imported／uploading→waiting 的边界已明确并有测试要求。
