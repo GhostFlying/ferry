@@ -12,7 +12,9 @@ cd "$ROOT_DIR"
 go test ./...
 go vet ./...
 ./scripts/build-android-bridge.sh
-gradle --no-daemon --stacktrace --write-verification-metadata sha256 --write-locks :android:app:assembleDebug
+# CI consumes the committed dependency locks and verification metadata. A
+# build must not generate new trust data in the checked-out source tree.
+gradle --no-daemon --stacktrace --dependency-verification strict :android:app:testDebugUnitTest :android:app:assembleDebug
 
 mkdir -p dist
 cp android/app/build/outputs/apk/debug/app-debug.apk dist/ferry-m1-debug.apk

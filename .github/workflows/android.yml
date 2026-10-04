@@ -12,6 +12,7 @@ on:
       - ".devcontainer/**"
       - "build.gradle.kts"
       - "settings.gradle.kts"
+      - "gradle.properties"
       - "gradle/**"
   pull_request:
     paths:
@@ -23,6 +24,7 @@ on:
       - ".devcontainer/**"
       - "build.gradle.kts"
       - "settings.gradle.kts"
+      - "gradle.properties"
       - "gradle/**"
 
 jobs:
@@ -61,5 +63,5 @@ jobs:
             dist/ferry-m1-debug.apk.sha256
             dist/toolchain.txt
             dist/android-sdk-installed.txt
-            dist/gradle-lockfile
+            dist/gradle.lockfile
             dist/gradle-verification-metadata.xml
