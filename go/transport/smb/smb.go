@@ -115,12 +115,30 @@ func validateDestination(destination string) error {
 	return nil
 }
 
-func (c *Client) Upload(ctx context.Context, operationID, destination string, source io.Reader) (result Result, retErr error) {
+func validateExpectedSHA256(expected string) (string, error) {
+	if len(expected) != sha256.Size*2 {
+		return "", errors.New("expected SHA-256 must be 64 hexadecimal characters")
+	}
+	decoded, err := hex.DecodeString(expected)
+	if err != nil || len(decoded) != sha256.Size {
+		return "", errors.New("expected SHA-256 must be 64 hexadecimal characters")
+	}
+	return strings.ToLower(expected), nil
+}
+
+// Upload writes a complete object using a temporary object and a server-side
+// exclusive final create. The exclusive create is the no-replace boundary:
+// an existing destination is left untouched and the operation fails.
+func (c *Client) Upload(ctx context.Context, operationID, destination, expectedSHA256 string, source io.Reader) (result Result, retErr error) {
 	if ctx == nil {
 		return Result{}, &Error{Stage: StageCancelled, Err: errors.New("nil context")}
 	}
 	if source == nil {
 		return Result{}, &Error{Stage: StageWrite, Err: errors.New("nil source")}
+	}
+	expectedSHA256, err := validateExpectedSHA256(expectedSHA256)
+	if err != nil {
+		return Result{}, &Error{Stage: StageWrite, Err: err}
 	}
 	temp, err := temporaryName(destination, operationID)
 	if err != nil {
@@ -134,15 +152,30 @@ func (c *Client) Upload(ctx context.Context, operationID, destination string, so
 	if err != nil {
 		return Result{}, &Error{Stage: StageCreate, Err: err}
 	}
-	owned := true
+	tempOwned := true
+	finalOwned := false
+	var finalFile *smb2.File
 	fileClosed := false
 	cleanup := func() error {
-		if !owned {
-			return nil
+		var first error
+		if finalOwned {
+			if err := share.Remove(destination); err != nil {
+				first = err
+			}
 		}
-		return share.Remove(temp)
+		if tempOwned {
+			if err := share.Remove(temp); err != nil && first == nil {
+				first = err
+			}
+		}
+		return first
 	}
 	defer func() {
+		if finalFile != nil {
+			if closeErr := finalFile.Close(); closeErr != nil && retErr == nil {
+				retErr = &Error{Stage: StageFlush, Err: closeErr}
+			}
+		}
 		if !fileClosed {
 			if closeErr := file.Close(); closeErr != nil && retErr == nil {
 				retErr = &Error{Stage: StageFlush, Err: closeErr}
@@ -152,7 +185,7 @@ func (c *Client) Upload(ctx context.Context, operationID, destination string, so
 			result = Result{}
 			retErr = &Error{Stage: StageCleanup, Err: cleanupErr}
 		} else if cleanupErr != nil {
-			retErr = &Error{Stage: StageCleanup, Err: fmt.Errorf("%v; remove temporary object: %w", retErr, cleanupErr)}
+			retErr = &Error{Stage: StageCleanup, Err: fmt.Errorf("%v; remove owned object: %w", retErr, cleanupErr)}
 		}
 	}()
 
@@ -172,19 +205,62 @@ func (c *Client) Upload(ctx context.Context, operationID, destination string, so
 		return Result{}, &Error{Stage: StageFlush, Err: err}
 	}
 	fileClosed = true
-	if err := share.Rename(temp, destination); err != nil {
-		return Result{}, &Error{Stage: StageRename, Err: err}
+
+	localHash := hex.EncodeToString(hash.Sum(nil))
+	if localHash != expectedSHA256 {
+		return Result{}, &Error{Stage: StageReadback, Err: fmt.Errorf("source hash mismatch expected=%s actual=%s", expectedSHA256, localHash)}
 	}
-	owned = false
+	tempHash, tempCount, err := readback(ctx, share, temp)
+	if err != nil {
+		return Result{}, &Error{Stage: StageReadback, Err: err}
+	}
+	if count != tempCount || localHash != tempHash || tempHash != expectedSHA256 {
+		return Result{}, &Error{Stage: StageReadback, Err: fmt.Errorf("temporary content mismatch expected=%s local=%s/%d remote=%s/%d", expectedSHA256, localHash, count, tempHash, tempCount)}
+	}
+
+	// O_EXCL is intentional. SMB rename replaces by default in go-smb2, so
+	// rename would violate the no-replace contract.
+	finalFile, err = share.OpenFile(destination, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		return Result{}, &Error{Stage: StageCreate, Err: err}
+	}
+	finalOwned = true
+	tempFile, err := share.OpenFile(temp, os.O_RDONLY, 0)
+	if err != nil {
+		return Result{}, &Error{Stage: StageWrite, Err: err}
+	}
+	_, copyErr := copyWithContext(ctx, finalFile, tempFile)
+	closeTempErr := tempFile.Close()
+	if copyErr != nil {
+		if ctx.Err() != nil {
+			return Result{}, &Error{Stage: StageCancelled, Err: ctx.Err()}
+		}
+		return Result{}, &Error{Stage: StageWrite, Err: copyErr}
+	}
+	if closeTempErr != nil {
+		return Result{}, &Error{Stage: StageWrite, Err: closeTempErr}
+	}
+	if err := finalFile.Sync(); err != nil {
+		return Result{}, &Error{Stage: StageFlush, Err: err}
+	}
+	if err := finalFile.Close(); err != nil {
+		finalFile = nil
+		return Result{}, &Error{Stage: StageFlush, Err: err}
+	}
+	finalFile = nil
 
 	remoteHash, remoteCount, err := readback(ctx, share, destination)
 	if err != nil {
 		return Result{}, &Error{Stage: StageReadback, Err: err}
 	}
-	localHash := hex.EncodeToString(hash.Sum(nil))
-	if count != remoteCount || localHash != remoteHash {
-		return Result{}, &Error{Stage: StageReadback, Err: fmt.Errorf("content mismatch local=%s/%d remote=%s/%d", localHash, count, remoteHash, remoteCount)}
+	if count != remoteCount || expectedSHA256 != remoteHash {
+		return Result{}, &Error{Stage: StageReadback, Err: fmt.Errorf("content mismatch expected=%s local=%s/%d remote=%s/%d", expectedSHA256, localHash, count, remoteHash, remoteCount)}
 	}
+	if err := share.Remove(temp); err != nil {
+		return Result{}, &Error{Stage: StageCleanup, Err: err}
+	}
+	tempOwned = false
+	finalOwned = false
 	return Result{Destination: destination, Bytes: count, LocalSHA256: localHash, RemoteSHA256: remoteHash}, nil
 }
 

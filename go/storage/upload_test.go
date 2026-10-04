@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"io"
+	"strings"
 	"testing"
 )
 
@@ -68,6 +69,26 @@ func TestUploadRequiresExpectedHash(t *testing.T) {
 	remote := &fakeRemote{objects: map[string][]byte{}}
 	if err := Upload(context.Background(), remote, bytes.NewBufferString("copy"), "", ".tmp", "final"); err == nil {
 		t.Fatal("empty expected hash accepted")
+	}
+}
+
+func TestUploadRejectsSourceHashMismatchWithoutCommit(t *testing.T) {
+	remote := &fakeRemote{objects: map[string][]byte{}}
+	err := Upload(context.Background(), remote, bytes.NewBufferString("copy"), strings.Repeat("0", sha256.Size*2), ".tmp", "final")
+	if err == nil || remote.committed || len(remote.objects) != 0 {
+		t.Fatalf("expected source hash rejection without commit, err=%v remote=%+v", err, remote)
+	}
+}
+
+func TestUploadLeavesExistingDestinationUnchanged(t *testing.T) {
+	data := []byte("complete media copy")
+	digest := sha256.Sum256(data)
+	remote := &fakeRemote{objects: map[string][]byte{"final.mp4": []byte("existing")}}
+	if err := Upload(context.Background(), remote, bytes.NewReader(data), hex.EncodeToString(digest[:]), ".tmp", "final.mp4"); err == nil {
+		t.Fatal("expected no-replace failure")
+	}
+	if string(remote.objects["final.mp4"]) != "existing" || remote.committed {
+		t.Fatalf("existing destination changed: %+v", remote.objects)
 	}
 }
 

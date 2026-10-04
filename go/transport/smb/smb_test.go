@@ -36,6 +36,20 @@ func TestTemporaryNameIsOwnedByOperation(t *testing.T) {
 	}
 }
 
+func TestValidateExpectedSHA256(t *testing.T) {
+	sum := sha256.Sum256([]byte("pocket-3"))
+	want := hex.EncodeToString(sum[:])
+	got, err := validateExpectedSHA256(strings.ToUpper(want))
+	if err != nil || got != want {
+		t.Fatalf("normalized hash=%q err=%v", got, err)
+	}
+	for _, invalid := range []string{"", "bad", strings.Repeat("0", 63), strings.Repeat("z", 64)} {
+		if _, err := validateExpectedSHA256(invalid); err == nil {
+			t.Fatalf("invalid expected hash accepted: %q", invalid)
+		}
+	}
+}
+
 func TestCopyWithContextHashesAndCounts(t *testing.T) {
 	input := strings.Repeat("pocket-3", 2048)
 	var output bytes.Buffer
