@@ -34,3 +34,10 @@ func TestEvaluateUnknownDefaultsToExclude(t *testing.T) {
 		t.Fatalf("unexpected inclusion: %+v", decision)
 	}
 }
+
+func TestEvaluatePrefixUsesSegmentBoundary(t *testing.T) {
+	rule := model.Rule{ID: "exclude-proxy", Include: false, Prefix: "DCIM/PROXY"}
+	if decision := Evaluate(model.SourceFile{Name: "x.mp4", RelativePath: "DCIM/PROXY2/x.mp4"}, []model.Rule{rule, {ID: "include", Include: true, Extensions: []string{".mp4"}}}); !decision.Include {
+		t.Fatalf("prefix matched a sibling segment: %+v", decision)
+	}
+}

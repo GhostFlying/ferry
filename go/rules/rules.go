@@ -40,6 +40,13 @@ func matches(file model.SourceFile, rule model.Rule) bool {
 	if rule.Prefix != "" && !strings.HasPrefix(filepath.ToSlash(file.RelativePath), filepath.ToSlash(rule.Prefix)) {
 		return false
 	}
+	if rule.Prefix != "" {
+		filePath := filepath.ToSlash(file.RelativePath)
+		prefix := strings.TrimSuffix(filepath.ToSlash(rule.Prefix), "/")
+		if filePath != prefix && !strings.HasPrefix(filePath, prefix+"/") {
+			return false
+		}
+	}
 	if len(rule.Extensions) == 0 {
 		return rule.MaxBytes == nil || file.Size <= *rule.MaxBytes
 	}

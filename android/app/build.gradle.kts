@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt")
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
@@ -9,6 +10,7 @@ val bridgeOutput = layout.projectDirectory.file("libs/ferry-bridge.aar")
 android {
     namespace = "io.github.ghostflying.ferry"
     compileSdk = 35
+    buildToolsVersion = "35.0.0"
 
     defaultConfig {
         applicationId = "io.github.ghostflying.ferry"
@@ -41,7 +43,20 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.documentfile:documentfile:1.0.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    testImplementation("junit:junit:4.13.2")
     implementation(files(bridgeOutput))
+}
+
+kapt {
+    correctErrorTypes = true
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+        arg("room.incremental", "true")
+    }
 }
 
 tasks.named("preBuild") {
