@@ -12,6 +12,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/hirochachacha/go-smb2"
 )
@@ -46,9 +47,11 @@ type Result struct {
 }
 
 type Client struct {
-	conn    net.Conn
-	session *smb2.Session
-	share   *smb2.Share
+	conn      net.Conn
+	session   *smb2.Session
+	share     *smb2.Share
+	closeOnce sync.Once
+	closeErr  error
 }
 
 func NewClient(ctx context.Context, conn net.Conn, username, password, shareName string) (*Client, error) {
@@ -75,6 +78,13 @@ func NewClient(ctx context.Context, conn net.Conn, username, password, shareName
 }
 
 func (c *Client) Close() error {
+	c.closeOnce.Do(func() {
+		c.closeErr = c.close()
+	})
+	return c.closeErr
+}
+
+func (c *Client) close() error {
 	var first error
 	if c.share != nil {
 		first = c.share.Umount()
@@ -85,7 +95,7 @@ func (c *Client) Close() error {
 		}
 	}
 	if c.conn != nil {
-		if err := c.conn.Close(); first == nil {
+		if err := c.conn.Close(); err != nil && !errors.Is(err, net.ErrClosed) && first == nil {
 			first = err
 		}
 	}
