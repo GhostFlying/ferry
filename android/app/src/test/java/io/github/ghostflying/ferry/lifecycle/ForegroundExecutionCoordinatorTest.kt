@@ -6,11 +6,13 @@ import io.github.ghostflying.ferry.data.OperationRepository
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
+import java.util.Collections
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -50,6 +52,7 @@ class ForegroundExecutionCoordinatorTest {
     @Test
     fun manualPauseCancelsActiveActionAndSurvivesOpen() = runBlocking {
         val started = CompletableDeferred<Unit>()
+        val finished = CompletableDeferred<Unit>()
         val dao = FakeOperationDao(listOf(operation("one", phase = "waiting")))
         val repository = OperationRepository(dao, clock)
         val coordinator = ForegroundExecutionCoordinator(
@@ -57,14 +60,18 @@ class ForegroundExecutionCoordinatorTest {
             CoroutineScope(SupervisorJob() + Dispatchers.Default),
         ) {
             started.complete(Unit)
-            delay(10_000)
-            "a".repeat(64)
+            try {
+                delay(10_000)
+                "a".repeat(64)
+            } finally {
+                finished.complete(Unit)
+            }
         }
 
         coordinator.onOpen()
         started.await()
         assertTrue(coordinator.pause("one"))
-        delay(20)
+        assertTrue(finished.isCompleted)
         coordinator.onOpen()
         delay(20)
 
@@ -92,6 +99,97 @@ class ForegroundExecutionCoordinatorTest {
 
         assertEquals(0, calls.get())
         assertEquals("paused", dao.operations.single().phase)
+        coordinator.onStop()
+    }
+
+    @Test
+    fun pauseBetweenEligibleReadAndClaimWinsCas() = runBlocking {
+        val dao = FakeOperationDao(listOf(operation("one", phase = "waiting")))
+        dao.pauseOnNextClaim = true
+        val repository = OperationRepository(dao, clock)
+        val calls = AtomicInteger()
+        val coordinator = ForegroundExecutionCoordinator(
+            repository,
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        ) {
+            calls.incrementAndGet()
+            "a".repeat(64)
+        }
+
+        coordinator.onOpen()
+        delay(50)
+
+        assertEquals(0, calls.get())
+        assertEquals("paused", dao.operations.single().phase)
+        coordinator.onStop()
+    }
+
+    @Test
+    fun terminalOperationsAreIgnoredAndFinishedWorkerDoesNotRepeat() = runBlocking {
+        val completed = operation("completed").copy(phase = "completed", remoteSha256 = "a".repeat(64))
+        val failed = operation("failed").copy(phase = "failed", lastError = "previous")
+        val dao = FakeOperationDao(listOf(completed, failed, operation("one")))
+        val repository = OperationRepository(dao, clock)
+        val calls = AtomicInteger()
+        val coordinator = ForegroundExecutionCoordinator(
+            repository,
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        ) {
+            calls.incrementAndGet()
+            "a".repeat(64)
+        }
+
+        coordinator.onOpen()
+        eventually { dao.operations.find { it.id == "one" }?.phase == "completed" }
+        coordinator.onOpen()
+        delay(20)
+
+        assertEquals(1, calls.get())
+        assertEquals("completed", dao.operations.find { it.id == "one" }?.phase)
+        coordinator.onStop()
+    }
+
+    @Test
+    fun actionExceptionMarksUploadingOperationFailed() = runBlocking {
+        val dao = FakeOperationDao(listOf(operation("one")))
+        val repository = OperationRepository(dao, clock)
+        val coordinator = ForegroundExecutionCoordinator(
+            repository,
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        ) { error("injected upload failure") }
+
+        coordinator.onOpen()
+        eventually { dao.operations.single().phase == "failed" }
+
+        assertEquals("failed", dao.operations.single().phase)
+        assertTrue(dao.operations.single().lastError?.contains("injected") == true)
+        coordinator.onStop()
+    }
+
+    @Test
+    fun lateActionResultCannotCompletePausedOperation() = runBlocking {
+        val started = CompletableDeferred<Unit>()
+        val dao = FakeOperationDao(listOf(operation("one")))
+        val repository = OperationRepository(dao, clock)
+        val coordinator = ForegroundExecutionCoordinator(
+            repository,
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        ) {
+            started.complete(Unit)
+            try {
+                delay(10_000)
+            } catch (_: CancellationException) {
+                // Model a transport that returns a late result after cancellation.
+            }
+            "a".repeat(64)
+        }
+
+        coordinator.onOpen()
+        started.await()
+        assertTrue(coordinator.pause("one"))
+
+        assertEquals("paused", dao.operations.single().phase)
+        assertTrue(dao.operations.single().remoteSha256 == null)
         coordinator.onStop()
     }
 
@@ -135,21 +233,33 @@ class ForegroundExecutionCoordinatorTest {
     }
 
     private class FakeOperationDao(initial: List<OperationEntity>) : OperationDao {
-        val operations = initial.toMutableList()
+        val operations = Collections.synchronizedList(initial.toMutableList())
+        var pauseOnNextClaim = false
 
+        @Synchronized
         override suspend fun find(id: String): OperationEntity? = operations.find { it.id == id }
 
+        @Synchronized
         override suspend fun findEligible(): List<OperationEntity> = operations.filter {
             it.phase in setOf("imported", "waiting") && !it.manualPaused &&
                 it.sourceSha256.isNotEmpty() && it.privateCopy.isNotEmpty()
         }
 
+        @Synchronized
         override suspend fun save(operation: OperationEntity) {
             operations.removeAll { it.id == operation.id }
             operations += operation
         }
 
+        @Synchronized
         override suspend fun claimForUpload(id: String, revision: Long, expectedPhase: String, updatedAt: Long): Int {
+            if (pauseOnNextClaim) {
+                pauseOnNextClaim = false
+                val pauseIndex = operations.indexOfFirst { it.id == id }
+                if (pauseIndex >= 0) {
+                    operations[pauseIndex] = operations[pauseIndex].copy(manualPaused = true, phase = "paused")
+                }
+            }
             val index = operations.indexOfFirst {
                 it.id == id && it.revision == revision && it.phase == expectedPhase &&
                     !it.manualPaused && it.sourceSha256.isNotEmpty() && it.privateCopy.isNotEmpty()
@@ -159,6 +269,7 @@ class ForegroundExecutionCoordinatorTest {
             return 1
         }
 
+        @Synchronized
         override suspend fun setManualPause(id: String, revision: Long, updatedAt: Long): Int {
             val index = operations.indexOfFirst {
                 it.id == id && it.revision == revision && !it.manualPaused &&
@@ -169,6 +280,7 @@ class ForegroundExecutionCoordinatorTest {
             return 1
         }
 
+        @Synchronized
         override suspend fun markSystemWaiting(updatedAt: Long): Int {
             var changed = 0
             operations.indices.forEach { index ->
@@ -181,6 +293,7 @@ class ForegroundExecutionCoordinatorTest {
             return changed
         }
 
+        @Synchronized
         override suspend fun markCompleted(id: String, revision: Long, remoteSha256: String, updatedAt: Long): Int {
             val index = operations.indexOfFirst {
                 it.id == id && it.revision == revision && it.phase == "uploading" &&
@@ -191,6 +304,7 @@ class ForegroundExecutionCoordinatorTest {
             return 1
         }
 
+        @Synchronized
         override suspend fun markFailed(id: String, revision: Long, error: String, updatedAt: Long): Int {
             val index = operations.indexOfFirst {
                 it.id == id && it.revision == revision && it.phase == "uploading" && !it.manualPaused

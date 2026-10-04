@@ -4,10 +4,11 @@ import io.github.ghostflying.ferry.data.OperationEntity
 import io.github.ghostflying.ferry.data.OperationRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
@@ -23,6 +24,7 @@ class ForegroundExecutionCoordinator(
 ) {
     private val lifecycleMutex = Mutex()
     private var worker: Job? = null
+    @Volatile
     private var action: Job? = null
     @Volatile
     private var activeOperationId: String? = null
@@ -46,26 +48,32 @@ class ForegroundExecutionCoordinator(
     }
 
     suspend fun pause(operationId: String): Boolean {
-        val changed = repository.pauseAndReport(operationId)
-        if (changed && activeOperationId == operationId) action?.cancel()
+        val actionToCancel = lifecycleMutex.withLock {
+            val changed = repository.pauseAndReport(operationId)
+            if (changed && activeOperationId == operationId) action else null
+        }
+        val changed = actionToCancel != null || repository.isManuallyPaused(operationId)
+        actionToCancel?.cancelAndJoin()
         return changed
     }
 
     private suspend fun runLoop() {
         while (currentCoroutineContext().isActive && !stopped) {
-            val candidate = repository.eligibleOperations().firstOrNull() ?: return
-            if (!repository.claimForUpload(candidate)) continue
-            activeOperationId = candidate.id
-            try {
-                val remoteSha = coroutineScope {
-                    val currentAction = async { upload(candidate) }
-                    action = currentAction
-                    try {
-                        currentAction.await().lowercase()
-                    } finally {
-                        action = null
-                    }
+            val dispatch = lifecycleMutex.withLock {
+                if (stopped) return@withLock null
+                val candidate = repository.eligibleOperations().firstOrNull() ?: return@withLock null
+                if (!repository.claimForUpload(candidate)) return@withLock Dispatch(null, null)
+                activeOperationId = candidate.id
+                val action = CoroutineScope(currentCoroutineContext()).async(start = CoroutineStart.LAZY) {
+                    upload(candidate)
                 }
+                this.action = action
+                Dispatch(candidate, action)
+            } ?: return
+            val candidate = dispatch.operation ?: continue
+            val currentAction = dispatch.action ?: continue
+            try {
+                val remoteSha = currentAction.await().lowercase()
                 currentCoroutineContext().ensureActive()
                 if (!repository.markCompleted(candidate, remoteSha) &&
                     !repository.isManuallyPaused(candidate.id)
@@ -82,4 +90,9 @@ class ForegroundExecutionCoordinator(
             }
         }
     }
+
+    private data class Dispatch(
+        val operation: OperationEntity?,
+        val action: Deferred<String>?,
+    )
 }
