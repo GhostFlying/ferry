@@ -19,6 +19,9 @@ class FerryUiStateTest {
     @Test
     fun configurationStartsUnconfiguredAndFailedStateIsClassified() {
         assertEquals("尚未配置", UiConfigurationSnapshot().sourceLabel)
+        assertEquals(ConfigurationScreenModel("来源", "尚未配置", "系统目录授权待接入"), configurationScreenModel(FerryTab.SOURCES))
+        assertEquals(ConfigurationScreenModel("目标", "尚未配置", "SMB 配置接口待接入"), configurationScreenModel(FerryTab.TARGETS))
+        assertEquals(ConfigurationScreenModel("规则", "尚未配置", "规则编辑接口待接入"), configurationScreenModel(FerryTab.RULES))
         assertEquals(FerryTab.TASKS, FerryUiState().tab)
         assertEquals(listOf(FerryTab.TASKS, FerryTab.SOURCES, FerryTab.TARGETS, FerryTab.RULES), FerryTab.entries)
         assertFalse(FerryUnsupportedActions.canResume)

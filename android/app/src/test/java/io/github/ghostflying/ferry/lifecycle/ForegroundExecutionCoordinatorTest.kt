@@ -13,7 +13,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -324,13 +326,16 @@ class ForegroundExecutionCoordinatorTest {
             return 1
         }
 
-        override suspend fun markFailed(id: String, revision: Long, error: String, updatedAt: Long): Int = synchronized(lock) {
+        override suspend fun markFailed(id: String, revision: Long, error: String, updatedAt: Long): Int {
+            currentCoroutineContext().ensureActive()
+            return synchronized(lock) {
             val index = operations.indexOfFirst {
                 it.id == id && it.revision == revision && it.phase == "uploading" && !it.manualPaused
             }
             if (index < 0) return 0
             operations[index] = operations[index].copy(phase = "failed", lastError = error, updatedAt = updatedAt)
             return 1
+            }
         }
     }
 }

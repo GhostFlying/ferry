@@ -67,6 +67,22 @@ data class UiConfigurationSnapshot(
     val rulesLabel: String = "尚未配置",
 )
 
+internal data class ConfigurationScreenModel(
+    val title: String,
+    val value: String,
+    val unavailable: String,
+)
+
+internal fun configurationScreenModel(
+    tab: FerryTab,
+    snapshot: UiConfigurationSnapshot = UiConfigurationSnapshot(),
+): ConfigurationScreenModel = when (tab) {
+    FerryTab.SOURCES -> ConfigurationScreenModel("来源", snapshot.sourceLabel, "系统目录授权待接入")
+    FerryTab.TARGETS -> ConfigurationScreenModel("目标", snapshot.targetLabel, "SMB 配置接口待接入")
+    FerryTab.RULES -> ConfigurationScreenModel("规则", snapshot.rulesLabel, "规则编辑接口待接入")
+    FerryTab.TASKS -> error("tasks do not have a configuration screen")
+}
+
 data class FerryUiState(
     val tab: FerryTab = FerryTab.TASKS,
     val operations: List<OperationEntity> = emptyList(),
@@ -159,9 +175,9 @@ fun FerryApp(controller: FerryUiController) {
             Surface(modifier = Modifier.fillMaxSize().padding(padding), color = Color.White) {
                 when (state.tab) {
                     FerryTab.TASKS -> TasksScreen(state, controller)
-                    FerryTab.SOURCES -> ConfigurationScreen("来源", state.configuration.sourceLabel, "系统目录授权待接入")
-                    FerryTab.TARGETS -> ConfigurationScreen("目标", state.configuration.targetLabel, "SMB 配置接口待接入")
-                    FerryTab.RULES -> ConfigurationScreen("规则", state.configuration.rulesLabel, "规则编辑接口待接入")
+                    FerryTab.SOURCES -> ConfigurationScreen(configurationScreenModel(FerryTab.SOURCES, state.configuration))
+                    FerryTab.TARGETS -> ConfigurationScreen(configurationScreenModel(FerryTab.TARGETS, state.configuration))
+                    FerryTab.RULES -> ConfigurationScreen(configurationScreenModel(FerryTab.RULES, state.configuration))
                 }
             }
         }
@@ -286,12 +302,12 @@ private fun OperationDetail(operation: OperationEntity, controller: FerryUiContr
 }
 
 @Composable
-private fun ConfigurationScreen(title: String, value: String, unavailable: String) {
+private fun ConfigurationScreen(model: ConfigurationScreenModel) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)) {
-        ScreenTitle("Ferry / $title")
+        ScreenTitle("Ferry / ${model.title}")
         Spacer(Modifier.height(24.dp))
-        Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(unavailable, color = FerryMuted, modifier = Modifier.padding(top = 8.dp))
+        Text(model.value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text(model.unavailable, color = FerryMuted, modifier = Modifier.padding(top = 8.dp))
         Spacer(Modifier.height(28.dp))
         HorizontalDivider()
         Spacer(Modifier.height(24.dp))
