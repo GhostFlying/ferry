@@ -1,6 +1,6 @@
 # M1 implementation checkpoint — 2026-10-04
 
-Status: **foundation implementation PASS; device/service gates pending.**
+Status: **foundation implementation candidate; independent review and device/service gates pending.**
 
 ## Approved scope
 
@@ -24,7 +24,8 @@ not claim M1 Pocket／Pixel／fnOS or SMB runtime completion.
   reconciliation.
 - M1-T1 storage no-replace contract and SMB client package adapted from the
   accepted M0 transport implementation; temporary write, flush, remote
-  readback, SHA-256 and cancellation boundaries have unit coverage.
+  readback, SHA-256, exclusive final create and cancellation boundaries have
+  unit coverage. The live fnOS adapter remains unverified.
 - P6 dependency locking, Gradle verification metadata and Actions container
   build workflow.
 
@@ -37,7 +38,7 @@ toolchain:
 ./scripts/ci/android.sh
 ```
 
-Source SHA: `ea25f57abc09ea11babab64247ea443208965d53`.
+Source SHA: `e011f2915f545746a1deff044cd84fb3ac7a0c54`.
 
 Container image ID: `sha256:1600111f150b1a1f54b2e02129f71711bd0eb923e4204699e0b3fcfcef28a8af`.
 
@@ -45,8 +46,11 @@ Toolchain: JDK 17.0.20.1, Go 1.27.1, Gradle 8.10.2, compile／target SDK 35,
 build-tools 35.0.0, minSdk 29, arm64-v8a.
 
 Results: Go unit tests PASS, `go vet ./...` PASS, gomobile AAR generation
-PASS, Android unit tests PASS, `:android:app:assembleDebug` PASS. APK SHA-256:
-`876072100e5a4f1358b129fd348b9e74e69182e3fd08850156ae064001673396`.
+PASS, Android unit tests PASS, strict dependency verification PASS,
+`:android:app:assembleDebug` PASS. APK SHA-256:
+`c56fd95993fd4b200b8155e2249c964812df8486b26bd65abd13dc5d464ed364`.
+The provenance bundle includes the committed `gradle.lockfile` and
+`verification-metadata.xml`; the build does not write dependency trust data.
 
 The APK is a technical launch shell pending accepted M1 UI concepts. It is not
 native fidelity evidence.
