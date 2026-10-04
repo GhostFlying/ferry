@@ -39,7 +39,7 @@ func (c Config) Validate() error {
 			return fmt.Errorf("rule %q has negative max_bytes", rule.ID)
 		}
 		if rule.Prefix != "" {
-			if _, err := CanonicalRelativePath(rule.Prefix); err != nil {
+			if _, err := CanonicalRelativePath(strings.TrimSuffix(rule.Prefix, "/")); err != nil {
 				return fmt.Errorf("rule %q prefix: %w", rule.ID, err)
 			}
 		}
@@ -63,7 +63,7 @@ func validateTargetAddress(raw string) error {
 // CanonicalRelativePath rejects absolute paths, traversal, empty segments and
 // platform separators before a path is used for a private copy or remote key.
 func CanonicalRelativePath(raw string) (string, error) {
-	if raw == "" || strings.ContainsRune(raw, '\x00') || strings.Contains(raw, `\\`) || strings.HasPrefix(raw, "/") {
+	if raw == "" || strings.ContainsRune(raw, '\x00') || strings.Contains(raw, `\`) || strings.HasPrefix(raw, "/") {
 		return "", fmt.Errorf("path must be a non-empty relative slash path")
 	}
 	clean := path.Clean(raw)
