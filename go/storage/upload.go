@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"strings"
 )
 
 var sha256Pattern = regexp.MustCompile(`^[0-9a-fA-F]{64}$`)
@@ -28,6 +29,7 @@ func Upload(ctx context.Context, remote RemoteObject, source io.Reader, expected
 	if !sha256Pattern.MatchString(expectedSHA256) {
 		return fmt.Errorf("expected SHA-256 is required before remote completion")
 	}
+	expectedSHA256 = strings.ToLower(expectedSHA256)
 	writer, err := remote.CreateExclusive(ctx, temporaryName)
 	if err != nil {
 		return fmt.Errorf("create temporary object: %w", err)
@@ -57,7 +59,7 @@ func Upload(ctx context.Context, remote RemoteObject, source io.Reader, expected
 		_ = remote.Delete(ctx, temporaryName)
 		return fmt.Errorf("remote readback: %w", err)
 	}
-	if remoteSHA != localSHA {
+	if strings.ToLower(remoteSHA) != localSHA {
 		_ = remote.Delete(ctx, temporaryName)
 		return fmt.Errorf("remote hash mismatch: got %s want %s", remoteSHA, localSHA)
 	}

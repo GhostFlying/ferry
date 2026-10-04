@@ -103,3 +103,12 @@ func TestUploadCommitsWithoutReplace(t *testing.T) {
 		t.Fatalf("unexpected remote: %+v", remote)
 	}
 }
+
+func TestUploadCanonicalizesUppercaseHashes(t *testing.T) {
+	data := []byte("complete media copy")
+	digest := sha256.Sum256(data)
+	remote := &fakeRemote{objects: map[string][]byte{}, readbackOverride: strings.ToUpper(hex.EncodeToString(digest[:]))}
+	if err := Upload(context.Background(), remote, bytes.NewReader(data), strings.ToUpper(hex.EncodeToString(digest[:])), ".tmp", "final.mp4"); err != nil {
+		t.Fatal(err)
+	}
+}
