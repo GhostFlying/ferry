@@ -12,7 +12,7 @@ cd "$ROOT_DIR"
 go test ./...
 go vet ./...
 ./scripts/build-android-bridge.sh
-gradle --no-daemon --stacktrace :android:app:assembleDebug
+gradle --no-daemon --stacktrace --write-verification-metadata sha256 --write-locks :android:app:assembleDebug
 
 mkdir -p dist
 cp android/app/build/outputs/apk/debug/app-debug.apk dist/ferry-m1-debug.apk
@@ -22,6 +22,5 @@ gradle --version >> dist/toolchain.txt
 SOURCE_SHA="${FERRY_SOURCE_SHA:-unknown}"
 printf 'compileSdk=35\ntargetSdk=35\nminSdk=29\nabi=arm64-v8a\nsourceSha=%s\ncontainerImage=%s\ngomobileVersion=%s\n' "$SOURCE_SHA" "$FERRY_CONTAINER_IMAGE_ID" "v0.0.0-20260908204917-8b95e45f8d3e" >> dist/toolchain.txt
 sdkmanager --list | sed -n '/Installed packages:/,/Available Packages:/p' > dist/android-sdk-installed.txt
-gradle --write-verification-metadata sha256 --write-locks help >/dev/null
 cp gradle/verification-metadata.xml dist/gradle-verification-metadata.xml
-cp gradle.lockfile dist/gradle.lockfile
+cp android/app/gradle.lockfile dist/gradle.lockfile
