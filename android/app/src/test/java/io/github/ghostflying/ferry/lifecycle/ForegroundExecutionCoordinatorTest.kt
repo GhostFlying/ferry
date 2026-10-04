@@ -241,6 +241,10 @@ class ForegroundExecutionCoordinatorTest {
             operations.find { it.id == id }
         }
 
+        override suspend fun findAll(): List<OperationEntity> = synchronized(lock) {
+            operations.toList()
+        }
+
         override suspend fun findEligible(): List<OperationEntity> = synchronized(lock) {
             operations.filter {
                 it.phase in setOf("imported", "waiting") && !it.manualPaused &&

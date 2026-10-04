@@ -35,6 +35,8 @@ class OperationRepository(
 
     suspend fun eligibleOperations(): List<OperationEntity> = dao.findEligible()
 
+    suspend fun allOperations(): List<OperationEntity> = dao.findAll()
+
     suspend fun claimForUpload(operation: OperationEntity): Boolean =
         dao.claimForUpload(
             id = operation.id,

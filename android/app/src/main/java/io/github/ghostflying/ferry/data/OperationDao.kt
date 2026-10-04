@@ -9,6 +9,9 @@ interface OperationDao {
     @Query("SELECT * FROM operations WHERE id = :id")
     suspend fun find(id: String): OperationEntity?
 
+    @Query("SELECT * FROM operations ORDER BY updatedAt DESC")
+    suspend fun findAll(): List<OperationEntity>
+
     @Query("SELECT * FROM operations WHERE phase IN ('imported', 'waiting') AND manualPaused = 0 AND sourceSha256 <> '' AND privateCopy <> '' ORDER BY updatedAt ASC")
     suspend fun findEligible(): List<OperationEntity>
 
