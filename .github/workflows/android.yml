@@ -42,7 +42,7 @@ jobs:
 
       - name: Build and test inside devcontainer
         env:
-          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           IMAGE_ID="$(docker image inspect "ferry-m1-devcontainer:${SOURCE_SHA}" --format '{{.Id}}')"
           docker run --rm --init \
