@@ -1,6 +1,6 @@
 # M1 implementation checkpoint — 2026-10-04
 
-Status: **foundation implementation review PASS; device/service/UI gates pending.**
+Status: **pre-device foundation implementation review PASS; accepted-surface UI plan under review; device/service gates pending.**
 
 ## Approved scope
 
@@ -30,6 +30,13 @@ not claim M1 Pocket／Pixel／fnOS or SMB runtime completion.
   to M2.
 - P6 dependency locking, Gradle verification metadata and Actions container
   build workflow.
+- P5 pre-device foreground coordinator: one worker, revision／phase CAS claim and
+  completion, manual pause persistence, cancellation wait, late-result isolation and
+  repeated `onOpen` protection. This is coordination with an injected action; it is
+  not a claim that the production SAF／SMB action is wired end to end.
+- The user accepted the shown M1 concepts A01 and A03–A10 on 2026-10-04. The
+  accepted-surface UI implementation plan is recorded separately; no native UI
+  implementation or fidelity result is claimed yet.
 
 ## Container evidence
 
@@ -40,7 +47,7 @@ toolchain:
 ./scripts/ci/android.sh
 ```
 
-Source SHA: `128f5553f93b81b8e4893a3a2834decbf8333b65`.
+Source SHA: `a3d5779428405ad6c3da345416c395b8aea2b8db`.
 
 Container image ID: `sha256:1600111f150b1a1f54b2e02129f71711bd0eb923e4204699e0b3fcfcef28a8af`.
 
@@ -50,7 +57,7 @@ build-tools 35.0.0, minSdk 29, arm64-v8a.
 Results: Go unit tests PASS, `go vet ./...` PASS, gomobile AAR generation
 PASS, Android unit tests PASS, strict dependency verification PASS,
 `:android:app:assembleDebug` PASS. APK SHA-256:
-`83b6e317c68f6b6a81fdaf162d01d26b818463f6a7c11588654c9085365103af`.
+`b981402a4b88ab0ef8e86f873d61bd0cb446f9019f3dca36bf498f122aff49b6`.
 The provenance bundle includes the committed `gradle.lockfile` and
 `verification-metadata.xml`, including Gradle module metadata checksums; the
 build does not write dependency trust data.
@@ -61,8 +68,8 @@ the pinned CI image and the same strict read-only verification workflow. The
 local recovery APK above remains the artifact whose hash is recorded in this
 checkpoint; the Actions artifact is separately provenance-bound to its run.
 
-The APK is a technical launch shell pending accepted M1 UI concepts. It is not
-native fidelity evidence.
+The APK is still a technical launch shell pending native implementation of the
+accepted M1 surface. It is not native fidelity evidence.
 
 ## Not run or blocked
 
@@ -72,12 +79,12 @@ native fidelity evidence.
   end-to-end run.
 - No live SMB adapter fixture run; generic storage tests do not prove fnOS
   server behavior.
-- No M1 native UI fidelity comparison; the concept manifest remains
-  `awaiting-user-acceptance`.
+- No M1 native UI fidelity comparison; accepted concept coverage is recorded, but
+  the UI implementation plan is still awaiting independent review.
 - Docker daemon could not resolve the pinned upstream base manifest in this
   environment; the local recovery image was used for the container evidence.
 
 These boundaries are evidence limits, not claims that the omitted gates pass.
-The next implementation step is to complete the executor／accepted UI surface
-and then run the specified device/service gates when the user supplies the
+The next implementation step is to complete the independently reviewed accepted
+UI surface. The specified device/service gates run when the user supplies the
 environment.
