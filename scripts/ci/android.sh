@@ -9,6 +9,15 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
+# GitHub PR jobs check out the PR head explicitly. When Git metadata is
+# available, fail closed if the mounted source does not match its provenance.
+if actual_source_sha="$(git rev-parse HEAD 2>/dev/null)"; then
+  [[ "$actual_source_sha" == "$FERRY_SOURCE_SHA" ]] || {
+    echo "source SHA mismatch: actual=$actual_source_sha declared=$FERRY_SOURCE_SHA" >&2
+    exit 2
+  }
+fi
+
 go test ./...
 go vet ./...
 ./scripts/build-android-bridge.sh
