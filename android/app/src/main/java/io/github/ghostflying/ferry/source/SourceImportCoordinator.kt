@@ -45,21 +45,25 @@ class SourceImportCoordinator(
             if (child.isDirectory) {
                 results += walk(child, operationRoot, relative)
             } else if (child.isFile) {
-                results += copyComplete(child.uri, relative, operationRoot)
+                results += copyComplete(child, relative, operationRoot)
             }
         }
         return results
     }
 
-    private suspend fun copyComplete(uri: Uri, relative: String, operationRoot: File): ImportedFile {
+    private suspend fun copyComplete(source: DocumentFile, relative: String, operationRoot: File): ImportedFile {
         val destination = File(operationRoot, relative).canonicalFile
         require(destination.toPath().startsWith(operationRoot.toPath())) { "source path escaped spool" }
         require(!destination.exists()) { "private copy already exists: $relative" }
         destination.parentFile?.mkdirs()
+        val advertisedSize = source.length()
+        if (advertisedSize >= 0) {
+            require(operationRoot.usableSpace >= advertisedSize) { "insufficient private storage" }
+        }
         val partial = File(destination.path + ".partial")
         val digest = MessageDigest.getInstance("SHA-256")
         var size = 0L
-        context.contentResolver.openInputStream(uri)?.use { input ->
+        context.contentResolver.openInputStream(source.uri)?.use { input ->
             FileOutputStream(partial).use { output ->
                 val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                 while (true) {
