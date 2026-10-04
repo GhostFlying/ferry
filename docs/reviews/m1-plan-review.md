@@ -1,11 +1,11 @@
 # M1 Android execution plan review
 
-Review kind: independent plan review  
-Review date: 2026-10-04 (Asia/Shanghai)  
-Author: `/root`  
-Independent reviewer: `/root/m0_plan_reviewer_astra` (`gpt-6-astra`, high)  
-Target: `c3176e306b627bd4453a50bb615b769b747c8cfe`  
-Plan: `docs/plans/m1.md`  
+Review kind: independent plan review
+Review date: 2026-10-04 (Asia/Shanghai)
+Author: `/root`
+Independent reviewer: `/root/m0_plan_reviewer_astra` (`gpt-6-astra`, high)
+Target: `c3176e306b627bd4453a50bb615b769b747c8cfe`
+Plan: `docs/plans/m1.md`
 Related governance: `docs/implementation-plan.md`, `docs/agent-workflow.md`, `docs/plans/m0.md`
 
 ## Conclusion
