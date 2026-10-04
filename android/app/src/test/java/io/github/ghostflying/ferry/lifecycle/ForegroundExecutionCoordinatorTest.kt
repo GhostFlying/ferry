@@ -234,25 +234,26 @@ class ForegroundExecutionCoordinatorTest {
 
     private class FakeOperationDao(initial: List<OperationEntity>) : OperationDao {
         val operations = Collections.synchronizedList(initial.toMutableList())
+        private val lock = Any()
         var pauseOnNextClaim = false
 
-        @Synchronized
-        override suspend fun find(id: String): OperationEntity? = operations.find { it.id == id }
-
-        @Synchronized
-        override suspend fun findEligible(): List<OperationEntity> = operations.filter {
-            it.phase in setOf("imported", "waiting") && !it.manualPaused &&
-                it.sourceSha256.isNotEmpty() && it.privateCopy.isNotEmpty()
+        override suspend fun find(id: String): OperationEntity? = synchronized(lock) {
+            operations.find { it.id == id }
         }
 
-        @Synchronized
-        override suspend fun save(operation: OperationEntity) {
+        override suspend fun findEligible(): List<OperationEntity> = synchronized(lock) {
+            operations.filter {
+                it.phase in setOf("imported", "waiting") && !it.manualPaused &&
+                    it.sourceSha256.isNotEmpty() && it.privateCopy.isNotEmpty()
+            }
+        }
+
+        override suspend fun save(operation: OperationEntity) = synchronized(lock) {
             operations.removeAll { it.id == operation.id }
             operations += operation
         }
 
-        @Synchronized
-        override suspend fun claimForUpload(id: String, revision: Long, expectedPhase: String, updatedAt: Long): Int {
+        override suspend fun claimForUpload(id: String, revision: Long, expectedPhase: String, updatedAt: Long): Int = synchronized(lock) {
             if (pauseOnNextClaim) {
                 pauseOnNextClaim = false
                 val pauseIndex = operations.indexOfFirst { it.id == id }
@@ -269,8 +270,7 @@ class ForegroundExecutionCoordinatorTest {
             return 1
         }
 
-        @Synchronized
-        override suspend fun setManualPause(id: String, revision: Long, updatedAt: Long): Int {
+        override suspend fun setManualPause(id: String, revision: Long, updatedAt: Long): Int = synchronized(lock) {
             val index = operations.indexOfFirst {
                 it.id == id && it.revision == revision && !it.manualPaused &&
                     it.phase in setOf("imported", "uploading", "verifying", "waiting")
@@ -280,8 +280,7 @@ class ForegroundExecutionCoordinatorTest {
             return 1
         }
 
-        @Synchronized
-        override suspend fun markSystemWaiting(updatedAt: Long): Int {
+        override suspend fun markSystemWaiting(updatedAt: Long): Int = synchronized(lock) {
             var changed = 0
             operations.indices.forEach { index ->
                 val operation = operations[index]
@@ -293,8 +292,7 @@ class ForegroundExecutionCoordinatorTest {
             return changed
         }
 
-        @Synchronized
-        override suspend fun markCompleted(id: String, revision: Long, remoteSha256: String, updatedAt: Long): Int {
+        override suspend fun markCompleted(id: String, revision: Long, remoteSha256: String, updatedAt: Long): Int = synchronized(lock) {
             val index = operations.indexOfFirst {
                 it.id == id && it.revision == revision && it.phase == "uploading" &&
                     !it.manualPaused && it.sourceSha256 == remoteSha256
@@ -304,8 +302,7 @@ class ForegroundExecutionCoordinatorTest {
             return 1
         }
 
-        @Synchronized
-        override suspend fun markFailed(id: String, revision: Long, error: String, updatedAt: Long): Int {
+        override suspend fun markFailed(id: String, revision: Long, error: String, updatedAt: Long): Int = synchronized(lock) {
             val index = operations.indexOfFirst {
                 it.id == id && it.revision == revision && it.phase == "uploading" && !it.manualPaused
             }
