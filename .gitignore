@@ -19,6 +19,9 @@ xcuserdata/
 *.jks
 *.p12
 *.mobileprovision
+*.aar
+*.apk
+android/app/libs/
 .DS_Store
 
 .gradle-container-id
