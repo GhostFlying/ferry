@@ -1,0 +1,9 @@
+.git
+.git/**
+.gradle
+android/**/build
+dist
+*.apk
+*.aar
+*.keystore
+*.jks

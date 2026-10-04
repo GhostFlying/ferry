@@ -1,0 +1,17 @@
+{
+  "config": {
+    "version": 1,
+    "source_name": "DJI Pocket 3",
+    "target_name": "fnOS",
+    "target_address": "smb://test-share",
+    "time_zone": "Asia/Shanghai",
+    "rules": [
+      {"id": "exclude-proxies", "include": false, "prefix": "DCIM/PROXY/"},
+      {"id": "include-video", "include": true, "extensions": [".mp4", ".mov"]}
+    ]
+  },
+  "files": [
+    {"name": "clip.mp4", "relative_path": "DCIM/clip.mp4", "size": 1024},
+    {"name": "proxy.mp4", "relative_path": "DCIM/PROXY/proxy.mp4", "size": 512}
+  ]
+}
