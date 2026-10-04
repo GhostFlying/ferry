@@ -37,7 +37,7 @@ toolchain:
 ./scripts/ci/android.sh
 ```
 
-Source SHA: `701ce68d450f64bbf29bc1d5a573d9eab5f2fda8`.
+Source SHA: `ea25f57abc09ea11babab64247ea443208965d53`.
 
 Container image ID: `sha256:1600111f150b1a1f54b2e02129f71711bd0eb923e4204699e0b3fcfcef28a8af`.
 
@@ -46,7 +46,7 @@ build-tools 35.0.0, minSdk 29, arm64-v8a.
 
 Results: Go unit tests PASS, `go vet ./...` PASS, gomobile AAR generation
 PASS, Android unit tests PASS, `:android:app:assembleDebug` PASS. APK SHA-256:
-`149b87fafbc337c19b4849afba969d07f18b58e02786b2f4b66db4b59c7a7f7e`.
+`876072100e5a4f1358b129fd348b9e74e69182e3fd08850156ae064001673396`.
 
 The APK is a technical launch shell pending accepted M1 UI concepts. It is not
 native fidelity evidence.

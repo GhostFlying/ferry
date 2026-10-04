@@ -20,10 +20,10 @@ build. A container image failure blocks build evidence; it does not justify a
 host build.
 
 The first complete container run used source SHA
-`701ce68d450f64bbf29bc1d5a573d9eab5f2fda8`, image ID
+`ea25f57abc09ea11babab64247ea443208965d53`, image ID
 `sha256:1600111f150b1a1f54b2e02129f71711bd0eb923e4204699e0b3fcfcef28a8af`,
 and produced an arm64-v8a debug APK with SHA-256
-`149b87fafbc337c19b4849afba969d07f18b58e02786b2f4b66db4b59c7a7f7e`.
+`876072100e5a4f1358b129fd348b9e74e69182e3fd08850156ae064001673396`.
 The run executed `scripts/ci/android.sh`; Go tests, `go vet`, gomobile AAR
 generation, Gradle unit tests, dependency locks, verification metadata and
 `:android:app:assembleDebug` all passed. The APK is a debug technical shell,
