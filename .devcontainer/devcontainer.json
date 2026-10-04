@@ -1,0 +1,19 @@
+{
+  "name": "ferry-m0-android",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/ferry,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace/ferry",
+  "mounts": [
+    "source=ferry-gradle-cache,target=/root/.gradle,type=volume",
+    "source=ferry-go-cache,target=/go/pkg,type=volume"
+  ],
+  "remoteUser": "root",
+  "containerEnv": {
+    "FERRY_DEVCONTAINER": "1",
+    "FERRY_SOURCE_SHA": "${localEnv:FERRY_SOURCE_SHA}"
+  },
+  "runArgs": ["--init"]
+}

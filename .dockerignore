@@ -1,0 +1,11 @@
+.git
+.git/**
+.gradle
+build
+dist
+node_modules
+*.apk
+*.aar
+*.keystore
+*.jks
+**/.DS_Store

@@ -1,6 +1,6 @@
 # Scope trim execution plan (2026-10-03)
 
-状态：**执行计划，等待本次文档变更的独立 review 与用户 gate；不授权 M0 实现。**
+状态：**历史范围收缩记录；M0 V01–V05 已获用户批准，当前实现以 M0 execution plan 为准。**
 
 ## 目标
 
@@ -25,7 +25,7 @@
 1. 基线必须是 `9441e92`；建立独立工作树 `../ferry-worktrees/scope-trim-20261003`，先确认无用户修改。
 2. 本文件落盘后，按本计划编辑阶段文档；保持每一项硬证据的可追踪 ID，不删除核心安全边界。
 3. 作者完成文档交叉检查后，交给**非作者**独立 plan/revision reviewer；reviewer 需检查真实 diff 与 P1 修复，而不是只读作者摘要。
-4. reviewer 结论、完整提交 SHA 与文档级验证结果交给主代理，供用户审阅；在用户明确批准前不启动 M0/M1/M2 实现、不占用 Dora、不运行 App/SMB、不同步 GitHub。
+4. reviewer 结论、完整提交 SHA 与文档级验证结果交给主代理，供用户审阅；本历史任务本身不启动实现；当前 M0 是否实施以独立 execution plan review 和批准记录为准。
 
 ## 计划变更要求
 
@@ -59,7 +59,7 @@
 
 ## 用户 gate
 
-本提交只交付 scope-trim 文档与审查准备记录。主代理须向用户提供计划 diff、提交 SHA、独立 review、文档验证命令/结果、未测范围和远端登记影响；只有用户明确批准 M0，才可进入 Android/Go probe、真实 APK 构建和 Dora/SMB 验收。批准本次范围修订不等于批准实现、发布或 M3/iOS。
+本提交只交付 scope-trim 文档与审查准备记录，属于历史计划。当前 M0 V01–V05 的用户批准已记录在 M0 execution plan；该批准不覆盖发布、M1、M0-UI 或 M3/iOS。
 
 ## Follow-up remediation execution plan (post-review)
 
