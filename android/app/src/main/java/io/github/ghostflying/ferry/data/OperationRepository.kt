@@ -30,13 +30,33 @@ class OperationRepository(
 
     suspend fun pause(id: String) {
         val current = dao.find(id) ?: return
-        dao.setPause(id, current.revision, paused = true, phase = "paused", updatedAt = clock.millis())
+        dao.setManualPause(id, current.revision, updatedAt = clock.millis())
     }
 
-    suspend fun resumeFromForeground(id: String) {
-        val current = dao.find(id) ?: return
-        if (!current.manualPaused && current.phase == "waiting") {
-            dao.setPause(id, current.revision, paused = false, phase = "waiting", updatedAt = clock.millis())
-        }
+    suspend fun eligibleOperations(): List<OperationEntity> = dao.findEligible()
+
+    suspend fun claimForUpload(operation: OperationEntity): Boolean =
+        dao.claimForUpload(
+            id = operation.id,
+            revision = operation.revision,
+            expectedPhase = operation.phase,
+            updatedAt = clock.millis(),
+        ) == 1
+
+    suspend fun markSystemWaiting(): Int = dao.markSystemWaiting(clock.millis())
+
+    suspend fun markCompleted(operation: OperationEntity, remoteSha256: String): Boolean =
+        dao.markCompleted(operation.id, operation.revision, remoteSha256.lowercase(), clock.millis()) == 1
+
+    suspend fun markFailed(operation: OperationEntity, error: String): Boolean =
+        dao.markFailed(operation.id, operation.revision, error, clock.millis()) == 1
+
+    suspend fun isManuallyPaused(id: String): Boolean = dao.find(id)?.manualPaused == true
+
+    suspend fun current(id: String): OperationEntity? = dao.find(id)
+
+    suspend fun pauseAndReport(id: String): Boolean {
+        val current = dao.find(id) ?: return false
+        return dao.setManualPause(id, current.revision, updatedAt = clock.millis()) == 1
     }
 }
