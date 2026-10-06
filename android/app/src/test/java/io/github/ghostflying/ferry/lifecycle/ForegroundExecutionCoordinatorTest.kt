@@ -66,6 +66,21 @@ class ForegroundExecutionCoordinatorTest {
     }
 
     @Test
+    fun sourceStageRunsWithoutUploader() = runBlocking {
+        val ran = CompletableDeferred<Unit>()
+        val coordinator = ForegroundExecutionCoordinator(
+            OperationRepository(FakeOperationDao(emptyList()), clock),
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            sourceStage = { ran.complete(Unit) },
+            upload = null,
+        )
+
+        coordinator.onOpen()
+        ran.await()
+        coordinator.onStop()
+    }
+
+    @Test
     fun manualPauseCancelsActiveActionAndSurvivesOpen() = runBlocking {
         val started = CompletableDeferred<Unit>()
         val finished = CompletableDeferred<Unit>()

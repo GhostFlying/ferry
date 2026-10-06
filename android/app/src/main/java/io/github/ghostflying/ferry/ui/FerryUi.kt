@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import io.github.ghostflying.ferry.data.OperationEntity
 import io.github.ghostflying.ferry.data.OperationRepository
 import io.github.ghostflying.ferry.lifecycle.ForegroundExecutionCoordinator
+import io.github.ghostflying.ferry.source.SourceStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -77,10 +78,36 @@ internal fun configurationScreenModel(
     tab: FerryTab,
     snapshot: UiConfigurationSnapshot = UiConfigurationSnapshot(),
 ): ConfigurationScreenModel = when (tab) {
-    FerryTab.SOURCES -> ConfigurationScreenModel("来源", snapshot.sourceLabel, "系统目录授权待接入")
+    FerryTab.SOURCES -> error("sources use the source screen")
     FerryTab.TARGETS -> ConfigurationScreenModel("目标", snapshot.targetLabel, "SMB 配置接口待接入")
     FerryTab.RULES -> ConfigurationScreenModel("规则", snapshot.rulesLabel, "规则编辑接口待接入")
     FerryTab.TASKS -> error("tasks do not have a configuration screen")
+}
+
+internal data class SourceScreenModel(
+    val label: String,
+    val status: String,
+    val showsReselectWarning: Boolean,
+    val actionLabel: String,
+)
+
+/**
+ * The accepted A03 v2 concept covers directory selection and the expired-grant
+ * warning. The Pocket OTG hint awaits its own concept acceptance, so until
+ * then that state shows the accepted reselect warning.
+ */
+internal fun sourceScreenModel(label: String?, status: SourceStatus): SourceScreenModel {
+    if (label == null) return SourceScreenModel("尚未选择目录", "等待授权", showsReselectWarning = false, actionLabel = "选择目录")
+    val (statusText, warning) = when (status) {
+        SourceStatus.NotConfigured -> "规则尚未配置" to false
+        SourceStatus.NeedsReselect, SourceStatus.PocketNeedsOtg -> "等待授权" to true
+        SourceStatus.Scanning -> "正在读取来源" to false
+        is SourceStatus.Ready -> with(status.summary) {
+            "已导入 ${imported + registered} · 已有 $skipped" + if (failed > 0) " · 未完成 $failed" else ""
+        } to false
+        is SourceStatus.Failed -> "来源读取未完成 · ${status.reason}" to false
+    }
+    return SourceScreenModel(label, statusText, warning, actionLabel = "重新选择目录")
 }
 
 data class FerryUiState(
@@ -88,6 +115,8 @@ data class FerryUiState(
     val operations: List<OperationEntity> = emptyList(),
     val selectedOperationId: String? = null,
     val configuration: UiConfigurationSnapshot = UiConfigurationSnapshot(),
+    val sourceLabel: String? = null,
+    val sourceStatus: SourceStatus = SourceStatus.NotConfigured,
 ) {
     val showsFirstSetup: Boolean get() = operations.isEmpty()
 }
@@ -110,6 +139,12 @@ class FerryUiController(
         reloadSnapshot()
     }
 
+    suspend fun restart() = lifecycleMutex.withLock {
+        coordinator.onStop()
+        coordinator.onOpen()
+        reloadSnapshot()
+    }
+
     suspend fun shutdown() = lifecycleMutex.withLock {
         coordinator.onStop()
     }
@@ -119,6 +154,10 @@ class FerryUiController(
     private suspend fun reloadSnapshot() {
         val operations = repository.allOperations()
         mutableState.update { it.copy(operations = operations) }
+    }
+
+    fun updateSource(label: String?, status: SourceStatus) {
+        mutableState.update { it.copy(sourceLabel = label, sourceStatus = status) }
     }
 
     fun selectTab(tab: FerryTab) {
@@ -147,7 +186,7 @@ internal object FerryUnsupportedActions {
 }
 
 @Composable
-fun FerryApp(controller: FerryUiController) {
+fun FerryApp(controller: FerryUiController, onPickSource: () -> Unit = {}) {
     val state by controller.state.collectAsState()
     MaterialTheme(
         colorScheme = lightColorScheme(
@@ -175,7 +214,7 @@ fun FerryApp(controller: FerryUiController) {
             Surface(modifier = Modifier.fillMaxSize().padding(padding), color = Color.White) {
                 when (state.tab) {
                     FerryTab.TASKS -> TasksScreen(state, controller)
-                    FerryTab.SOURCES -> ConfigurationScreen(configurationScreenModel(FerryTab.SOURCES, state.configuration))
+                    FerryTab.SOURCES -> SourceScreen(sourceScreenModel(state.sourceLabel, state.sourceStatus), onPickSource)
                     FerryTab.TARGETS -> ConfigurationScreen(configurationScreenModel(FerryTab.TARGETS, state.configuration))
                     FerryTab.RULES -> ConfigurationScreen(configurationScreenModel(FerryTab.RULES, state.configuration))
                 }
@@ -314,6 +353,31 @@ private fun ConfigurationScreen(model: ConfigurationScreenModel) {
         InfoRow("ⓘ", "此页面只显示已配置状态；配置接口尚未接入")
         Spacer(Modifier.height(24.dp))
         Button(onClick = {}, enabled = FerryUnsupportedActions.canSaveConfiguration, modifier = Modifier.fillMaxWidth()) { Text("配置（待接入）") }
+    }
+}
+
+@Composable
+private fun SourceScreen(model: SourceScreenModel, onPickSource: () -> Unit) {
+    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)) {
+        ScreenTitle("Ferry / 来源")
+        Spacer(Modifier.height(24.dp))
+        Text(model.label, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text(model.status, color = FerryMuted, modifier = Modifier.padding(top = 8.dp))
+        HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
+        if (model.showsReselectWarning) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("!", fontSize = 28.sp, color = FerryError, fontWeight = FontWeight.Bold, modifier = Modifier.width(40.dp))
+                Text("目录访问权限已失效，请重新选择", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            }
+            Text("新文件的导入需要访问所选目录，请重新选择以继续。", color = FerryMuted, modifier = Modifier.padding(start = 40.dp, top = 8.dp))
+        }
+        InfoRow("□", "已选目录\n${model.label}")
+        InfoRow("⚙", "访问方式\nAndroid 系统目录授权")
+        InfoRow("⊡", "读取权限\n只读")
+        Spacer(Modifier.height(20.dp))
+        Button(onClick = onPickSource, modifier = Modifier.fillMaxWidth()) { Text(model.actionLabel) }
+        Spacer(Modifier.height(20.dp))
+        Text("Ferry 不写入、不改名、不删除来源文件。", color = FerryMuted)
     }
 }
 

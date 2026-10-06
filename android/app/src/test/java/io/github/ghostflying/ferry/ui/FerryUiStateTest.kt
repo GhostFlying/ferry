@@ -13,13 +13,14 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import io.github.ghostflying.ferry.source.ImportSummary
+import io.github.ghostflying.ferry.source.SourceStatus
 import org.junit.Test
 
 class FerryUiStateTest {
     @Test
     fun configurationStartsUnconfiguredAndFailedStateIsClassified() {
         assertEquals("尚未配置", UiConfigurationSnapshot().sourceLabel)
-        assertEquals(ConfigurationScreenModel("来源", "尚未配置", "系统目录授权待接入"), configurationScreenModel(FerryTab.SOURCES))
         assertEquals(ConfigurationScreenModel("目标", "尚未配置", "SMB 配置接口待接入"), configurationScreenModel(FerryTab.TARGETS))
         assertEquals(ConfigurationScreenModel("规则", "尚未配置", "规则编辑接口待接入"), configurationScreenModel(FerryTab.RULES))
         assertEquals(FerryTab.TASKS, FerryUiState().tab)
@@ -100,6 +101,17 @@ class FerryUiStateTest {
         controller.onStop()
 
         assertEquals("waiting", controller.state.value.operations.single().phase)
+    }
+
+    @Test
+    fun sourceScreenShowsAcceptedReselectWarningForPocketHint() {
+        assertEquals(SourceScreenModel("尚未选择目录", "等待授权", false, "选择目录"), sourceScreenModel(null, SourceStatus.NotConfigured))
+        assertTrue(sourceScreenModel("DCIM", SourceStatus.NeedsReselect).showsReselectWarning)
+        assertTrue(sourceScreenModel("DCIM", SourceStatus.PocketNeedsOtg).showsReselectWarning)
+        assertEquals(
+            "已导入 3 · 已有 2 · 未完成 1",
+            sourceScreenModel("DCIM", SourceStatus.Ready(ImportSummary(imported = 2, skipped = 2, registered = 1, failed = 1))).status,
+        )
     }
 
     private fun operation(id: String, phase: String, error: String? = null) = OperationEntity(
