@@ -47,6 +47,8 @@ class OperationRepository(
 
     suspend fun markSystemWaiting(): Int = dao.markSystemWaiting(clock.millis())
 
+    suspend fun recoverInterrupted(): Int = dao.recoverInterrupted(clock.millis())
+
     suspend fun markCompleted(operation: OperationEntity, remoteSha256: String): Boolean =
         dao.markCompleted(operation.id, operation.revision, remoteSha256.lowercase(), clock.millis()) == 1
 

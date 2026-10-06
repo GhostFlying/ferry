@@ -152,6 +152,17 @@ class FerryUiStateTest {
             }
             return changed
         }
+        override suspend fun recoverInterrupted(updatedAt: Long): Int {
+            var changed = 0
+            operations.indices.forEach { index ->
+                val current = operations[index]
+                if (!current.manualPaused && current.phase in setOf("uploading", "verifying")) {
+                    operations[index] = current.copy(phase = "waiting", updatedAt = updatedAt)
+                    changed++
+                }
+            }
+            return changed
+        }
         override suspend fun markCompleted(id: String, revision: Long, remoteSha256: String, updatedAt: Long): Int = 0
         override suspend fun markFailed(id: String, revision: Long, error: String, updatedAt: Long): Int = 0
     }

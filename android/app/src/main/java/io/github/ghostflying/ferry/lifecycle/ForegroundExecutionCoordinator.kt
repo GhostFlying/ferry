@@ -35,14 +35,19 @@ class ForegroundExecutionCoordinator(
     suspend fun onOpen() = lifecycleMutex.withLock {
         stopped = false
         if (worker?.isActive == true) return@withLock
+        // No worker is running, so any uploading/verifying row was left by a
+        // killed process and must become eligible again.
+        repository.recoverInterrupted()
         worker = scope.launch { runLoop() }
     }
 
     suspend fun onStop() = lifecycleMutex.withLock {
         stopped = true
-        repository.markSystemWaiting()
+        // Release rows only after the worker has stopped so a completion
+        // recorded before the cancel is not overwritten.
         action?.cancel()
         worker?.cancelAndJoin()
+        repository.markSystemWaiting()
         worker = null
         action = null
         activeOperationId = null

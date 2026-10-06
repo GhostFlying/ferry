@@ -52,6 +52,20 @@ class ForegroundExecutionCoordinatorTest {
     }
 
     @Test
+    fun onOpenRecoversUploadLeftByKilledProcess() = runBlocking {
+        val dao = FakeOperationDao(listOf(operation("one", phase = "uploading")))
+        val repository = OperationRepository(dao, clock)
+        val coordinator = ForegroundExecutionCoordinator(
+            repository,
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        ) { "a".repeat(64) }
+
+        coordinator.onOpen()
+        eventually { dao.operations.single().phase == "completed" }
+        coordinator.onStop()
+    }
+
+    @Test
     fun manualPauseCancelsActiveActionAndSurvivesOpen() = runBlocking {
         val started = CompletableDeferred<Unit>()
         val finished = CompletableDeferred<Unit>()
@@ -309,6 +323,18 @@ class ForegroundExecutionCoordinatorTest {
             operations.indices.forEach { index ->
                 val operation = operations[index]
                 if (!operation.manualPaused && operation.phase in setOf("imported", "uploading", "verifying", "waiting")) {
+                    operations[index] = operation.copy(phase = "waiting", updatedAt = updatedAt)
+                    changed++
+                }
+            }
+            return changed
+        }
+
+        override suspend fun recoverInterrupted(updatedAt: Long): Int = synchronized(lock) {
+            var changed = 0
+            operations.indices.forEach { index ->
+                val operation = operations[index]
+                if (!operation.manualPaused && operation.phase in setOf("uploading", "verifying")) {
                     operations[index] = operation.copy(phase = "waiting", updatedAt = updatedAt)
                     changed++
                 }

@@ -27,6 +27,9 @@ interface OperationDao {
     @Query("UPDATE operations SET phase = 'waiting', updatedAt = :updatedAt WHERE manualPaused = 0 AND phase IN ('imported', 'uploading', 'verifying', 'waiting')")
     suspend fun markSystemWaiting(updatedAt: Long): Int
 
+    @Query("UPDATE operations SET phase = 'waiting', updatedAt = :updatedAt WHERE manualPaused = 0 AND phase IN ('uploading', 'verifying')")
+    suspend fun recoverInterrupted(updatedAt: Long): Int
+
     @Query("UPDATE operations SET phase = 'completed', remoteSha256 = :remoteSha256, lastError = NULL, updatedAt = :updatedAt WHERE id = :id AND revision = :revision AND phase = 'uploading' AND manualPaused = 0 AND sourceSha256 = :remoteSha256")
     suspend fun markCompleted(id: String, revision: Long, remoteSha256: String, updatedAt: Long): Int
 
