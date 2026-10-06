@@ -11,7 +11,7 @@ import (
 )
 
 func TestValidateDestination(t *testing.T) {
-	for _, value := range []string{"", ".", "../x", "a/../x", "/absolute", `a\\b`, "a\x00b"} {
+	for _, value := range []string{"", ".", "..", "../x", "a/../x", "/absolute", `a\\b`, "a\x00b"} {
 		if err := validateDestination(value); err == nil {
 			t.Fatalf("expected rejection for %q", value)
 		}

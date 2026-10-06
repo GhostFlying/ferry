@@ -12,6 +12,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/hirochachacha/go-smb2"
 )
@@ -92,6 +93,10 @@ func (c *Client) Close() error {
 	return first
 }
 
+// cleanupGrace bounds how long SMB requests may continue after the caller
+// cancels, so owned objects can still be closed and removed.
+const cleanupGrace = 30 * time.Second
+
 var operationIDPattern = regexp.MustCompile(`^[A-Za-z0-9._-]+$`)
 
 func temporaryName(destination, operationID string) (string, error) {
@@ -109,7 +114,7 @@ func validateDestination(destination string) error {
 		return errors.New("invalid destination")
 	}
 	clean := path.Clean(destination)
-	if clean == "." || clean != destination || strings.HasPrefix(clean, "../") || strings.HasPrefix(clean, "/") {
+	if clean == "." || clean == ".." || clean != destination || strings.HasPrefix(clean, "../") || strings.HasPrefix(clean, "/") {
 		return errors.New("destination must be a relative clean path")
 	}
 	return nil
@@ -147,7 +152,16 @@ func (c *Client) Upload(ctx context.Context, operationID, destination, expectedS
 	if err := ctx.Err(); err != nil {
 		return Result{}, &Error{Stage: StageCancelled, Err: err}
 	}
-	share := c.share.WithContext(ctx)
+	// go-smb2 binds every request, including File.Close and Share.Remove, to
+	// the share context, and opens files without FILE_SHARE_DELETE. Requests
+	// therefore keep running for a grace period after ctx is cancelled so the
+	// deferred cleanup can close handles and remove owned objects. The copy
+	// loops still observe ctx between chunks.
+	ioCtx, stopIO := context.WithCancel(context.WithoutCancel(ctx))
+	defer stopIO()
+	stopAfterCancel := context.AfterFunc(ctx, func() { time.AfterFunc(cleanupGrace, stopIO) })
+	defer stopAfterCancel()
+	share := c.share.WithContext(ioCtx)
 	file, err := share.OpenFile(temp, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
 	if err != nil {
 		return Result{}, &Error{Stage: StageCreate, Err: err}
@@ -222,6 +236,17 @@ func (c *Client) Upload(ctx context.Context, operationID, destination, expectedS
 	// rename would violate the no-replace contract.
 	finalFile, err = share.OpenFile(destination, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
 	if err != nil {
+		// A previous attempt may have committed this object before its
+		// completion was recorded. Matching content completes the operation
+		// without replacing anything; other content keeps the create error.
+		if existingHash, existingCount, readErr := readback(ctx, share, destination); readErr == nil &&
+			existingHash == expectedSHA256 && existingCount == count {
+			if err := share.Remove(temp); err != nil {
+				return Result{}, &Error{Stage: StageCleanup, Err: err}
+			}
+			tempOwned = false
+			return Result{Destination: destination, Bytes: count, LocalSHA256: localHash, RemoteSHA256: existingHash}, nil
+		}
 		return Result{}, &Error{Stage: StageCreate, Err: err}
 	}
 	finalOwned = true
