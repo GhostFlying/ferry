@@ -105,11 +105,16 @@ class FerryUiStateTest {
 
     @Test
     fun sourceScreenShowsOnlyAcceptedStates() {
-        assertEquals(SourceScreenModel("尚未配置", "", false, "选择来源"), sourceScreenModel(null, SourceStatus.NotConfigured))
-        assertEquals(SourceScreenModel("DCIM", "等待授权", true, "重新选择目录"), sourceScreenModel("DCIM", SourceStatus.NeedsReselect))
-        assertEquals(SourceScreenModel("DCIM", "等待授权", true, "重新选择目录"), sourceScreenModel("DCIM", SourceStatus.PocketNeedsOtg))
+        assertEquals(SourceScreenModel("尚未配置", "", null, "选择来源"), sourceScreenModel(null, SourceStatus.NotConfigured))
+        val reselect = sourceScreenModel("DCIM", SourceStatus.NeedsReselect)
+        assertEquals("等待授权", reselect.status)
+        assertEquals("目录访问权限已失效，请重新选择", reselect.warning?.title)
+        val otg = sourceScreenModel("DCIM", SourceStatus.PocketNeedsOtg)
+        assertEquals("等待 OTG 连接", otg.status)
+        assertEquals("检测到 Pocket 3，但未以 OTG 方式连接", otg.warning?.title)
+        assertEquals("请在相机下拉菜单「设置 → OTG 连接」后重新连接数据线。", otg.warning?.body)
         for (status in listOf(SourceStatus.Scanning, SourceStatus.Ready(ImportSummary(imported = 1)), SourceStatus.Failed("io"))) {
-            assertEquals(SourceScreenModel("DCIM", "", false, "重新选择目录"), sourceScreenModel("DCIM", status))
+            assertEquals(SourceScreenModel("DCIM", "", null, "重新选择目录"), sourceScreenModel("DCIM", status))
         }
     }
 

@@ -84,23 +84,30 @@ internal fun configurationScreenModel(
     FerryTab.TASKS -> error("tasks do not have a configuration screen")
 }
 
+internal data class SourceWarning(val title: String, val body: String)
+
 internal data class SourceScreenModel(
     val label: String,
     val status: String,
-    val showsReselectWarning: Boolean,
+    val warning: SourceWarning?,
     val actionLabel: String,
 )
 
+private val ReselectWarning = SourceWarning("目录访问权限已失效，请重新选择", "新文件的导入需要访问所选目录，请重新选择以继续。")
+private val PocketOtgWarning = SourceWarning("检测到 Pocket 3，但未以 OTG 方式连接", "请在相机下拉菜单「设置 → OTG 连接」后重新连接数据线。")
+
 /**
- * Only the states shown in the accepted A03 v2 concept are visible: the
- * selected directory and the expired-grant warning. Scan and import progress
- * is logged until its own concept is accepted, and the Pocket OTG hint uses
- * the accepted reselect warning until the OTG concept is accepted.
+ * Only states shown in accepted concepts are visible: the selected directory,
+ * the A03 v2 expired-grant warning and the A12 Pocket OTG hint. Scan and
+ * import progress is logged until its own concept is accepted.
  */
 internal fun sourceScreenModel(label: String?, status: SourceStatus): SourceScreenModel {
-    if (label == null) return SourceScreenModel("尚未配置", "", showsReselectWarning = false, actionLabel = "选择来源")
-    val warning = status == SourceStatus.NeedsReselect || status == SourceStatus.PocketNeedsOtg
-    return SourceScreenModel(label, if (warning) "等待授权" else "", warning, actionLabel = "重新选择目录")
+    if (label == null) return SourceScreenModel("尚未配置", "", warning = null, actionLabel = "选择来源")
+    return when (status) {
+        SourceStatus.NeedsReselect -> SourceScreenModel(label, "等待授权", ReselectWarning, "重新选择目录")
+        SourceStatus.PocketNeedsOtg -> SourceScreenModel(label, "等待 OTG 连接", PocketOtgWarning, "重新选择目录")
+        else -> SourceScreenModel(label, "", warning = null, actionLabel = "重新选择目录")
+    }
 }
 
 data class FerryUiState(
@@ -357,12 +364,12 @@ private fun SourceScreen(model: SourceScreenModel, onPickSource: () -> Unit) {
         Text(model.label, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         if (model.status.isNotEmpty()) Text(model.status, color = FerryMuted, modifier = Modifier.padding(top = 8.dp))
         HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
-        if (model.showsReselectWarning) {
+        model.warning?.let { warning ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("!", fontSize = 28.sp, color = FerryError, fontWeight = FontWeight.Bold, modifier = Modifier.width(40.dp))
-                Text("目录访问权限已失效，请重新选择", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(warning.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             }
-            Text("新文件的导入需要访问所选目录，请重新选择以继续。", color = FerryMuted, modifier = Modifier.padding(start = 40.dp, top = 8.dp))
+            Text(warning.body, color = FerryMuted, modifier = Modifier.padding(start = 40.dp, top = 8.dp))
         }
         InfoRow("□", "已选目录\n${model.label}")
         InfoRow("⚙", "访问方式\nAndroid 系统目录授权")
