@@ -121,6 +121,7 @@ class FerryUiStateTest {
 
         override suspend fun find(id: String): OperationEntity? = operations.find { it.id == id }
         override suspend fun findAll(): List<OperationEntity> = operations.toList()
+        override suspend fun findBySourcePath(sourcePath: String): OperationEntity? = operations.find { it.sourcePath == sourcePath }
         override suspend fun findEligible(): List<OperationEntity> = operations.filter {
             it.phase in setOf("imported", "waiting") && !it.manualPaused && it.sourceSha256.isNotEmpty() && it.privateCopy.isNotEmpty()
         }

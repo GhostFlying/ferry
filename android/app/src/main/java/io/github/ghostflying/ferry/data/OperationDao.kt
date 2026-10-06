@@ -9,6 +9,9 @@ interface OperationDao {
     @Query("SELECT * FROM operations WHERE id = :id")
     suspend fun find(id: String): OperationEntity?
 
+    @Query("SELECT * FROM operations WHERE sourcePath = :sourcePath LIMIT 1")
+    suspend fun findBySourcePath(sourcePath: String): OperationEntity?
+
     @Query("SELECT * FROM operations ORDER BY updatedAt DESC")
     suspend fun findAll(): List<OperationEntity>
 

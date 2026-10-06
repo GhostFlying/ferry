@@ -275,6 +275,10 @@ class ForegroundExecutionCoordinatorTest {
             operations.find { it.id == id }
         }
 
+        override suspend fun findBySourcePath(sourcePath: String): OperationEntity? = synchronized(lock) {
+            operations.find { it.sourcePath == sourcePath }
+        }
+
         override suspend fun findAll(): List<OperationEntity> = synchronized(lock) {
             operations.toList()
         }

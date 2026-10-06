@@ -11,6 +11,7 @@ class OperationRepository(
         revision: Long,
         sourcePath: String,
         privateCopy: String,
+        sourceSha256: String,
     ): OperationEntity {
         val operation = OperationEntity(
             id = UUID.randomUUID().toString(),
@@ -19,7 +20,7 @@ class OperationRepository(
             manualPaused = false,
             sourcePath = sourcePath,
             privateCopy = privateCopy,
-            sourceSha256 = "",
+            sourceSha256 = sourceSha256,
             remoteSha256 = null,
             lastError = null,
             updatedAt = clock.millis(),
@@ -32,6 +33,8 @@ class OperationRepository(
         val current = dao.find(id) ?: return
         dao.setManualPause(id, current.revision, updatedAt = clock.millis())
     }
+
+    suspend fun findBySourcePath(sourcePath: String): OperationEntity? = dao.findBySourcePath(sourcePath)
 
     suspend fun eligibleOperations(): List<OperationEntity> = dao.findEligible()
 
