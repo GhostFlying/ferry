@@ -11,11 +11,17 @@ cd "$ROOT_DIR"
 
 # GitHub PR jobs check out the PR head explicitly. When Git metadata is
 # available, fail closed if the mounted source does not match its provenance.
+# The mounted checkout is owned by the host user, so trust it explicitly;
+# otherwise Git refuses it and the check would be skipped silently.
+git -C / config --global --add safe.directory "$ROOT_DIR"
 if actual_source_sha="$(git rev-parse HEAD 2>/dev/null)"; then
   [[ "$actual_source_sha" == "$FERRY_SOURCE_SHA" ]] || {
     echo "source SHA mismatch: actual=$actual_source_sha declared=$FERRY_SOURCE_SHA" >&2
     exit 2
   }
+elif [[ "${FERRY_REQUIRE_SOURCE_GIT:-}" == "1" ]]; then
+  echo "cannot read the mounted source SHA" >&2
+  exit 2
 fi
 
 go test ./...
