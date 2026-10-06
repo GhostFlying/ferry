@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -120,12 +121,26 @@ class SourceImportCoordinatorTest {
     @Test
     fun stageReportsPocketHintWithoutScanning() = runBlocking {
         val tree = FakeTree("DCIM/a.mp4" to "alpha").apply { accessible = false }
-        val stage = SourceStage({ StoredConfig(CONFIG, 1) }, { tree }, planAll(tree), importer, pocketSeen = { true })
+        val stage = SourceStage({ StoredConfig(CONFIG, 1) }, { tree }, planAll(tree), importer, pocketSeen = { true }, mountSettleMillis = 1_000)
 
         stage.run()
 
         assertEquals(SourceStatus.PocketNeedsOtg, stage.status.value)
         assertTrue(dao.operations.isEmpty())
+    }
+
+    @Test
+    fun stageWaitsForCardToMountAfterPocketAttaches() = runBlocking {
+        val tree = FakeTree("DCIM/a.mp4" to "alpha").apply { accessible = false }
+        val stage = SourceStage({ StoredConfig(CONFIG, 1) }, { tree }, planAll(tree), importer, pocketSeen = { true })
+        CoroutineScope(Dispatchers.Default).launch {
+            delay(1_200)
+            tree.accessible = true
+        }
+
+        stage.run()
+
+        assertEquals(SourceStatus.Ready(ImportSummary(imported = 1)), stage.status.value)
     }
 
     @Test
@@ -160,6 +175,7 @@ class SourceImportCoordinatorTest {
         val contents = linkedMapOf(*files)
         val declaredSizes = mutableMapOf<String, Long>()
         val streams = mutableMapOf<String, () -> InputStream>()
+        @Volatile
         var accessible = true
 
         override fun isAccessible(): Boolean = accessible

@@ -108,13 +108,10 @@ class MainActivity : ComponentActivity() {
         super.onStart()
         getSystemService(UsbManager::class.java)?.deviceList?.values?.forEach(::notePocket)
         val attach = IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED)
-        val mounts = IntentFilter(Intent.ACTION_MEDIA_MOUNTED).apply { addDataScheme("file") }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(sourceEvents, attach, RECEIVER_NOT_EXPORTED)
-            registerReceiver(sourceEvents, mounts, RECEIVER_NOT_EXPORTED)
         } else {
             registerReceiver(sourceEvents, attach)
-            registerReceiver(sourceEvents, mounts)
         }
         if (::controller.isInitialized) activityScope.launch { controller.onStart() }
     }

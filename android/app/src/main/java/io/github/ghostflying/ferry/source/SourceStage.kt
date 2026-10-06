@@ -2,6 +2,7 @@ package io.github.ghostflying.ferry.source
 
 import io.github.ghostflying.ferry.config.StoredConfig
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,6 +43,7 @@ class SourceStage(
     private val planner: Planner,
     private val importer: SourceImportCoordinator,
     private val pocketSeen: () -> Boolean,
+    private val mountSettleMillis: Long = 8_000,
 ) {
     private val mutableStatus = MutableStateFlow<SourceStatus>(SourceStatus.NotConfigured)
     val status: StateFlow<SourceStatus> = mutableStatus.asStateFlow()
@@ -54,7 +56,7 @@ class SourceStage(
             mutableStatus.value = SourceStatus.NotConfigured
             return
         }
-        sourceAvailability(pocketSeen(), tree.isAccessible())?.let {
+        sourceAvailability(pocketSeen(), awaitAccessible(tree))?.let {
             mutableStatus.value = it
             return
         }
@@ -68,5 +70,24 @@ class SourceStage(
             // copy was already removed and the next open retries.
             SourceStatus.Failed(failure.message ?: failure::class.java.simpleName)
         }
+    }
+
+    /**
+     * Right after the Pocket enumerates, the system needs a moment to mount
+     * the card, and no mount broadcast arrives for this kind of volume. Give
+     * an attached Pocket that time before reporting the OTG hint.
+     */
+    private suspend fun awaitAccessible(tree: SourceTree): Boolean {
+        if (tree.isAccessible()) return true
+        if (!pocketSeen()) return false
+        repeat((mountSettleMillis / SETTLE_POLL_MILLIS).toInt()) {
+            delay(SETTLE_POLL_MILLIS)
+            if (tree.isAccessible()) return true
+        }
+        return false
+    }
+
+    private companion object {
+        const val SETTLE_POLL_MILLIS = 500L
     }
 }
