@@ -92,22 +92,15 @@ internal data class SourceScreenModel(
 )
 
 /**
- * The accepted A03 v2 concept covers directory selection and the expired-grant
- * warning. The Pocket OTG hint awaits its own concept acceptance, so until
- * then that state shows the accepted reselect warning.
+ * Only the states shown in the accepted A03 v2 concept are visible: the
+ * selected directory and the expired-grant warning. Scan and import progress
+ * is logged until its own concept is accepted, and the Pocket OTG hint uses
+ * the accepted reselect warning until the OTG concept is accepted.
  */
 internal fun sourceScreenModel(label: String?, status: SourceStatus): SourceScreenModel {
-    if (label == null) return SourceScreenModel("尚未选择目录", "等待授权", showsReselectWarning = false, actionLabel = "选择目录")
-    val (statusText, warning) = when (status) {
-        SourceStatus.NotConfigured -> "规则尚未配置" to false
-        SourceStatus.NeedsReselect, SourceStatus.PocketNeedsOtg -> "等待授权" to true
-        SourceStatus.Scanning -> "正在读取来源" to false
-        is SourceStatus.Ready -> with(status.summary) {
-            "已导入 ${imported + registered} · 已有 $skipped" + if (failed > 0) " · 未完成 $failed" else ""
-        } to false
-        is SourceStatus.Failed -> "来源读取未完成 · ${status.reason}" to false
-    }
-    return SourceScreenModel(label, statusText, warning, actionLabel = "重新选择目录")
+    if (label == null) return SourceScreenModel("尚未配置", "", showsReselectWarning = false, actionLabel = "选择来源")
+    val warning = status == SourceStatus.NeedsReselect || status == SourceStatus.PocketNeedsOtg
+    return SourceScreenModel(label, if (warning) "等待授权" else "", warning, actionLabel = "重新选择目录")
 }
 
 data class FerryUiState(
@@ -362,7 +355,7 @@ private fun SourceScreen(model: SourceScreenModel, onPickSource: () -> Unit) {
         ScreenTitle("Ferry / 来源")
         Spacer(Modifier.height(24.dp))
         Text(model.label, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(model.status, color = FerryMuted, modifier = Modifier.padding(top = 8.dp))
+        if (model.status.isNotEmpty()) Text(model.status, color = FerryMuted, modifier = Modifier.padding(top = 8.dp))
         HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
         if (model.showsReselectWarning) {
             Row(verticalAlignment = Alignment.CenterVertically) {

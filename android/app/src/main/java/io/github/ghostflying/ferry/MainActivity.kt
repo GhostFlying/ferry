@@ -45,7 +45,12 @@ class MainActivity : ComponentActivity() {
     private val pickSource = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri == null) return@registerForActivityResult
         contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        configStore.sourceTreeUri?.let(Uri::parse)?.takeIf { it != uri }?.let { previous ->
+            runCatching { contentResolver.releasePersistableUriPermission(previous, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        }
         configStore.saveSourceTree(uri.toString())
+        // The status flow may not emit for a new directory, so show it now.
+        controller.updateSource(SafSourceTree.label(uri), controller.state.value.sourceStatus)
         // The result arrives after onStart, whose source pass used the old
         // directory, so restart the worker with the new one.
         activityScope.launch { controller.restart() }
@@ -152,7 +157,11 @@ class MainActivity : ComponentActivity() {
     companion object {
         private const val TAG = "FerrySource"
 
-        /** Latched for the process; only an accessible directory clears the OTG hint. */
+        /**
+         * Latched for the process. An accessible directory takes precedence in
+         * [io.github.ghostflying.ferry.source.sourceAvailability], so the hint
+         * only shows while the directory is unreadable.
+         */
         @Volatile
         private var pocketSeen = false
 

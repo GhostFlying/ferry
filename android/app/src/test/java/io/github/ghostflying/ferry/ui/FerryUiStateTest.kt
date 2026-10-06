@@ -104,14 +104,13 @@ class FerryUiStateTest {
     }
 
     @Test
-    fun sourceScreenShowsAcceptedReselectWarningForPocketHint() {
-        assertEquals(SourceScreenModel("尚未选择目录", "等待授权", false, "选择目录"), sourceScreenModel(null, SourceStatus.NotConfigured))
-        assertTrue(sourceScreenModel("DCIM", SourceStatus.NeedsReselect).showsReselectWarning)
-        assertTrue(sourceScreenModel("DCIM", SourceStatus.PocketNeedsOtg).showsReselectWarning)
-        assertEquals(
-            "已导入 3 · 已有 2 · 未完成 1",
-            sourceScreenModel("DCIM", SourceStatus.Ready(ImportSummary(imported = 2, skipped = 2, registered = 1, failed = 1))).status,
-        )
+    fun sourceScreenShowsOnlyAcceptedStates() {
+        assertEquals(SourceScreenModel("尚未配置", "", false, "选择来源"), sourceScreenModel(null, SourceStatus.NotConfigured))
+        assertEquals(SourceScreenModel("DCIM", "等待授权", true, "重新选择目录"), sourceScreenModel("DCIM", SourceStatus.NeedsReselect))
+        assertEquals(SourceScreenModel("DCIM", "等待授权", true, "重新选择目录"), sourceScreenModel("DCIM", SourceStatus.PocketNeedsOtg))
+        for (status in listOf(SourceStatus.Scanning, SourceStatus.Ready(ImportSummary(imported = 1)), SourceStatus.Failed("io"))) {
+            assertEquals(SourceScreenModel("DCIM", "", false, "重新选择目录"), sourceScreenModel("DCIM", status))
+        }
     }
 
     private fun operation(id: String, phase: String, error: String? = null) = OperationEntity(
