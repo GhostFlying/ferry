@@ -1,5 +1,5 @@
 {
-  "name": "ferry-m0-android",
+  "name": "ferry-m1-android",
   "build": {
     "dockerfile": "Dockerfile",
     "context": ".."

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "awaiting-user-acceptance",
+  "status": "accepted-partial",
   "created_utc": "2026-10-02 11:10:09 UTC",
   "task_ids": [
     "M0-DESIGN1",
@@ -13,10 +13,13 @@
   "snapshot_kind": "uncommitted preparation; per-image and prompt SHA-256 identify this design set",
   "selected_count": 11,
   "user_acceptance": {
-    "status": "awaiting-user-acceptance",
-    "reference": null
+    "status": "accepted-partial",
+    "accepted_scope": "M1 Android concepts already shown: tasks, source, target, rules, pause, waiting-space and readback states; unshown UI still requires new concept review.",
+    "reference": "user response in Codex session, 2026-10-04 05:50 UTC",
+    "accepted_by": "user",
+    "accepted_utc": "2026-10-04 05:50:46 UTC"
   },
-  "milestone_implementation_authorization": "not granted by this design work",
+  "milestone_implementation_authorization": "M1 implementation approved separately; accepted M1 shown concepts may enter native UI planning",
   "annotations_not_product_copy": [
     "设计示例，非运行证据 (review-only footer)"
   ],
@@ -55,7 +58,7 @@
     {
       "concept_id": "A01",
       "title": "M1 任务主屏：单上传／单导入与队列",
-      "status": "awaiting-user-acceptance",
+      "status": "accepted-user",
       "path": "a01-tasks-active-v3.png",
       "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-2956fb0c-1fa7-4e04-ba65-06609b8a0b78.png",
       "prompt_record": "prompts/a01-v3.txt",
@@ -89,7 +92,9 @@
           "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-c91d9082-c8c2-42db-9859-f5b4d30c5e8b.png",
           "sha256": "096474feda64c50acd747ed2208f5924b4b0e640badc7fe12485cca2e3088048"
         }
-      ]
+      ],
+      "user_acceptance_reference": "manifest user_acceptance.accepted_scope",
+      "user_acceptance_utc": "2026-10-04 05:50:46 UTC"
     },
     {
       "concept_id": "A02",
@@ -132,7 +137,7 @@
     {
       "concept_id": "A03",
       "title": "M1 来源：授权失效",
-      "status": "awaiting-user-acceptance",
+      "status": "accepted-user",
       "path": "a03-source-authorization-v2.png",
       "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-47da756f-5c65-4ce3-b5e3-92cf50b24b7c.png",
       "prompt_record": "prompts/a03-v2.txt",
@@ -166,12 +171,14 @@
           "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-cae51668-79be-4a22-9ec2-86ddecb91684.png",
           "sha256": "82c4b9121397141b36ede53b2e20c07db4b70e78c7b17013ae9bb382938b7e10"
         }
-      ]
+      ],
+      "user_acceptance_reference": "manifest user_acceptance.accepted_scope",
+      "user_acceptance_utc": "2026-10-04 05:50:46 UTC"
     },
     {
       "concept_id": "A04",
       "title": "M1 目标：SMB 与应用内 Tailscale 配置",
-      "status": "awaiting-user-acceptance",
+      "status": "accepted-user",
       "path": "a04-target-config-v2.png",
       "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-12dd5716-3efd-4d41-a71f-7bc49ead8590.png",
       "prompt_record": "prompts/a04-v2.txt",
@@ -206,12 +213,14 @@
           "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-5d89a674-e995-4c14-8a29-2fc92543adba.png",
           "sha256": "46a8805d5ea68cb7aa57d182f3b9f92aadcfe840a855fc3a12913117aa36a929"
         }
-      ]
+      ],
+      "user_acceptance_reference": "manifest user_acceptance.accepted_scope",
+      "user_acceptance_utc": "2026-10-04 05:50:46 UTC"
     },
     {
       "concept_id": "A05",
       "title": "M1 规则：匹配预览",
-      "status": "awaiting-user-acceptance",
+      "status": "accepted-user",
       "path": "a05-rules-preview-v2.png",
       "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-fb6046ed-ef67-4f04-93fc-eeeb49db1b28.png",
       "prompt_record": "prompts/a05-v2.txt",
@@ -247,12 +256,14 @@
           "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-c4cd569b-c0f7-4316-95d5-2628c35ef9b8.png",
           "sha256": "82f0c7e8c1167e9ad218064546b5767181aed136a131e61edd4a6b5a01049145"
         }
-      ]
+      ],
+      "user_acceptance_reference": "manifest user_acceptance.accepted_scope",
+      "user_acceptance_utc": "2026-10-04 05:50:46 UTC"
     },
     {
       "concept_id": "A06",
       "title": "M1 任务：等待空间",
-      "status": "awaiting-user-acceptance",
+      "status": "accepted-user",
       "path": "a06-waiting-space-v2.png",
       "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-5dfb0e5f-b643-4249-94ea-45fb1d667be1.png",
       "prompt_record": "prompts/a06-v2.txt",
@@ -284,12 +295,14 @@
           "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-bf0d2385-5810-43ab-b633-41bbca8b1b65.png",
           "sha256": "62a0d14bcfe0c7a72ce11255e733ed8071cc052f57d404b76ea5e2ed7711d387"
         }
-      ]
+      ],
+      "user_acceptance_reference": "manifest user_acceptance.accepted_scope",
+      "user_acceptance_utc": "2026-10-04 05:50:46 UTC"
     },
     {
       "concept_id": "A07",
       "title": "M1 任务：读回校验失败",
-      "status": "awaiting-user-acceptance",
+      "status": "accepted-user",
       "path": "a07-verification-failure-v2.png",
       "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-90b9f85a-ccc4-4580-8193-40e50fe5c92f.png",
       "prompt_record": "prompts/a07-v2.txt",
@@ -322,12 +335,14 @@
           "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-be26a587-28b9-4f06-a6b5-69af8f2d831a.png",
           "sha256": "1c19683e433b6b2a54d9ad46dd5204cf4e78d5fc8704d61413f34916de3be619"
         }
-      ]
+      ],
+      "user_acceptance_reference": "manifest user_acceptance.accepted_scope",
+      "user_acceptance_utc": "2026-10-04 05:50:46 UTC"
     },
     {
       "concept_id": "A08",
       "title": "M1 任务：首次配置空态",
-      "status": "awaiting-user-acceptance",
+      "status": "accepted-user",
       "path": "a08-first-setup.png",
       "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-ddd1a4ba-48f3-4f6a-9968-a9b22ebc75df.png",
       "prompt_record": "prompts/a08.txt",
@@ -358,12 +373,14 @@
           "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-2956fb0c-1fa7-4e04-ba65-06609b8a0b78.png",
           "sha256": "3480b347bbd0f142cdc794b6a851142f52694f20e6bacfdc4b75e9881e4f69e1"
         }
-      ]
+      ],
+      "user_acceptance_reference": "manifest user_acceptance.accepted_scope",
+      "user_acceptance_utc": "2026-10-04 05:50:46 UTC"
     },
     {
       "concept_id": "A09",
       "title": "M1 任务：人工暂停与手动恢复",
-      "status": "awaiting-user-acceptance",
+      "status": "accepted-user",
       "path": "a09-user-paused-v2.png",
       "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-79082b8f-101c-46d9-b938-7e22cbd69f92.png",
       "prompt_record": "prompts/a09-v2.txt",
@@ -397,12 +414,14 @@
           "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-f961d422-acc8-4b7e-b0db-952dc4842b19.png",
           "sha256": "50a47e2c1f69d5dc0ef36263bbda23a3f37f6b167c34350b511c779f21640834"
         }
-      ]
+      ],
+      "user_acceptance_reference": "manifest user_acceptance.accepted_scope",
+      "user_acceptance_utc": "2026-10-04 05:50:46 UTC"
     },
     {
       "concept_id": "A10",
       "title": "M1 任务：内容读回中",
-      "status": "awaiting-user-acceptance",
+      "status": "accepted-user",
       "path": "a10-readback-active.png",
       "source_generated_path": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-7e343f02-5149-468b-b3a5-819d1b264387.png",
       "prompt_record": "prompts/a10.txt",
@@ -434,7 +453,9 @@
           "equivalent_preserved_generated_source": "/data00/home/luchengxuan/.codex/generated_images/01a0fc39-0416-7972-a2cc-7cc3ee21ce17/exec-2956fb0c-1fa7-4e04-ba65-06609b8a0b78.png",
           "sha256": "3480b347bbd0f142cdc794b6a851142f52694f20e6bacfdc4b75e9881e4f69e1"
         }
-      ]
+      ],
+      "user_acceptance_reference": "manifest user_acceptance.accepted_scope",
+      "user_acceptance_utc": "2026-10-04 05:50:46 UTC"
     },
     {
       "concept_id": "A11",

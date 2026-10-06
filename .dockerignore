@@ -1,11 +1,11 @@
 .git
 .git/**
 .gradle
-build
+android/**/build
 dist
-node_modules
 *.apk
 *.aar
 *.keystore
 *.jks
+node_modules
 **/.DS_Store

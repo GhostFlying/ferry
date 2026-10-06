@@ -1,0 +1,335 @@
+package smb
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
+	"fmt"
+	"io"
+	"net"
+	"os"
+	"path"
+	"regexp"
+	"strings"
+	"time"
+
+	"github.com/hirochachacha/go-smb2"
+)
+
+type Stage string
+
+const (
+	StageConnect      Stage = "connect"
+	StageAuthenticate Stage = "authenticate"
+	StageCreate       Stage = "create"
+	StageWrite        Stage = "write"
+	StageFlush        Stage = "flush"
+	StageRename       Stage = "rename"
+	StageReadback     Stage = "readback"
+	StageCleanup      Stage = "cleanup"
+	StageCancelled    Stage = "cancelled"
+)
+
+type Error struct {
+	Stage Stage
+	Err   error
+}
+
+func (e *Error) Error() string { return fmt.Sprintf("%s: %v", e.Stage, e.Err) }
+func (e *Error) Unwrap() error { return e.Err }
+
+type Result struct {
+	Destination  string
+	Bytes        int64
+	LocalSHA256  string
+	RemoteSHA256 string
+}
+
+type Client struct {
+	conn    net.Conn
+	session *smb2.Session
+	share   *smb2.Share
+}
+
+func NewClient(ctx context.Context, conn net.Conn, username, password, shareName string) (*Client, error) {
+	if ctx == nil {
+		return nil, &Error{Stage: StageConnect, Err: errors.New("nil context")}
+	}
+	if conn == nil {
+		return nil, &Error{Stage: StageConnect, Err: errors.New("nil connection")}
+	}
+	if shareName == "" {
+		return nil, &Error{Stage: StageConnect, Err: errors.New("empty share name")}
+	}
+	dialer := &smb2.Dialer{Initiator: &smb2.NTLMInitiator{User: username, Password: password}}
+	session, err := dialer.DialContext(ctx, conn)
+	if err != nil {
+		return nil, &Error{Stage: StageAuthenticate, Err: err}
+	}
+	share, err := session.WithContext(ctx).Mount(shareName)
+	if err != nil {
+		_ = session.Logoff()
+		return nil, &Error{Stage: StageConnect, Err: err}
+	}
+	return &Client{conn: conn, session: session, share: share}, nil
+}
+
+func (c *Client) Close() error {
+	var first error
+	if c.share != nil {
+		first = c.share.Umount()
+	}
+	if c.session != nil {
+		if err := c.session.Logoff(); first == nil {
+			first = err
+		}
+	}
+	if c.conn != nil {
+		if err := c.conn.Close(); first == nil {
+			first = err
+		}
+	}
+	return first
+}
+
+// cleanupGrace bounds how long SMB requests may continue after the caller
+// cancels, so owned objects can still be closed and removed.
+const cleanupGrace = 30 * time.Second
+
+var operationIDPattern = regexp.MustCompile(`^[A-Za-z0-9._-]+$`)
+
+func temporaryName(destination, operationID string) (string, error) {
+	if err := validateDestination(destination); err != nil {
+		return "", err
+	}
+	if !operationIDPattern.MatchString(operationID) {
+		return "", errors.New("invalid operation id")
+	}
+	return destination + ".ferry-" + operationID + ".part", nil
+}
+
+func validateDestination(destination string) error {
+	if destination == "" || strings.ContainsRune(destination, '\x00') || strings.Contains(destination, "\\") {
+		return errors.New("invalid destination")
+	}
+	clean := path.Clean(destination)
+	if clean == "." || clean == ".." || clean != destination || strings.HasPrefix(clean, "../") || strings.HasPrefix(clean, "/") {
+		return errors.New("destination must be a relative clean path")
+	}
+	return nil
+}
+
+func validateExpectedSHA256(expected string) (string, error) {
+	if len(expected) != sha256.Size*2 {
+		return "", errors.New("expected SHA-256 must be 64 hexadecimal characters")
+	}
+	decoded, err := hex.DecodeString(expected)
+	if err != nil || len(decoded) != sha256.Size {
+		return "", errors.New("expected SHA-256 must be 64 hexadecimal characters")
+	}
+	return strings.ToLower(expected), nil
+}
+
+// Upload writes a complete object using a temporary object and a server-side
+// exclusive final create. The exclusive create is the no-replace boundary:
+// an existing destination is left untouched and the operation fails.
+func (c *Client) Upload(ctx context.Context, operationID, destination, expectedSHA256 string, source io.Reader) (result Result, retErr error) {
+	if ctx == nil {
+		return Result{}, &Error{Stage: StageCancelled, Err: errors.New("nil context")}
+	}
+	if source == nil {
+		return Result{}, &Error{Stage: StageWrite, Err: errors.New("nil source")}
+	}
+	expectedSHA256, err := validateExpectedSHA256(expectedSHA256)
+	if err != nil {
+		return Result{}, &Error{Stage: StageWrite, Err: err}
+	}
+	temp, err := temporaryName(destination, operationID)
+	if err != nil {
+		return Result{}, &Error{Stage: StageCreate, Err: err}
+	}
+	if err := ctx.Err(); err != nil {
+		return Result{}, &Error{Stage: StageCancelled, Err: err}
+	}
+	// go-smb2 binds every request, including File.Close and Share.Remove, to
+	// the share context, and opens files without FILE_SHARE_DELETE. Requests
+	// therefore keep running for a grace period after ctx is cancelled so the
+	// deferred cleanup can close handles and remove owned objects. The copy
+	// loops still observe ctx between chunks.
+	ioCtx, stopIO := context.WithCancel(context.WithoutCancel(ctx))
+	defer stopIO()
+	stopAfterCancel := context.AfterFunc(ctx, func() { time.AfterFunc(cleanupGrace, stopIO) })
+	defer stopAfterCancel()
+	share := c.share.WithContext(ioCtx)
+	file, err := share.OpenFile(temp, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		return Result{}, &Error{Stage: StageCreate, Err: err}
+	}
+	tempOwned := true
+	finalOwned := false
+	var finalFile *smb2.File
+	fileClosed := false
+	cleanup := func() error {
+		var first error
+		if finalOwned {
+			if err := share.Remove(destination); err != nil {
+				first = err
+			}
+		}
+		if tempOwned {
+			if err := share.Remove(temp); err != nil && first == nil {
+				first = err
+			}
+		}
+		return first
+	}
+	defer func() {
+		if finalFile != nil {
+			if closeErr := finalFile.Close(); closeErr != nil && retErr == nil {
+				retErr = &Error{Stage: StageFlush, Err: closeErr}
+			}
+		}
+		if !fileClosed {
+			if closeErr := file.Close(); closeErr != nil && retErr == nil {
+				retErr = &Error{Stage: StageFlush, Err: closeErr}
+			}
+		}
+		if cleanupErr := cleanup(); cleanupErr != nil && retErr == nil {
+			result = Result{}
+			retErr = &Error{Stage: StageCleanup, Err: cleanupErr}
+		} else if cleanupErr != nil {
+			retErr = &Error{Stage: StageCleanup, Err: fmt.Errorf("%v; remove owned object: %w", retErr, cleanupErr)}
+		}
+	}()
+
+	hash := sha256.New()
+	count, err := copyWithContext(ctx, io.MultiWriter(file, hash), source)
+	if err != nil {
+		if ctx.Err() != nil {
+			return Result{}, &Error{Stage: StageCancelled, Err: ctx.Err()}
+		}
+		return Result{}, &Error{Stage: StageWrite, Err: err}
+	}
+	if err := file.Sync(); err != nil {
+		return Result{}, &Error{Stage: StageFlush, Err: err}
+	}
+	if err := file.Close(); err != nil {
+		fileClosed = true
+		return Result{}, &Error{Stage: StageFlush, Err: err}
+	}
+	fileClosed = true
+
+	localHash := hex.EncodeToString(hash.Sum(nil))
+	if localHash != expectedSHA256 {
+		return Result{}, &Error{Stage: StageReadback, Err: fmt.Errorf("source hash mismatch expected=%s actual=%s", expectedSHA256, localHash)}
+	}
+	tempHash, tempCount, err := readback(ctx, share, temp)
+	if err != nil {
+		return Result{}, &Error{Stage: StageReadback, Err: err}
+	}
+	if count != tempCount || localHash != tempHash || tempHash != expectedSHA256 {
+		return Result{}, &Error{Stage: StageReadback, Err: fmt.Errorf("temporary content mismatch expected=%s local=%s/%d remote=%s/%d", expectedSHA256, localHash, count, tempHash, tempCount)}
+	}
+
+	// O_EXCL is intentional. SMB rename replaces by default in go-smb2, so
+	// rename would violate the no-replace contract.
+	finalFile, err = share.OpenFile(destination, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		// A previous attempt may have committed this object before its
+		// completion was recorded. Matching content completes the operation
+		// without replacing anything; other content keeps the create error.
+		if existingHash, existingCount, readErr := readback(ctx, share, destination); readErr == nil &&
+			existingHash == expectedSHA256 && existingCount == count {
+			if err := share.Remove(temp); err != nil {
+				return Result{}, &Error{Stage: StageCleanup, Err: err}
+			}
+			tempOwned = false
+			return Result{Destination: destination, Bytes: count, LocalSHA256: localHash, RemoteSHA256: existingHash}, nil
+		}
+		return Result{}, &Error{Stage: StageCreate, Err: err}
+	}
+	finalOwned = true
+	tempFile, err := share.OpenFile(temp, os.O_RDONLY, 0)
+	if err != nil {
+		return Result{}, &Error{Stage: StageWrite, Err: err}
+	}
+	_, copyErr := copyWithContext(ctx, finalFile, tempFile)
+	closeTempErr := tempFile.Close()
+	if copyErr != nil {
+		if ctx.Err() != nil {
+			return Result{}, &Error{Stage: StageCancelled, Err: ctx.Err()}
+		}
+		return Result{}, &Error{Stage: StageWrite, Err: copyErr}
+	}
+	if closeTempErr != nil {
+		return Result{}, &Error{Stage: StageWrite, Err: closeTempErr}
+	}
+	if err := finalFile.Sync(); err != nil {
+		return Result{}, &Error{Stage: StageFlush, Err: err}
+	}
+	if err := finalFile.Close(); err != nil {
+		finalFile = nil
+		return Result{}, &Error{Stage: StageFlush, Err: err}
+	}
+	finalFile = nil
+
+	remoteHash, remoteCount, err := readback(ctx, share, destination)
+	if err != nil {
+		return Result{}, &Error{Stage: StageReadback, Err: err}
+	}
+	if count != remoteCount || expectedSHA256 != remoteHash {
+		return Result{}, &Error{Stage: StageReadback, Err: fmt.Errorf("content mismatch expected=%s local=%s/%d remote=%s/%d", expectedSHA256, localHash, count, remoteHash, remoteCount)}
+	}
+	if err := share.Remove(temp); err != nil {
+		return Result{}, &Error{Stage: StageCleanup, Err: err}
+	}
+	tempOwned = false
+	finalOwned = false
+	return Result{Destination: destination, Bytes: count, LocalSHA256: localHash, RemoteSHA256: remoteHash}, nil
+}
+
+func copyWithContext(ctx context.Context, dst io.Writer, src io.Reader) (int64, error) {
+	buf := make([]byte, 128*1024)
+	var count int64
+	for {
+		if err := ctx.Err(); err != nil {
+			return count, err
+		}
+		n, readErr := src.Read(buf)
+		if n > 0 {
+			written, err := dst.Write(buf[:n])
+			count += int64(written)
+			if err != nil {
+				return count, err
+			}
+			if written != n {
+				return count, io.ErrShortWrite
+			}
+		}
+		if readErr == io.EOF {
+			return count, nil
+		}
+		if readErr != nil {
+			return count, readErr
+		}
+	}
+}
+
+func readback(ctx context.Context, share *smb2.Share, destination string) (hash string, count int64, retErr error) {
+	file, err := share.OpenFile(destination, os.O_RDONLY, 0)
+	if err != nil {
+		return "", 0, err
+	}
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil && retErr == nil {
+			retErr = closeErr
+		}
+	}()
+	digest := sha256.New()
+	count, err = copyWithContext(ctx, digest, file)
+	if err != nil {
+		return "", count, err
+	}
+	return hex.EncodeToString(digest.Sum(nil)), count, nil
+}

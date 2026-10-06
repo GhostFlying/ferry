@@ -10,6 +10,7 @@
 # Native builds and local tooling
 .gradle/
 **/build/
+dist/
 local.properties
 DerivedData/
 *.xcuserstate
@@ -18,4 +19,14 @@ xcuserdata/
 *.jks
 *.p12
 *.mobileprovision
+*.aar
+*.apk
+android/app/libs/
 .DS_Store
+
+.gradle-container-id
+.gradle-exit
+.gradle-log
+.ci-android-container-id
+.ci-android-exit
+.ci-android-log
