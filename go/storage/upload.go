@@ -8,6 +8,7 @@ import (
 	"io"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var sha256Pattern = regexp.MustCompile(`^[0-9a-fA-F]{64}$`)
@@ -21,6 +22,14 @@ type RemoteObject interface {
 	ReadBackSHA256(ctx context.Context, name string) (string, error)
 	CommitNoReplace(ctx context.Context, temporaryName, finalName string) error
 	Delete(ctx context.Context, name string) error
+}
+
+// deleteTemporary removes an abandoned temporary object even when ctx has
+// been cancelled; otherwise the next CreateExclusive for it would fail.
+func deleteTemporary(ctx context.Context, remote RemoteObject, name string) {
+	cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+	defer cancel()
+	_ = remote.Delete(cleanupCtx, name)
 }
 
 // Upload streams a complete private copy to a temporary object and only
@@ -38,33 +47,33 @@ func Upload(ctx context.Context, remote RemoteObject, source io.Reader, expected
 	_, copyErr := io.CopyBuffer(io.MultiWriter(writer, digest), source, make([]byte, 1024*1024))
 	closeErr := writer.Close()
 	if copyErr != nil {
-		_ = remote.Delete(ctx, temporaryName)
+		deleteTemporary(ctx, remote, temporaryName)
 		return fmt.Errorf("write temporary object: %w", copyErr)
 	}
 	if closeErr != nil {
-		_ = remote.Delete(ctx, temporaryName)
+		deleteTemporary(ctx, remote, temporaryName)
 		return fmt.Errorf("close temporary object: %w", closeErr)
 	}
 	if err := remote.Flush(ctx, temporaryName); err != nil {
-		_ = remote.Delete(ctx, temporaryName)
+		deleteTemporary(ctx, remote, temporaryName)
 		return fmt.Errorf("flush temporary object: %w", err)
 	}
 	localSHA := hex.EncodeToString(digest.Sum(nil))
 	if expectedSHA256 != "" && localSHA != expectedSHA256 {
-		_ = remote.Delete(ctx, temporaryName)
+		deleteTemporary(ctx, remote, temporaryName)
 		return fmt.Errorf("source hash mismatch: got %s want %s", localSHA, expectedSHA256)
 	}
 	remoteSHA, err := remote.ReadBackSHA256(ctx, temporaryName)
 	if err != nil {
-		_ = remote.Delete(ctx, temporaryName)
+		deleteTemporary(ctx, remote, temporaryName)
 		return fmt.Errorf("remote readback: %w", err)
 	}
 	if strings.ToLower(remoteSHA) != localSHA {
-		_ = remote.Delete(ctx, temporaryName)
+		deleteTemporary(ctx, remote, temporaryName)
 		return fmt.Errorf("remote hash mismatch: got %s want %s", remoteSHA, localSHA)
 	}
 	if err := remote.CommitNoReplace(ctx, temporaryName, finalName); err != nil {
-		_ = remote.Delete(ctx, temporaryName)
+		deleteTemporary(ctx, remote, temporaryName)
 		return fmt.Errorf("commit without replace: %w", err)
 	}
 	return nil

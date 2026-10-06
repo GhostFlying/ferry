@@ -39,7 +39,10 @@ func (f *fakeRemote) CommitNoReplace(_ context.Context, temporaryName, finalName
 	f.committed = true
 	return nil
 }
-func (f *fakeRemote) Delete(_ context.Context, name string) error {
+func (f *fakeRemote) Delete(ctx context.Context, name string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	delete(f.objects, name)
 	return nil
 }
@@ -110,5 +113,24 @@ func TestUploadCanonicalizesUppercaseHashes(t *testing.T) {
 	remote := &fakeRemote{objects: map[string][]byte{}, readbackOverride: strings.ToUpper(hex.EncodeToString(digest[:]))}
 	if err := Upload(context.Background(), remote, bytes.NewReader(data), strings.ToUpper(hex.EncodeToString(digest[:])), ".tmp", "final.mp4"); err != nil {
 		t.Fatal(err)
+	}
+}
+
+type cancellingReader struct{ cancel context.CancelFunc }
+
+func (r cancellingReader) Read([]byte) (int, error) {
+	r.cancel()
+	return 0, context.Canceled
+}
+
+func TestUploadDeletesTemporaryAfterCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	remote := &fakeRemote{objects: map[string][]byte{}}
+	err := Upload(ctx, remote, cancellingReader{cancel: cancel}, strings.Repeat("0", sha256.Size*2), ".tmp", "final.mp4")
+	if err == nil {
+		t.Fatal("expected cancelled upload to fail")
+	}
+	if _, exists := remote.objects[".tmp"]; exists {
+		t.Fatalf("temporary object survived cancellation: %+v", remote.objects)
 	}
 }
