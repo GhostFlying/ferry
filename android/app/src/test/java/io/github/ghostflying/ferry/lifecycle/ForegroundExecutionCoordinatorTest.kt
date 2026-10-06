@@ -66,6 +66,21 @@ class ForegroundExecutionCoordinatorTest {
     }
 
     @Test
+    fun sourceStageRunsWithoutUploader() = runBlocking {
+        val ran = CompletableDeferred<Unit>()
+        val coordinator = ForegroundExecutionCoordinator(
+            OperationRepository(FakeOperationDao(emptyList()), clock),
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            sourceStage = { ran.complete(Unit) },
+            upload = null,
+        )
+
+        coordinator.onOpen()
+        ran.await()
+        coordinator.onStop()
+    }
+
+    @Test
     fun manualPauseCancelsActiveActionAndSurvivesOpen() = runBlocking {
         val started = CompletableDeferred<Unit>()
         val finished = CompletableDeferred<Unit>()
@@ -273,6 +288,10 @@ class ForegroundExecutionCoordinatorTest {
 
         override suspend fun find(id: String): OperationEntity? = synchronized(lock) {
             operations.find { it.id == id }
+        }
+
+        override suspend fun findBySourcePath(sourcePath: String): OperationEntity? = synchronized(lock) {
+            operations.find { it.sourcePath == sourcePath }
         }
 
         override suspend fun findAll(): List<OperationEntity> = synchronized(lock) {

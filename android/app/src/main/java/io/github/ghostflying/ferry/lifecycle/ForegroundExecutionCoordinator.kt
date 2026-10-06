@@ -3,9 +3,11 @@ package io.github.ghostflying.ferry.lifecycle
 import io.github.ghostflying.ferry.data.OperationEntity
 import io.github.ghostflying.ferry.data.OperationRepository
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
@@ -16,11 +18,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 /** Coordinates one foreground worker without adding a background-service promise. */
 class ForegroundExecutionCoordinator(
     private val repository: OperationRepository,
     private val scope: CoroutineScope,
+    private val sourceStage: (suspend () -> Unit)? = null,
+    private val sourceDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val upload: (suspend (OperationEntity) -> String)?,
 ) {
     private val lifecycleMutex = Mutex()
@@ -64,6 +69,9 @@ class ForegroundExecutionCoordinator(
     }
 
     private suspend fun runLoop() = supervisorScope {
+        // The source pass runs once per open, before uploads and whether or
+        // not an uploader exists; cancelling the worker cancels it.
+        sourceStage?.let { withContext(sourceDispatcher) { it() } }
         while (currentCoroutineContext().isActive && !stopped) {
             val uploadAction = upload ?: return@supervisorScope
             val dispatch = lifecycleMutex.withLock {

@@ -1,0 +1,8 @@
+Use case: text-localization
+Asset type: candidate Android source page concept
+Input image: a03-source-authorization-v2.png is edit target. Preserve all layout, alignment, typography, palette, icon style, controls, rows, sections, review-only footer and bottom navigation exactly. Change ONLY these texts:
+1. Under SOURCE-DEMO, replace the status "等待授权" with "等待 OTG 连接".
+2. In the red warning block, replace the heading "目录访问权限已失效，请重新选择" with "检测到 Pocket 3，但未以 OTG 方式连接". Keep the same red outlined exclamation icon, vertically centered with the heading, and keep the heading left-aligned with the body text below it; wrap to two lines if needed with the same left edge.
+3. Replace the warning body "新文件的导入需要访问所选目录，请重新选择以继续。" with "请在相机下拉菜单「设置 → OTG 连接」后重新连接数据线。", aligned to the same left edge as the heading.
+4. In the section 来源不可用时, replace the first row body "来源不可用时，新的文件不会导入，需在重新授权后继续。" with "开启 OTG 连接并重新接入后自动继续。"
+Every icon must stay vertically centered with its row text and every text block must keep the same left edge as in the input. Keep everything else unchanged. Full readable phone screen, no crop. Every DEMO name/state is a fixture, not evidence.

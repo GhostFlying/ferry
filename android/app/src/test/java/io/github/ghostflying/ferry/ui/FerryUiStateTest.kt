@@ -13,13 +13,14 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import io.github.ghostflying.ferry.source.ImportSummary
+import io.github.ghostflying.ferry.source.SourceStatus
 import org.junit.Test
 
 class FerryUiStateTest {
     @Test
     fun configurationStartsUnconfiguredAndFailedStateIsClassified() {
         assertEquals("尚未配置", UiConfigurationSnapshot().sourceLabel)
-        assertEquals(ConfigurationScreenModel("来源", "尚未配置", "系统目录授权待接入"), configurationScreenModel(FerryTab.SOURCES))
         assertEquals(ConfigurationScreenModel("目标", "尚未配置", "SMB 配置接口待接入"), configurationScreenModel(FerryTab.TARGETS))
         assertEquals(ConfigurationScreenModel("规则", "尚未配置", "规则编辑接口待接入"), configurationScreenModel(FerryTab.RULES))
         assertEquals(FerryTab.TASKS, FerryUiState().tab)
@@ -102,6 +103,21 @@ class FerryUiStateTest {
         assertEquals("waiting", controller.state.value.operations.single().phase)
     }
 
+    @Test
+    fun sourceScreenShowsOnlyAcceptedStates() {
+        assertEquals(SourceScreenModel("尚未配置", "", null, "选择来源"), sourceScreenModel(null, SourceStatus.NotConfigured))
+        val reselect = sourceScreenModel("DCIM", SourceStatus.NeedsReselect)
+        assertEquals("等待授权", reselect.status)
+        assertEquals("目录访问权限已失效，请重新选择", reselect.warning?.title)
+        val otg = sourceScreenModel("DCIM", SourceStatus.PocketNeedsOtg)
+        assertEquals("等待 OTG 连接", otg.status)
+        assertEquals("检测到 Pocket 3，但未以 OTG 方式连接", otg.warning?.title)
+        assertEquals("请在相机下拉菜单「设置 → OTG 连接」后重新连接数据线。", otg.warning?.body)
+        for (status in listOf(SourceStatus.Scanning, SourceStatus.Ready(ImportSummary(imported = 1)), SourceStatus.Failed("io"))) {
+            assertEquals(SourceScreenModel("DCIM", "", null, "重新选择目录"), sourceScreenModel("DCIM", status))
+        }
+    }
+
     private fun operation(id: String, phase: String, error: String? = null) = OperationEntity(
         id = id,
         revision = 1,
@@ -121,6 +137,7 @@ class FerryUiStateTest {
 
         override suspend fun find(id: String): OperationEntity? = operations.find { it.id == id }
         override suspend fun findAll(): List<OperationEntity> = operations.toList()
+        override suspend fun findBySourcePath(sourcePath: String): OperationEntity? = operations.find { it.sourcePath == sourcePath }
         override suspend fun findEligible(): List<OperationEntity> = operations.filter {
             it.phase in setOf("imported", "waiting") && !it.manualPaused && it.sourceSha256.isNotEmpty() && it.privateCopy.isNotEmpty()
         }

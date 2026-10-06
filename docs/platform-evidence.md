@@ -10,6 +10,10 @@
 
 [DJI OTG 帮助](https://repair.dji.com/help/content?customId=01700007307&lang=en&paperDocType=ARTICLE&re=US&spaceId=17)包含 Pocket 3，列出 iOS 的 OTG 操作和「文件」中的 DCIM 位置，但其具体示例使用 Lightning 适配器，不构成本项目 iPhone 17 Pro／USB-C 的兼容性证明。Lightning 不在项目范围内；USB-C 路径必须实测。
 
+[DJI Osmo 系列 OTG 连接说明](https://support.dji.com/help/content?customId=en-us03400007307&spaceId=34&re=GB&lang=en&documentType=artical&paperDocType=paper)要求 Android 连接前在相机「下拉控制菜单 → 设置 → OTG 连接」，再用 C-to-C 线连接；之后相机作为 USB 存储出现，素材位于 DCIM，部分手机还需在通知中选择「传输文件」。
+
+2026-10-06 指定 Pixel 6 Pro（Android 16／API 36）实测：未开启 OTG 连接时，系统日志读到 DJI `2ca3:0020`、固件 5.04，接口为 Mass Storage、RNDIS 和 DJI bulk，但设备数秒后移除，没有存储卷。用户确认开启 OTG 连接后 Pixel 能挂载为系统存储。M1 因此以系统挂载＋SAF 读取，App 只用 USB 设备列表检测 Pocket 并提示开启 OTG，不自行实现 USB Mass Storage／exFAT 读取；SAF 读取、重连和拔线结果仍以 M1 设备报告为准。
+
 结论：有线导入有官方依据。具体手机上是否可由第三方 App 读取、重连后授权是否有效和实际文件系统表现，Android 属于 M0 结束后 M1 的实测事项，iOS 属于 M3，均不是 M0 门槛。
 
 ## Android

@@ -1,95 +1,111 @@
 package io.github.ghostflying.ferry.source
 
-import android.content.Context
-import android.net.Uri
-import androidx.documentfile.provider.DocumentFile
+import io.github.ghostflying.ferry.data.OperationRepository
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.security.MessageDigest
 import kotlinx.coroutines.ensureActive
 import kotlin.coroutines.coroutineContext
-import java.util.regex.Pattern
 
-data class ImportedFile(
-    val sourcePath: String,
-    val privateCopy: File,
-    val size: Long,
-    val sha256: String,
+/** Counts of one source pass; [failed] files have no operation and are retried on the next pass. */
+data class ImportSummary(
+    val imported: Int = 0,
+    val skipped: Int = 0,
+    val registered: Int = 0,
+    val failed: Int = 0,
 )
 
+/**
+ * Imports planned source files into complete private copies keyed by their
+ * relative path, so a later pass skips files that already have an operation.
+ * Partial copies live in [partialRoot], outside the spool, and are discarded
+ * by [reconcilePartials].
+ */
 class SourceImportCoordinator(
-    private val context: Context,
     private val spoolRoot: File,
+    private val partialRoot: File,
+    private val repository: OperationRepository,
 ) {
-    suspend fun importTree(treeUri: Uri, operationId: String): List<ImportedFile> {
-        require(operationIdPattern.matcher(operationId).matches()) { "invalid operation id" }
-        val root = DocumentFile.fromTreeUri(context, treeUri)
-            ?: error("source authorization is unavailable")
-        val operationRoot = File(spoolRoot, operationId).canonicalFile.apply { mkdirs() }
-        require(operationRoot.toPath().startsWith(spoolRoot.canonicalFile.toPath())) { "operation path escaped spool" }
-        return walk(root, operationRoot, "")
-    }
-
-    private suspend fun walk(
-        directory: DocumentFile,
-        operationRoot: File,
-        prefix: String,
-    ): List<ImportedFile> {
-        val results = mutableListOf<ImportedFile>()
-        for (child in directory.listFiles()) {
+    suspend fun importPlanned(
+        tree: SourceTree,
+        planner: Planner,
+        configJson: String,
+        revision: Long,
+    ): ImportSummary {
+        val entries = tree.list()
+        val planned = planner.plan(configJson, entries)
+        var summary = ImportSummary()
+        for (entry in entries) {
             coroutineContext.ensureActive()
-            val name = child.name ?: continue
-            require(safeSegment(name)) { "unsafe source name: $name" }
-            val relative = if (prefix.isEmpty()) name else "$prefix/$name"
-            if (child.isDirectory) {
-                results += walk(child, operationRoot, relative)
-            } else if (child.isFile) {
-                results += copyComplete(child, relative, operationRoot)
+            if (entry.relativePath !in planned) continue
+            if (repository.findBySourcePath(entry.relativePath) != null) {
+                summary = summary.copy(skipped = summary.skipped + 1)
+                continue
             }
+            val destination = spoolFile(entry.relativePath)
+            if (destination.exists()) {
+                // Committed before the process died, but never registered.
+                repository.createIntent(revision, entry.relativePath, destination.path, hashFile(destination))
+                summary = summary.copy(registered = summary.registered + 1)
+                continue
+            }
+            val sha256 = tree.open(entry.relativePath).use { copyComplete(it, entry, destination) }
+            if (sha256 == null) {
+                summary = summary.copy(failed = summary.failed + 1)
+                continue
+            }
+            repository.createIntent(revision, entry.relativePath, destination.path, sha256)
+            summary = summary.copy(imported = summary.imported + 1)
         }
-        return results
+        return summary
     }
 
-    private suspend fun copyComplete(source: DocumentFile, relative: String, operationRoot: File): ImportedFile {
-        val destination = File(operationRoot, relative).canonicalFile
-        require(destination.toPath().startsWith(operationRoot.toPath())) { "source path escaped spool" }
-        require(!destination.exists()) { "private copy already exists: $relative" }
-        destination.parentFile?.mkdirs()
-        val advertisedSize = source.length()
-        if (advertisedSize >= 0) {
-            require(operationRoot.usableSpace >= advertisedSize) { "insufficient private storage" }
-        }
-        val partial = File(destination.path + ".partial")
-        val digest = MessageDigest.getInstance("SHA-256")
-        var size = 0L
-        context.contentResolver.openInputStream(source.uri)?.use { input ->
+    fun reconcilePartials() {
+        partialRoot.listFiles()?.forEach { it.delete() }
+    }
+
+    /** Returns the SHA-256 of the committed copy, or null if the source size did not match. */
+    private suspend fun copyComplete(input: InputStream, entry: SourceEntry, destination: File): String? {
+        partialRoot.mkdirs()
+        require(partialRoot.usableSpace >= entry.size) { "insufficient private storage" }
+        val partial = File(partialRoot, sha256Hex(entry.relativePath.toByteArray()))
+        var committed = false
+        try {
+            val digest = MessageDigest.getInstance("SHA-256")
+            var size = 0L
             FileOutputStream(partial).use { output ->
                 val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                 while (true) {
                     coroutineContext.ensureActive()
                     val count = input.read(buffer)
                     if (count < 0) break
-                    require((partial.parentFile?.usableSpace ?: 0L) >= count) { "insufficient private storage" }
+                    require(partialRoot.usableSpace >= count) { "insufficient private storage" }
                     output.write(buffer, 0, count)
                     digest.update(buffer, 0, count)
                     size += count
                 }
                 output.fd.sync()
             }
-        } ?: error("source cannot be opened: $relative")
-        if (!partial.renameTo(destination)) error("cannot commit private copy: $relative")
-        return ImportedFile(relative, destination, size, digest.digest().hex())
+            if (size != entry.size) return null
+            destination.parentFile?.mkdirs()
+            if (!partial.renameTo(destination)) error("cannot commit private copy: ${entry.relativePath}")
+            committed = true
+            return digest.digest().hex()
+        } finally {
+            if (!committed) partial.delete()
+        }
     }
 
-    fun reconcilePartials(operationId: String) {
-        require(operationIdPattern.matcher(operationId).matches()) { "invalid operation id" }
-        val operationRoot = File(spoolRoot, operationId).canonicalFile
-        require(operationRoot.toPath().startsWith(spoolRoot.canonicalFile.toPath())) { "operation path escaped spool" }
-        operationRoot.walkTopDown().filter { it.isFile && it.name.endsWith(".partial") }.forEach { it.delete() }
+    private fun spoolFile(relativePath: String): File {
+        val file = File(spoolRoot, relativePath).canonicalFile
+        require(file.toPath().startsWith(spoolRoot.canonicalFile.toPath())) { "source path escaped spool" }
+        return file
     }
 
-    suspend fun hashPrivateCopy(file: File): String = MessageDigest.getInstance("SHA-256").let { digest ->
+    private suspend fun hashFile(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
         FileInputStream(file).use { input ->
             val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
             while (true) {
@@ -99,15 +115,10 @@ class SourceImportCoordinator(
                 digest.update(buffer, 0, count)
             }
         }
-        digest.digest().hex()
+        return digest.digest().hex()
     }
+
+    private fun sha256Hex(value: ByteArray): String = MessageDigest.getInstance("SHA-256").digest(value).hex()
 
     private fun ByteArray.hex(): String = joinToString("") { "%02x".format(it.toInt() and 0xff) }
-
-    private fun safeSegment(value: String): Boolean =
-        value.isNotEmpty() && value != "." && value != ".." && !value.contains('/') && !value.contains('\\')
-
-    private companion object {
-        val operationIdPattern: Pattern = Pattern.compile("[A-Za-z0-9._-]{1,80}")
-    }
 }
